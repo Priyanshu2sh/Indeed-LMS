@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login{% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<header class="position-relative bg-dark text-white py-10 overflow-hidden" style="background: linear-gradient(120deg, #0f172a, #1e293b);">
+  <div class="container position-relative z-1 text-center">
+
+    <!-- Glowing Icon -->
+    <div class="mx-auto mb-4" style="width: 80px; height: 80px; background: radial-gradient(circle,rgb(105, 201, 216), #0ea5e9); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px #0ea5e9;">
+      <i class="fas fa-sign-in-alt fa-2x text-white"></i>
+    </div>
+
+    <!-- Heading -->
+    <h1 class="display-4 fw-bold mb-2 text-gradient animate__animated animate__fadeInDown">
+      Welcome Back!
+    </h1>
+
+    <p class="lead text-white-50 animate__animated animate__fadeInUp animate__delay-1s">
+      Log in to continue your learning journey.
+    </p>
+
+    <!-- Decorative Blur Layer -->
+    <div class="position-absolute top-50 start-50 translate-middle bg-white bg-opacity-10 rounded-circle" style="width: 500px; height: 500px; filter: blur(80px); z-index: 0;"></div>
+  </div>
+
+  <!-- Bottom Wave -->
+  <div class="position-absolute bottom-0 start-0 w-100 z-0">
+    <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#ffffff" fill-opacity="1"
+        d="M0,64L48,69.3C96,75,192,85,288,85.3C384,85,480,75,576,69.3C672,64,768,64,864,64C960,64,1056,64,1152,64C1248,64,1344,64,1392,64L1440,64V120H0Z" />
+    </svg>
+  </div>
+</header>
+
+
+<!-- LOGIN FORM SECTION -->
+<div class="container my-7">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-5">
+      <div class="p-5 rounded-4" style="
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
+        <h3 class="text-center mb-4 text-primary">Login to Your Account</h3>
+
+        {% include 'components/msg.html' %}
+
+        <form method="post" action="{% url 'dologin' %}">
+          {% csrf_token %}
+
+          <!-- Email -->
+          <div class="form-floating mb-4">
+            <input type="email" class="form-control bg-light" id="email" placeholder="Email" name="email" required>
+            <label for="email">Email</label>
+          </div>
+
+          <!-- Password -->
+          <div class="form-floating mb-4 position-relative">
+            <input type="password" class="form-control bg-light" id="password" placeholder="Password" name="password" required>
+            <label for="password">Password</label>
+            <span class="position-absolute top-50 end-0 translate-middle-y me-3" onclick="togglePassword()" style="cursor: pointer;">
+              <i id="toggleIcon" class="fas fa-eye text-muted"></i>
+            </span>
+          </div>
+
+          <!-- Remember & Forgot -->
+          <div class="d-flex align-items-center mb-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="rememberMe">
+              <label class="form-check-label" for="rememberMe">Remember me</label>
+            </div>
+            <div class="ms-auto">
+              <a href="{% url 'password_reset' %}" class="text-decoration-underline">Forgot Password?</a>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="d-grid">
+            <button class="btn btn-primary btn-lg" type="submit">Login</button>
+          </div>
+        </form>
+
+        <p class="text-center text-muted mt-4 mb-0">
+          Don’t have an account?
+          <a href="{% url 'register' %}" class="text-primary fw-semibold text-decoration-underline">Sign Up</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const toggleIcon = document.getElementById("toggleIcon");
+
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      toggleIcon.classList.remove("fa-eye");
+      toggleIcon.classList.add("fa-eye-slash");
+    } else {
+      passwordInput.type = "password";
+      toggleIcon.classList.remove("fa-eye-slash");
+      toggleIcon.classList.add("fa-eye");
+    }
+  }
+</script>
+
+<style>
+  .text-gradient {
+    background: linear-gradient(90deg, #facc15, #fcd34d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+</style>
+
+{% endblock %}
