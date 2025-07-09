@@ -103,6 +103,9 @@ def SEARCH_COURSE(request):
 
 
 def COURSE_DETAILS(request, slug):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login first')
+        return redirect('login')
     category = Categories.get_all_category(Categories)
     time_duration = Video.objects.filter(course__slug = slug).aggregate(sum = Sum('time_duration'))
 
@@ -202,6 +205,9 @@ def CHECKOUT(request,slug):
 
 
 def MY_COURSE(request):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login first')
+        return redirect('login')
     course = UserCourse.objects.filter(user = request.user)
 
     context = {
