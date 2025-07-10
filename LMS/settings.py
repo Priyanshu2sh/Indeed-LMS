@@ -12,16 +12,19 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)9(fqkz$z-@relsd2^^5b+ssz=qu%675z$inmrcknd$01x#_q9'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')  
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -144,5 +147,5 @@ EMAIL_HOST_USER = 'pksharma6160752@gmail.com'
 EMAIL_HOST_PASSWORD = 'agvevrxxsmuzcrkp'
 
 
-KEY_ID = "rzp_test_GohgiRr8u0rn3b"
-KEY_SECRET = "AYx8tYaQKAcUDIjTK7nQkivF"
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET')

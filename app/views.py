@@ -6,19 +6,20 @@ from django.template.loader import render_to_string
 from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 
 
 import razorpay
 from LMS.settings import *
 
-client = razorpay.Client(auth=(KEY_ID, KEY_SECRET))
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 def BASE(request):
     return render(request, 'base.html')
 
 
 def HOME(request):
-    category = Categories.objects.all().order_by('id')[0:5]
+    category = Categories.objects.all().order_by('id')
     course = Course.objects.filter(status = 'PUBLISH').order_by('-id')
 
     context = {
@@ -70,12 +71,24 @@ def filter_data(request):
 
 
 def CONTACT_US(request):
-    category = Categories.get_all_category(Categories)
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
 
-    context = {
-        'category':category,
-    }
-    return render(request, 'main/contact_us.html',context)
+        if not name or not email or not message:
+            messages.error(request, 'All fields are required!')
+            return redirect('contact_us')
+
+        contact = ContactUs(
+            name=name,
+            email=email,
+            message=message,
+        )
+        contact.save()
+        messages.success(request, 'Your message has been sent successfully!')
+        return redirect('contact_us')
+    return render(request, 'main/contact_us.html')
 
 
 def ABOUT_US(request):
@@ -121,10 +134,13 @@ def COURSE_DETAILS(request, slug):
     else:
         return redirect('404')
     
+    latest_courses = Course.objects.filter(status = 'PUBLISH').order_by('-id')[:5]
+    
     context = {
         'course':course,
         'category':category,
         'time_duration':time_duration,
+        'latest_courses': latest_courses,
         'check_enroll':check_enroll,
     }
     return render(request,'course/course_details.html',context)
@@ -208,10 +224,13 @@ def MY_COURSE(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login first')
         return redirect('login')
+
+    category = Categories.objects.all().order_by('id')
     course = UserCourse.objects.filter(user = request.user)
 
     context = {
         'course':course,
+        'category':category,
     }
     return render(request, 'course/my-course.html', context)
 
