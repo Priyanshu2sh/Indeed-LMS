@@ -113,7 +113,7 @@
     
     <!-- Left -->
     <p class="mb-0 fs-5 text-dark-75">
-      🎓 We found <span class="fw-bold text-dark">834 courses</span> available for you
+      🎓 We found <span class="fw-bold text-dark">{{course|length}} courses</span> available for you
     </p>
 
     <!-- Right (Sort Dropdown) -->
@@ -122,7 +122,6 @@
   <select id="sortSelect"
           class="form-select form-select-sm bg-white text-dark border rounded-2 px-3 py-2 stylish-dropdown">
     <option value="default">Default</option>
-    <option value="new">New Courses</option>
     <option value="low">Price Low to High</option>
     <option value="high">Price High to Low</option>
   </select>
@@ -248,9 +247,6 @@
                             </ul>
                         </div>
                     </div>
-
-
-                    <a href="#" class="btn btn-primary btn-block mb-10">FILTER RESULTS</a>
                 </div>
 
             </div>

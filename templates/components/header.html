@@ -4,7 +4,7 @@
         <div class="container">
 
             <!-- Brand -->
-            <a class="navbar-brand" href="index.html">
+            <a class="navbar-brand" href="{% url 'home' %}">
                 <img src="{% static 'assets/img/indeed_logo.png'%}" class="navbar-brand-img" alt="...">
             </a>
 
@@ -108,12 +108,12 @@
                                 </a>
                             </li>
                             <li class="dropdown-item">
-                                <a class="dropdown-link" href="">
+                                <a class="dropdown-link" href="{% url 'my_course' %}">
                                     Enrolled Courses
                                 </a>
                             </li>
                             <li class="dropdown-item">
-                                <a href="{% url 'logout' %}" class="dropdown-link">
+                                <a onclick="logout()" class="dropdown-link">
                                     Logout
                                 </a>
                             </li>
@@ -132,12 +132,12 @@
                                 </a>
                             </li>
                             <li class="dropdown-item">
-                                <a class="dropdown-link" href="">
+                                <a class="dropdown-link" href="{% url 'my_course' %}">
                                     Enrolled Courses
                                 </a>
                             </li>
                             <li class="dropdown-item">
-                                <a href="{% url 'logout' %}" class="dropdown-link">
+                                <a onclick="logout()" class="dropdown-link">
                                     Logout
                                 </a>
                             </li>
@@ -218,3 +218,13 @@
             </button>
         </div>
     </header>
+
+    <!-- logout_confirm.html -->
+    <form id="logoutForm" method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+    </form>
+    <script>
+        function logout() {
+            document.getElementById("logoutForm").submit();
+        }
+    </script>

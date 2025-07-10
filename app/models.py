@@ -142,3 +142,12 @@ class Payment(models.Model):
 
     def __str__(self):
         return self.user.first_name + " - " + self.course.title
+    
+class ContactUs(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    message = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.date.strftime('%B %d, %Y at %I:%M %p')}"

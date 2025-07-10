@@ -41,7 +41,7 @@
         <nav aria-label="breadcrumb" class="animate__animated animate__fadeInUp">
             <ol class="breadcrumb breadcrumb-light justify-content-center">
                 <li class="breadcrumb-item">
-                    <a class="text-white" href="#">Home</a>
+                    <a class="text-white" href="{% url 'home' %}">Home</a>
                 </li>
                 <li class="breadcrumb-item active text-white" aria-current="page">
                     Profile Update
@@ -92,13 +92,13 @@
                     <!-- Email -->
                     <div class="col-md-6 mb-4">
                         <label class="form-label fw-medium">Email Address</label>
-                        <input type="email" class="form-control form-control-lg rounded-3" value="{{ user.email }}" readonly>
+                        <input type="email" class="form-control form-control-lg rounded-3" name="email" value="{{ user.email }}" readonly>
                     </div>
 
                     <!-- Username -->
                     <div class="col-md-6 mb-4">
                         <label class="form-label fw-medium">Username</label>
-                        <input type="text" class="form-control form-control-lg rounded-3" value="{{ user.username }}" readonly>
+                        <input type="text" class="form-control form-control-lg rounded-3" name="username" value="{{ user.username }}" readonly>
                     </div>
 
    <div class="col-12 mb-4 position-relative">

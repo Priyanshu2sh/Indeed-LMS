@@ -138,16 +138,11 @@
       We'd love to hear from you — let's start the conversation.
     </p>
 
-    <!-- Call to Action -->
-    <a href="#contact-form" class="btn btn-warning btn-lg fw-bold shadow-lg px-5 py-2 glow-hover">
-      Contact Us Now
-    </a>
-
     <!-- Breadcrumb -->
     <nav class="mt-4" aria-label="breadcrumb">
       <ol class="breadcrumb breadcrumb-scroll justify-content-center bg-transparent p-0">
         <li class="breadcrumb-item">
-          <a class="text-white" href="#"><i class="fas fa-home me-1"></i> Home</a>
+          <a class="text-white" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> Home</a>
         </li>
         <li class="breadcrumb-item text-white active" aria-current="page">
           <i class="fas fa-envelope me-1"></i> Contact
@@ -166,9 +161,9 @@
   </div>
 </header>
 
-
 <!-- CONTACT SECTION -->
 <div class="container py-8 py-lg-11">
+  {% include 'components/msg.html' %}
   <div class="row g-5 justify-content-center align-items-stretch">
 
     <!-- Contact Info -->
@@ -223,11 +218,11 @@
         </div>
 
         <div class="d-flex gap-2 mt-4">
-          <a href="https://www.facebook.com/indeedinspiring" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-facebook-f"></i></a>
-          <a href="https://twitter.com/indeedinspiring" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-twitter"></i></a>
-          <a href="https://www.instagram.com/indeedinspiring" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-instagram"></i></a>
-          <a href="https://in.linkedin.com/company/indeedinspiring" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-linkedin-in"></i></a>
-          <a href="https://www.youtube.com/@IndeedInspiringInfotech" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-youtube"></i></a>
+          <a href="https://www.facebook.com/indeedinspiring" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-facebook-f"></i></a>
+          <a href="https://twitter.com/indeedinspiring" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-twitter"></i></a>
+          <a href="https://www.instagram.com/indeedinspiring" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-instagram"></i></a>
+          <a href="https://in.linkedin.com/company/indeedinspiring" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-linkedin-in"></i></a>
+          <a href="https://www.youtube.com/@IndeedInspiringInfotech" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-youtube"></i></a>
 
         </div>
       </div>

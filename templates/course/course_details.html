@@ -151,9 +151,9 @@
                             <a class="nav-link" href="#Reviews" data-bs-toggle="smooth-scroll" data-bs-offset="0">Reviews</a>
                         </li>
                     </ul>
-
                     <div id="accordionCurriculum">
-                        {% for lesson in course.lesson_set.all %}
+                        {% if course.lesson %}
+                          {% for lesson in course.lesson_set.all %}
                         <div class="border rounded shadow mb-6 overflow-hidden">
                             <div class="d-flex align-items-center" id="curriculumheadingOne">
                                 <h5 class="mb-0 w-100">
@@ -223,6 +223,10 @@
                             {% endfor %}
                         </div>
                         {% endfor %}
+                        {% else %}
+                          <p>No lessons available for this course.</p>
+                        {% endif %}
+                        
                     </div>
                 </div>
 
@@ -414,24 +418,7 @@
                     <ul class="list-unstyled pt-2">
                         <li class="media d-flex">
                             <div class="avatar avatar-xxl me-3 me-md-6 flex-shrink-0">
-                                <img src="assets/img/avatars/avatar-1.jpg" alt="..." class="avatar-img rounded-circle">
-                            </div>
-                            <div class="media-body flex-grow-1">
-                                <div class="d-md-flex align-items-center mb-5">
-                                    <div class="me-auto mb-4 mb-md-0">
-                                        <h5 class="mb-0">Oscar Cafeo</h5>
-                                        <p class="font-size-sm font-italic">Beautiful courses</p>
-                                    </div>
-                                    <div class="star-rating">
-                                        <div class="rating" style="width:100%;"></div>
-                                    </div>
-                                </div>
-                                <p class="mb-6 line-height-md">This course was well organized and covered a lot more details than any other Figma courses. I really enjoy it. One suggestion is that it can be much better if we could complete the prototype together. Since we created 24 frames, I really want to test it on Figma mirror to see all the connections. Could you please let me take a look at the complete prototype?</p>
-                            </div>
-                        </li>
-                        <li class="media d-flex">
-                            <div class="avatar avatar-xxl me-3 me-md-6 flex-shrink-0">
-                                <img src="assets/img/avatars/avatar-2.jpg" alt="..." class="avatar-img rounded-circle">
+                                <img src="{% static 'assets/img/avatars/avatar-1.jpg' %}" alt="..." class="avatar-img rounded-circle">
                             </div>
                             <div class="media-body flex-grow-1">
                                 <div class="d-md-flex align-items-center mb-5">
@@ -506,7 +493,7 @@
                 <!-- SIDEBAR FILTER
                 ================================================== -->
                 <div class="d-block rounded border p-2 shadow mb-6">
-                    <a href="https://www.youtube.com/watch?v=9I-Y6VQ6tyI" class="d-block sk-thumbnail rounded mb-1" data-fancybox>
+                    <a href="{{course.featured_video}}" class="d-block sk-thumbnail rounded mb-1" data-fancybox>
                         <div class="h-60p w-60p rounded-circle bg-white size-20-all d-inline-flex align-items-center justify-content-center position-absolute center z-index-1">
                             <!-- Icon -->
                             <svg width="14" height="16" viewBox="0 0 14 16" xmlns="http://www.w3.org/2000/svg">
@@ -514,15 +501,7 @@
                             </svg>
 
                         </div>
-                        {% if forloop.counter == 1 %}
-        <img class="rounded shadow-light-lg" src="{% static 'assets/img/post/post-32.jpg' %}" alt="...">
-    {% elif forloop.counter == 2 %}
-        <img class="rounded shadow-light-lg" src=" {% static 'assets/img/post/post-30.jpg' %}" alt="...">
-    {% elif forloop.counter == 3 %}
-        <img class="rounded shadow-light-lg" src="{% static 'assets/img/post/post-31.jpg' %}" alt="...">
-    {% else %}
-        <img class="rounded shadow-light-lg" src="{% static 'assets/img/post/post-32.jpg' %}" alt="...">
-    {% endif %}
+                        <img class="rounded shadow-light-lg" src="{{course.featured_image.url}}" alt="...">
 
                     </a>
 
@@ -538,8 +517,7 @@
                             <del class="ms-3">₹ {{course.price}}</del>
                             <div class="badge badge-lg badge-purple text-white ms-auto fw-normal">91% Off</div>
                         </div>
-                        {% endif %}
-
+                        
                         <div class="d-flex align-items-center text-alizarin mb-6">
                             <!-- Icon -->
                             <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -553,6 +531,7 @@
 
                             <span class="ms-2">2 days left at this price!</span>
                         </div>
+                        {% endif %}
                         {% if check_enroll is None %}
                         <a class="btn btn-primary btn-block mb-3" href="/checkout/{{course.slug}}">ENROLL</a>
                         {% else %}
@@ -672,81 +651,28 @@
                     <div class="border rounded px-6 px-lg-5 px-xl-6 pt-5 shadow">
                         <h3 class="mb-5">Latest Courses</h3>
                         <ul class="list-unstyled mb-0">
-                            <li class="media mb-6 d-flex">
-                                <a href="course-single-v5.html" class="w-100p d-block me-5">
-                                    <img src="assets/img/photos/photo-1.jpg" alt="..." class="avatar-img rounded-lg h-90p w-100p">
-                                </a>
-                                <div class="media-body flex-grow-1">
-                                    <a href="course-single-v5.html" class="d-block">
-                                        <h6 class="line-clamp-2 mb-3">Web Developtment and Design</h6>
+                            {% for course in latest_courses %}
+                                <li class="media mb-6 d-flex">
+                                    <a href="{{course.get_absolute_url}}" class="w-100p d-block me-5">
+                                        <img src="{{course.featured_image.url}}" alt="..." class="avatar-img rounded-lg h-90p w-100p">
                                     </a>
-                                    <del class="font-size-sm me-2">$959</del>
-                                    <ins class="h6 mb-0 ">$415.99</ins>
-                                </div>
-                            </li>
-
-                            <li class="media mb-6 d-flex">
-                                <a href="course-single-v5.html" class="w-100p d-block me-5">
-                                    <img src="assets/img/photos/photo-2.jpg" alt="..." class="avatar-img rounded-lg h-90p w-100p">
-                                </a>
-                                <div class="media-body flex-grow-1">
-                                    <a href="course-single-v5.html" class="d-block">
-                                        <h6 class="line-clamp-2 mb-3">The Complete Cyber Security Course : Hackers </h6>
-                                    </a>
-                                    <del class="font-size-sm me-2">$959</del>
-                                    <ins class="h6 mb-0 ">$415.99</ins>
-                                </div>
-                            </li>
-
-                            <li class="media mb-6 d-flex">
-                                <a href="course-single-v5.html" class="w-100p d-block me-5">
-                                    <img src="assets/img/photos/photo-14.jpg" alt="..." class="avatar-img rounded-lg h-90p w-100p">
-                                </a>
-                                <div class="media-body flex-grow-1">
-                                    <a href="course-single-v5.html" class="d-block">
-                                        <h6 class="line-clamp-2 mb-3">Fashion Photography From Professional</h6>
-                                    </a>
-                                    <del class="font-size-sm me-2">$959</del>
-                                    <ins class="h6 mb-0 ">$415.99</ins>
-                                </div>
-                            </li>
-
-                            <li class="media mb-6 d-flex">
-                                <a href="course-single-v5.html" class="w-100p d-block me-5">
-                                    <img src="assets/img/photos/photo-16.jpg" alt="..." class="avatar-img rounded-lg h-90p w-100p">
-                                </a>
-                                <div class="media-body flex-grow-1">
-                                    <a href="course-single-v5.html" class="d-block">
-                                        <h6 class="line-clamp-2 mb-3">The Complete Financial Analyst Course 2020</h6>
-                                    </a>
-                                    <del class="font-size-sm me-2">$959</del>
-                                    <ins class="h6 mb-0 ">$415.99</ins>
-                                </div>
-                            </li>
+                                    <div class="media-body flex-grow-1">
+                                        <a href="{{course.get_absolute_url}}" class="d-block">
+                                            <h6 class="line-clamp-2 mb-3">{{ course.title }}</h6>
+                                        </a>
+                                        {% if course.price == 0 %}
+                                           <ins class="h6 mb-0">Free</ins>
+                                        {% else %}
+                                        <del class="font-size-sm me-2">₹ {{ course.price }}</del>
+                                        <ins class="h6 mb-0 ">₹ {% discount_calculation course.price course.discount %}</ins>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
 
             </div>
         </div>
-
-        <div class="text-center mb-5 mb-md-8">
-            <h1>Related Courses</h1>
-            <p class="font-size-lg text-capitalize">Discover your perfect program in our courses.</p>
-        </div>
-
-        <div class="mx-n4 mb-12" data-flickity='{"pageDots": true, "prevNextButtons": false, "cellAlign": "left", "wrapAround": true, "imagesLoaded": true}'>
-            <div class="col-md-6 col-lg-4 col-xl-3 pb-4 pb-md-5" style="padding-right:15px;padding-left:15px;">
-                <!-- Card -->
-                <div class="card border shadow-dark-hover p-2 sk-fade">
-                    <!-- Image -->
-                    <div class="card-zoom position-relative">
-                        <a href="course-single-v5.html" class="card-img sk-thumbnail img-ratio-3 d-block">
-                            <img class="rounded shadow-light-lg" src="assets/img/products/product-15.jpg" alt="...">
-                        </a>
-
-                        <span class="sk-fade-right badge-float bottom-0 right-0 mb-2 me-2">
-                            <ins class="h5 mb-0 text-white">$415.99</ins>
-                        </span>
-                    </div>
 {% endblock %}

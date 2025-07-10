@@ -66,5 +66,5 @@ def PROFILE_UPDATE(request):
         if password != None and password != "":
             user.set_password(password)
         user.save()
-        messages.success(request,'Profile Are Successfully Updated. ')
+        messages.success(request,'Profile updated successfully. ')
         return redirect('profile')
