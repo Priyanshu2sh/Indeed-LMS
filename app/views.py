@@ -1,3 +1,4 @@
+from collections import defaultdict
 from time import time
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -7,7 +8,7 @@ from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-
+from django.db.models import Count
 
 import razorpay
 from LMS.settings import *
@@ -21,6 +22,12 @@ def BASE(request):
 def HOME(request):
     category = Categories.objects.all().order_by('id')
     course = Course.objects.filter(status = 'PUBLISH').order_by('-id')
+    for c in course:
+        total_duration = Video.objects.filter(course=c).aggregate(total=Sum('time_duration'))['total'] or 0
+        hours = total_duration // 60
+        minutes = total_duration % 60
+        formatted_duration = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+        c.total_duration = formatted_duration
 
     context = {
         'category':category,
@@ -92,12 +99,7 @@ def CONTACT_US(request):
 
 
 def ABOUT_US(request):
-    category = Categories.get_all_category(Categories)
-
-    context = {
-        'category':category,
-    }
-    return render(request, 'main/about_us.html',context)
+    return render(request, 'main/about_us.html')
 
 
 def SEARCH_COURSE(request):
@@ -122,18 +124,51 @@ def COURSE_DETAILS(request, slug):
     category = Categories.get_all_category(Categories)
     time_duration = Video.objects.filter(course__slug = slug).aggregate(sum = Sum('time_duration'))
 
-    course_id = Course.objects.get(slug = slug)
+    course = Course.objects.get(slug = slug)
+    reviews = CourseReview.objects.filter(course = course, rating__in=[4, 4.5, 5]).order_by('-date')[:2]
+    course_rating_average = CourseReview.objects.filter(course=course).aggregate(average_rating=Sum('rating') / Count('id'))['average_rating'] or 0
+
+    one_star = CourseReview.objects.filter(course=course, rating__in=[0.5, 1]).count()
+    two_star = CourseReview.objects.filter(course=course, rating__in=[1.5, 2]).count()
+    three_star = CourseReview.objects.filter(course=course, rating__in=[2.5, 3]).count()
+    four_star = CourseReview.objects.filter(course=course, rating__in=[3.5, 4]).count()
+    five_star = CourseReview.objects.filter(course=course, rating__in=[4.5, 5]).count()
+
+    total_reviews = one_star + two_star + three_star + four_star + five_star
+    # Avoid division by zero
+    if total_reviews > 0:
+        one_star_percent = (one_star / total_reviews) * 100
+        two_star_percent = (two_star / total_reviews) * 100
+        three_star_percent = (three_star / total_reviews) * 100
+        four_star_percent = (four_star / total_reviews) * 100
+        five_star_percent = (five_star / total_reviews) * 100
+    else:
+        one_star_percent = two_star_percent = three_star_percent = four_star_percent = five_star_percent = 0
+
+    if request.method == 'POST':
+        if not(request.user.first_name and request.user.last_name):
+            messages.error(request, 'Please complete your profile before leaving a review.')
+            return redirect('profile')
+
+        rating = request.POST.get('rating')
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+
+        comment = CourseReview(
+            user=request.user,
+            course=course,
+            rating=float(rating) if rating else 0,
+            title=title,
+            content=content
+        )
+        comment.save()
+        messages.success(request, 'Comment added successfully!')
+        
     try:
-        check_enroll = UserCourse.objects.get(user = request.user, course = course_id)
+        check_enroll = UserCourse.objects.get(user = request.user, course = course)
     except UserCourse.DoesNotExist:
         check_enroll = None
 
-    course = Course.objects.filter(slug = slug)
-    if course.exists():
-        course = course.first()
-    else:
-        return redirect('404')
-    
     latest_courses = Course.objects.filter(status = 'PUBLISH').order_by('-id')[:5]
     
     context = {
@@ -142,6 +177,18 @@ def COURSE_DETAILS(request, slug):
         'time_duration':time_duration,
         'latest_courses': latest_courses,
         'check_enroll':check_enroll,
+        'reviews': reviews,
+        'course_rating_average': round(course_rating_average, 2),
+        'one_star': one_star,
+        'two_star': two_star,
+        'three_star': three_star,
+        'four_star': four_star,
+        'five_star': five_star,
+        'one_star_percent': one_star_percent,
+        'two_star_percent': two_star_percent,
+        'three_star_percent': three_star_percent,
+        'four_star_percent': four_star_percent,
+        'five_star_percent': five_star_percent,
     }
     return render(request,'course/course_details.html',context)
 
@@ -172,31 +219,16 @@ def CHECKOUT(request,slug):
         if request.method == 'POST':
             first_name = request.POST.get('first_name')
             last_name = request.POST.get('last_name')
-            country = request.POST.get('country')
-            address_1 = request.POST.get('address_1')
-            address_2 = request.POST.get('address_2')
-            city = request.POST.get('city')
-            state = request.POST.get('state')
-            postcode = request.POST.get('postcode')
-            phone = request.POST.get('phone')
             email = request.POST.get('email')
-            order_comments = request.POST.get('order_comments')
 
             amount_cal = course.price - (course.price * course.discount / 100)
             amount = int(amount_cal) * 100
             currency = "INR"
             notes = {
                 "name": f'{first_name} {last_name}',
-                "country": country,
-                "address": f'{address_1} {address_2}',
-                "city": city,
-                "state": state,
-                "postcode": postcode,
-                "phone": phone,
-                "email": email,
-                "order_comments": order_comments,
+                "email": email
             }
-            receipt = f"Skola-{int(time())}"
+            receipt = f"Indeed-{int(time())}"
             order = client.order.create(
                 {
                     'receipt': receipt,
@@ -211,6 +243,12 @@ def CHECKOUT(request,slug):
                 order_id = order.get('id')
             )
             payment.save()
+            return JsonResponse({
+                "order_id": order.get("id"),
+                "amount": amount,
+                "course_title": course.title,
+                "notes": notes,
+            })
     
     context = {
         'course': course,
@@ -271,13 +309,33 @@ def WATCH_COURSE(request, slug):
     if lecture is None:
         lecture=1
     video = Video.objects.get(id = lecture)
+    comments = Comments.objects.filter(video = video)
     if course.exists():
         course = course.first()
     else:
         return redirect('404')
+    if request.method == 'POST':
+        if not(request.user.first_name and request.user.last_name):
+            messages.error(request, 'Please complete your profile before leaving a review.')
+            return redirect('profile')
+        
+        rating = request.POST.get('rating')
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+
+        comment = Comments(
+            user=request.user,
+            video=video,
+            rating=rating,
+            title=title,
+            content=content
+        )
+        comment.save()
+        messages.success(request, 'Comment added successfully!')
     
     context = {
         'course':course,
         'video':video,
+        'comments':comments,
     }
     return render(request, 'course/watch-course.html', context)

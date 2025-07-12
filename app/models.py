@@ -120,6 +120,17 @@ class Video(models.Model):
     time_duration = models.IntegerField(null=True)
     preview = models.BooleanField(default=False)
 
+class Comments(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    rating = models.FloatField(null=True, default=0)
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.first_name + " - " + self.video.title
+
 
 class UserCourse(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -151,3 +162,14 @@ class ContactUs(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.date.strftime('%B %d, %Y at %I:%M %p')}"
+    
+class CourseReview(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    rating = models.FloatField(null=True, default=0)
+    title = models.TextField()
+    content = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} - {self.course.title} - {self.rating}"

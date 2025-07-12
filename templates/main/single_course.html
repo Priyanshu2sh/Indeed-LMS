@@ -84,7 +84,7 @@
     <nav aria-label="breadcrumb" class="animated-header">
       <ol class="breadcrumb breadcrumb-scroll justify-content-center bg-transparent p-0">
         <li class="breadcrumb-item">
-          <a class="text-white" href="#">
+          <a class="text-white" href="{% url 'home' %}">
             <i class="fas fa-home me-1"></i> Home
           </a>
         </li>
@@ -299,18 +299,18 @@
 
                             <!-- Footer -->
                             <div class="card-footer px-2 pb-2 mb-1 pt-4 position-relative">
-                                <a href="instructors-single.html" class="d-block">
+                                <a href="{{i.get_absolute_url}}" class="d-block">
                                     <div class="avatar sk-fade-right avatar-xl badge-float position-absolute top-0 right-0 mt-n6 me-5 rounded-circle shadow border border-white border-w-lg">
                                         <img src="{{i.author.author_profile}}" alt="..." class="avatar-img rounded-circle">
                                     </div>
                                 </a>
 
                                 <!-- Preheading -->
-                                <a href="course-single-v5.html"><span class="mb-1 d-inline-block text-gray-800">{{i.category}}</span></a>
+                                <a href="{{i.get_absolute_url}}"><span class="mb-1 d-inline-block text-gray-800">{{i.category}}</span></a>
 
                                 <!-- Heading -->
                                 <div class="position-relative">
-                                    <a href="course-single-v5.html" class="d-block stretched-link"><h4 class="line-clamp-2 h-md-48 h-lg-58 me-md-6 me-lg-10 me-xl-4 mb-2">{{i.title}}</h4></a>
+                                    <a href="{{i.get_absolute_url}}" class="d-block stretched-link"><h4 class="line-clamp-2 h-md-48 h-lg-58 me-md-6 me-lg-10 me-xl-4 mb-2">{{i.title}}</h4></a>
 
                                     <div class="d-lg-flex align-items-end flex-wrap mb-n1">
                                         <div class="star-rating mb-2 mb-lg-0 me-lg-3">
@@ -355,8 +355,8 @@
 
                                         {% if i.price == 0 %}
                                         <div class="col-auto px-2 text-right">
-                                            
-                                            <ins class="h4 mb-0 d-block mb-lg-n1"><a href="#" class="badge badge-primary">Free</a></ins>
+
+                                            <ins class="h4 mb-0 d-block mb-lg-n1"><a href="{{ i.get_absolute_url }}" class="badge badge-primary">Free</a></ins>
                                         </div>
                                         {% else %}
                                         <div class="col-auto px-2 text-right">
