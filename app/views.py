@@ -395,3 +395,19 @@ def WATCH_COURSE(request, slug):
 
 # ------------ Blog Details Page ------------>
 
+def blog_detail(request):
+    return render(request, 'main/home_content/blog_details.html')
+
+
+# def blog_detail(request, slug):
+#     blog = get_object_or_404(Blog, slug=slug)
+
+#     # Get related & trending posts
+#     trending_posts = Blog.objects.order_by('-views')[:5]
+#     related_posts = Blog.objects.filter(category=blog.category).exclude(id=blog.id)[:2]
+
+#     return render(request, 'main/home_content/blog_details.html', {
+#         'blog': blog,
+#         'trending_posts': trending_posts,
+#         'related_posts': related_posts,
+#     })
