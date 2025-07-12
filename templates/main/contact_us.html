@@ -3,16 +3,14 @@
 {% load static %}
 {% block content %}
 
-<!-- AOS CSS -->
+<!-- Required Libraries -->
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
-
-<!-- Font Awesome + Bootstrap Icons -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
-<!-- Lottie Player -->
 <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
 
+<!-- Styles -->
 <style>
 .gradient-text-animated {
   background: linear-gradient(90deg, #9333ea, #f59e0b, #f43f5e);
@@ -26,13 +24,6 @@
   50% { background-position: 100% center; }
   100% { background-position: 0% center; }
 }
-.glow-hover {
-  transition: all 0.3s ease;
-}
-.glow-hover:hover {
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-  transform: translateY(-2px);
-}
 .wave-svg-bottom {
   position: absolute;
   bottom: 0;
@@ -40,64 +31,33 @@
   width: 100%;
   line-height: 0;
 }
-.icon-circle {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 1rem;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-.text-gradient {
-  background: linear-gradient(to right, #6366f1, #8b5cf6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.grayscale-hover iframe {
-  filter: grayscale(100%);
-  transition: filter 0.3s ease;
-}
-.grayscale-hover iframe:hover {
-  filter: grayscale(0%);
-}
-[data-aos="rotate-img"] {
-  transform: rotate(0deg);
-  transition-property: transform, opacity;
-}
-
-[data-aos="rotate-img"].aos-animate {
-  transform: rotate(360deg);
-}
-.scroll-rotate img {
-  transition: transform 0.3s ease;
-}
 #rotatingImage {
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-  will-change: transform;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
 }
-
 #rotatingImage.glow {
   box-shadow: 0 0 18px rgba(173, 216, 230, 0.6);
 }
-
-
 </style>
 
-<!-- HEADER -->
+<!-- HEADER SECTION -->
 <header class="position-relative py-12 py-md-14 text-center text-white"
-        style="background: linear-gradient(135deg,rgb(53, 11, 57), #8f94fb), url('https://source.unsplash.com/1600x600/?communication,technology') center/cover no-repeat;">
-  <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(14, 9, 49, 0.5); backdrop-filter: blur(6px); z-index: 0;"></div>
-  <div class="container position-relative z-index-1">
- <div class="mb-4 scroll-rotate">
-  <img src="{% static 'assets/img/post/post-24.jpg' %}" 
-       alt="Contact Us"
-       id="rotatingImage"
-       style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" />
-</div>
+        style="background: linear-gradient(135deg, rgb(53, 11, 57), #8f94fb), url('https://source.unsplash.com/1600x600/?communication,technology') center/cover no-repeat;">
 
+  <!-- Dark Overlay (NO blur applied now) -->
+  <div class="position-absolute top-0 start-0 w-100 h-100"
+       style="background: rgba(14, 9, 49, 0.5); z-index: 1;"></div>
 
+  <!-- Main Content -->
+  <div class="container position-relative z-index-2" id="contactContent">
+    <div class="mb-4">
+      <img src="{% static 'assets/img/post/post-24.jpg' %}"
+           alt="Contact Us"
+           id="rotatingImage" />
+    </div>
     <h1 class="display-3 fw-bold mb-3 gradient-text-animated">Get in touch today!</h1>
     <p class="lead text-white-50 mb-4">We'd love to hear from you — let's start the conversation.</p>
     <nav class="mt-4" aria-label="breadcrumb">
@@ -111,6 +71,8 @@
       </ol>
     </nav>
   </div>
+
+  <!-- Decorative Wave -->
   <div class="wave-svg-bottom">
     <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
       <path fill="#ffffff" fill-opacity="1"
@@ -118,6 +80,22 @@
     </svg>
   </div>
 </header>
+
+<!-- Animation for content -->
+<script>
+  gsap.from("#contactContent", {
+    y: -100,
+    opacity: 0,
+    duration: 1.2,
+    ease: "power3.out"
+  });
+</script>
+
+
+
+
+
+
 
 <!-- CONTACT SECTION -->
 <div class="container py-8 py-lg-11">
