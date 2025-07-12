@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% load course_tags %}
-{% load static %}
 {% block title %}my-course{% endblock %}
+{% load static %}
 
 {% block content %}
+
 <!-- AOS CSS (optional) -->
 <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
 
@@ -17,13 +18,25 @@
 <!-- tsParticles -->
 <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
 
+
 <style>
+   .course-card {
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all 0.4s ease-in-out;
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
   header.animated-header {
     background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
     padding: 120px 0 100px 0;
     position: relative;
     overflow: hidden;
   }
+
 
   #tsparticles {
     position: absolute;
@@ -39,7 +52,6 @@
     position: relative;
     z-index: 2;
   }
-
   .hero-card {
     background: rgba(130, 11, 11, 0.05);
     border-radius: 20px;
@@ -49,66 +61,90 @@
     transition: transform 0.3s ease;
   }
 
-  .course-card {
-    border-radius: 20px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    transition: all 0.4s ease-in-out;
-    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.08);
-    position: relative;
-  }
 
-  .course-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 24px 40px rgba(0, 0, 0, 0.25), 0 0 20px #fbbf24;
-  }
+.course-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 24px 40px rgba(0, 0, 0, 0.15);
+}
 
-  .course-img-container img {
-    width: 100%;
-    border-radius: 16px;
-    transition: transform 0.4s ease-in-out;
-  }
+.course-img-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+}
 
-  .course-card:hover .course-img-container img {
-    transform: scale(1.06);
-  }
+.course-img-container img {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  transition: transform 0.4s ease-in-out;
+}
 
-  .discount-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: linear-gradient(135deg, #f43f5e, #e11d48);
-    color: white;
-    padding: 6px 12px;
-    font-size: 0.75rem;
-    border-radius: 20px;
-    font-weight: bold;
-    box-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
-    z-index: 2;
-  }
+.course-card:hover .course-img-container img {
+  transform: scale(1.06);
+}
 
-  .category-pill {
-    background: #facc15;
-    color: #1e293b;
-    font-weight: 600;
-    padding: 5px 14px;
-    border-radius: 50px;
-    font-size: 0.8rem;
-  }
+.img-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.35));
+  border-radius: 16px;
+  z-index: 1;
+  opacity: 0;
+  transition: 0.3s ease-in-out;
+}
+.course-card:hover .img-overlay {
+  opacity: 1;
+}
 
-  .price-pill {
-    background: #10b981;
-    color: white;
-    padding: 6px 16px;
-    border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.85rem;
-    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
-  }
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  border-radius: 20px;
+  font-weight: bold;
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.3);
+}
+
+.category-pill {
+  background: #facc15;
+  color: #1e293b;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.course-card:hover .category-pill {
+  background: #fbbf24;
+}
+
+.author-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.price-pill {
+  background: #10b981;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);
+}
+
 </style>
-
 <!-- HEADER -->
 <header class="animated-header">
   <!-- Particle background -->
@@ -150,7 +186,6 @@
     </svg>
   </div>
 </header>
-
 
 
 <!-- GSAP + ScrollTrigger Animations -->
@@ -263,6 +298,9 @@ tsParticles.load("tsparticles", {
   detectRetina: true
 });
 </script>
+
+
+
 
 
 
