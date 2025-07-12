@@ -222,6 +222,7 @@ def CHECKOUT(request,slug):
             email = request.POST.get('email')
 
             amount_cal = course.price - (course.price * course.discount / 100)
+            amount_cal = amount_cal + (amount_cal * 0.18)  # Adding 18% tax
             amount = int(amount_cal) * 100
             currency = "INR"
             notes = {
@@ -309,7 +310,7 @@ def WATCH_COURSE(request, slug):
     if lecture is None:
         lecture=1
     video = Video.objects.get(id = lecture)
-    comments = Comments.objects.filter(video = video)
+    comments = Comments.objects.filter(video = video, rating__in=[4, 4.5, 5]).order_by('-date')[:2]
     if course.exists():
         course = course.first()
     else:
@@ -326,7 +327,7 @@ def WATCH_COURSE(request, slug):
         comment = Comments(
             user=request.user,
             video=video,
-            rating=rating,
+            rating=float(rating) if rating else 0,
             title=title,
             content=content
         )

@@ -226,7 +226,7 @@
                                         <p class="font-size-sm font-italic">{{ comment.title }}</p>
                                     </div>
                                     <div class="star-rating">
-                                        <div class="rating" style="width:100%;"></div>
+                                        <div class="rating" style="width: {% if comment.rating == 4 %} 80%; {% elif comment.rating == 4.5 %} 93%; {% elif comment.rating == 5 %} 100%; {% endif %}"></div>
                                     </div>
                                 </div>
                                 <p class="mb-6 line-height-md">{{ comment.content }}</p>
@@ -276,12 +276,12 @@
 
                             <div class="form-group mb-6">
                                 <label for="exampleInputTitle1">Review Title</label>
-                                <input type="text" class="form-control placeholder-1" name="title" id="exampleInputTitle1" placeholder="Courses">
+                                <input type="text" class="form-control placeholder-1" name="title" id="exampleInputTitle1" placeholder="Courses" required>
                             </div>
 
                             <div class="form-group mb-6">
                                 <label for="exampleFormControlTextarea1">Review Content</label>
-                                <textarea class="form-control placeholder-1" name="content" id="exampleFormControlTextarea1" rows="6" placeholder="Content"></textarea>
+                                <textarea class="form-control placeholder-1" name="content" id="exampleFormControlTextarea1" rows="6" placeholder="Content" required></textarea>
                             </div>
 
                             <button type="submit" class="btn btn-primary btn-block mw-md-300p">SUBMIT REVIEW</button>
