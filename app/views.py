@@ -391,3 +391,7 @@ def WATCH_COURSE(request, slug):
         'comments':comments,
     }
     return render(request, 'course/watch-course.html', context)
+
+
+# ------------ Blog Details Page ------------>
+

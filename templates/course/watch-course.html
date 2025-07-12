@@ -35,6 +35,36 @@
 
     <title>watch - {{course.title}}</title>
 
+    <style>
+.comment-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08), 0 0 12px rgba(0, 180, 216, 0.08);
+  transition: all 0.3s ease;
+  max-width: 320px;
+  padding: 1.25rem 1rem;
+  min-height: auto;
+}
+
+.comment-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 0 14px rgba(255, 200, 0, 0.25);
+}
+
+.shadow-avatar {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  box-shadow: 0 0 0 3px #fcd34d, 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+}
+</style>
+
+
 </head>
 <body class="bg-white">
 
@@ -212,28 +242,45 @@
                         </a>
                     </div>
 
-                    <h3 class="mb-6">Comment</h3>
-                    <ul class="list-unstyled pt-2">
-                        {% for comment in comments %}
-                        <li class="media d-flex">
-                            <div class="avatar avatar-xxl me-3 me-md-6 flex-shrink-0">
-                                <img src="{% static 'assets/img/avatars/avatar-1.jpg' %}" alt="..." class="avatar-img rounded-circle">
-                            </div>
-                            <div class="media-body flex-grow-1">
-                                <div class="d-md-flex align-items-center mb-5">
-                                    <div class="me-auto mb-4 mb-md-0">
-                                        <h5 class="mb-0">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
-                                        <p class="font-size-sm font-italic">{{ comment.title }}</p>
-                                    </div>
-                                    <div class="star-rating">
-                                        <div class="rating" style="width:100%;"></div>
-                                    </div>
-                                </div>
-                                <p class="mb-6 line-height-md">{{ comment.content }}</p>
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
+     <!-- Comment Swiper -->
+<h3 class="mb-6">Comments</h3>
+<div class="swiper commentSwiper">
+  <div class="swiper-wrapper">
+    {% for comment in comments %}
+    <div class="swiper-slide">
+      <div class="comment-card p-4">
+        <div class="d-flex align-items-center mb-3">
+          <img src="{% static 'assets/img/avatars/avatar-1.jpg' %}" class="avatar avatar-md rounded-circle me-3 shadow-avatar" alt="Avatar" />
+          <div>
+            <h5 class="mb-0 text-dark">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
+            <small class="text-muted font-italic">{{ comment.title }}</small>
+          </div>
+        </div>
+        <p class="mb-0 text-gray-700">{{ comment.content }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  var commentSwiper = new Swiper(".commentSwiper", {
+    slidesPerView: 1,
+    spaceBetween: 30,
+    loop: true,
+    loopAdditionalSlides: 3,
+    loopFillGroupWithBlank: true,
+    autoplay: {
+      delay: 1000,
+      disableOnInteraction: false,
+    },
+    breakpoints: {
+      768: { slidesPerView: 2 },
+      992: { slidesPerView: 3 },
+    },
+  });
+</script>
+
 
                     <div class="border shadow rounded p-6 p-md-9">
                         <h3 class="mb-2">Add Reviews & Rate</h3>
