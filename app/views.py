@@ -235,24 +235,63 @@ def MY_COURSE(request):
     return render(request, 'course/my-course.html', context)
 
 
+# @csrf_exempt
+# def VERIFY_PAYMENT(request):
+#     if request.method == 'POST':
+#         data = request.POST
+#         try:
+#             client.utility.verify_payment_signature(data)
+#             razorpay_order_id = data['razorpay_order_id']
+#             razorpay_payment_id = data['razorpay_order_id']
+
+#             payment = Payment.objects.get(order_id = razorpay_order_id)
+#             payment.payment_id = razorpay_payment_id
+#             payment.status = True
+
+#             usercourse = UserCourse(
+#                 user = payment.user,
+#                 course = payment.course,
+#             )
+#             usercourse.save()
+#             payment.user_course = usercourse
+#             payment.save()
+
+#             context = {
+#                 'data': data,
+#                 'payment': payment,
+#             }
+#             return render(request, 'verify_payment/success.html', context)
+#         except:
+#             return render(request, 'verify_payment/fail.html')
+
+
 @csrf_exempt
 def VERIFY_PAYMENT(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         data = request.POST
         try:
-            client.utility.verify_payment_signature(data)
-            razorpay_order_id = data['razorpay_order_id']
-            razorpay_payment_id = data['razorpay_order_id']
+            params_dict = {
+                'razorpay_order_id': data.get('razorpay_order_id'),
+                'razorpay_payment_id': data.get('razorpay_payment_id'),
+                'razorpay_signature': data.get('razorpay_signature'),
+            }
 
-            payment = Payment.objects.get(order_id = razorpay_order_id)
+            # Proper signature verification
+            client.utility.verify_payment_signature(params_dict)
+
+            razorpay_order_id = params_dict['razorpay_order_id']
+            razorpay_payment_id = params_dict['razorpay_payment_id']
+
+            payment = Payment.objects.get(order_id=razorpay_order_id)
             payment.payment_id = razorpay_payment_id
             payment.status = True
 
-            usercourse = UserCourse(
-                user = payment.user,
-                course = payment.course,
+            # Create user-course relationship
+            usercourse = UserCourse.objects.create(
+                user=payment.user,
+                course=payment.course,
             )
-            usercourse.save()
+
             payment.user_course = usercourse
             payment.save()
 
@@ -261,8 +300,21 @@ def VERIFY_PAYMENT(request):
                 'payment': payment,
             }
             return render(request, 'verify_payment/success.html', context)
-        except:
-            return render(request, 'verify_payment/fail.html')
+
+        except razorpay.errors.SignatureVerificationError as e:
+            # If signature mismatch or any other verification error
+            return render(request, 'verify_payment/fail.html', {'error': str(e)})
+
+        except Payment.DoesNotExist:
+            # Order not found in your DB
+            return render(request, 'verify_payment/fail.html', {'error': 'Payment record not found'})
+
+        except Exception as e:
+            # Any other unexpected error
+            return render(request, 'verify_payment/fail.html', {'error': str(e)})
+
+    return render(request, 'verify_payment/fail.html', {'error': 'Invalid request method'})
+
         
 
 def WATCH_COURSE(request, slug):

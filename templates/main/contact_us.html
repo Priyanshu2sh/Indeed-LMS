@@ -3,85 +3,42 @@
 {% load static %}
 {% block content %}
 
-  <!-- Font Awesome (for icons) -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- AOS CSS -->
+<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
 
-  <!-- Lottie Player -->
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-
-  <!-- Bootstrap Icons -->
+<!-- Font Awesome + Bootstrap Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
-<!-- Font Awesome -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
-
+<!-- Lottie Player -->
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
 <style>
-
 .gradient-text-animated {
-      background: linear-gradient(90deg, #9333ea, #f59e0b, #f43f5e);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: gradientFlow 4s ease infinite;
-    }
-
-    @keyframes gradientFlow {
-      0% {
-        background-position: 0% center;
-      }
-      50% {
-        background-position: 100% center;
-      }
-      100% {
-        background-position: 0% center;
-      }
-    }
-
-    .glow-hover {
-      transition: all 0.3s ease;
-      box-shadow: 0 0 0 rgba(255, 193, 7, 0);
-    }
-
-    .glow-hover:hover {
-      box-shadow: 0 0 20px rgba(255, 193, 7, 0.6);
-      transform: translateY(-2px);
-    }
-
-    .wave-svg-bottom {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      line-height: 0;
-    }
-
-    .breadcrumb {
-      padding: 0;
-      margin: 0;
-      background: transparent;
-      justify-content: center;
-    }
-
-    .breadcrumb-item + .breadcrumb-item::before {
-      color: #ffffffa0;
-    }
-.icon {
-  width: 48px;
-  height: 48px;
-  background-color: #f1f3f5;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: linear-gradient(90deg, #9333ea, #f59e0b, #f43f5e);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 4s ease infinite;
 }
-.grayscale-hover iframe {
-  filter: grayscale(100%);
-  transition: filter 0.3s ease;
+@keyframes gradientFlow {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
 }
-.grayscale-hover iframe:hover {
-  filter: grayscale(0%);
+.glow-hover {
+  transition: all 0.3s ease;
+}
+.glow-hover:hover {
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+  transform: translateY(-2px);
+}
+.wave-svg-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  line-height: 0;
 }
 .icon-circle {
   width: 42px;
@@ -93,52 +50,56 @@
   font-size: 1rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
 .text-gradient {
   background: linear-gradient(to right, #6366f1, #8b5cf6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
-.glow-hover {
-  transition: all 0.3s ease;
+.grayscale-hover iframe {
+  filter: grayscale(100%);
+  transition: filter 0.3s ease;
+}
+.grayscale-hover iframe:hover {
+  filter: grayscale(0%);
+}
+[data-aos="rotate-img"] {
+  transform: rotate(0deg);
+  transition-property: transform, opacity;
 }
 
-.glow-hover:hover {
-  box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-  transform: translateY(-2px);
+[data-aos="rotate-img"].aos-animate {
+  transform: rotate(360deg);
+}
+.scroll-rotate img {
+  transition: transform 0.3s ease;
+}
+#rotatingImage {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  will-change: transform;
+}
+
+#rotatingImage.glow {
+  box-shadow: 0 0 18px rgba(173, 216, 230, 0.6);
 }
 
 
+</style>
 
-    </style>
-
-<!-- PAGE TITLE ================================================== -->
-<!-- CONTACT HEADER SECTION -->
+<!-- HEADER -->
 <header class="position-relative py-12 py-md-14 text-center text-white"
-        style="background: linear-gradient(135deg,rgb(53, 11, 57), #8f94fb);), url('https://source.unsplash.com/1600x600/?communication,technology') center/cover no-repeat;">
-  
-  <!-- Glassy Overlay -->
+        style="background: linear-gradient(135deg,rgb(53, 11, 57), #8f94fb), url('https://source.unsplash.com/1600x600/?communication,technology') center/cover no-repeat;">
   <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(14, 9, 49, 0.5); backdrop-filter: blur(6px); z-index: 0;"></div>
-
-  <!-- Content -->
   <div class="container position-relative z-index-1">
-    
-<div class="mb-4">
+ <div class="mb-4 scroll-rotate">
   <img src="{% static 'assets/img/post/post-24.jpg' %}" 
        alt="Contact Us"
+       id="rotatingImage"
        style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" />
 </div>
 
 
-
     <h1 class="display-3 fw-bold mb-3 gradient-text-animated">Get in touch today!</h1>
-
-    <p class="lead text-white-50 mb-4">
-      We'd love to hear from you — let's start the conversation.
-    </p>
-
-    <!-- Breadcrumb -->
+    <p class="lead text-white-50 mb-4">We'd love to hear from you — let's start the conversation.</p>
     <nav class="mt-4" aria-label="breadcrumb">
       <ol class="breadcrumb breadcrumb-scroll justify-content-center bg-transparent p-0">
         <li class="breadcrumb-item">
@@ -150,13 +111,10 @@
       </ol>
     </nav>
   </div>
-
-  <!-- SVG WAVE -->
   <div class="wave-svg-bottom">
     <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
       <path fill="#ffffff" fill-opacity="1"
-            d="M0,64L48,69.3C96,75,192,85,288,85.3C384,85,480,75,576,69.3C672,64,768,64,864,64C960,64,1056,64,1152,64C1248,64,1344,64,1392,64L1440,64L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z">
-      </path>
+            d="M0,64L48,69.3C96,75,192,85,288,85.3C384,85,480,75,576,69.3C672,64,768,64,864,64C960,64,1056,64,1152,64C1248,64,1344,64,1392,64L1440,64L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z"></path>
     </svg>
   </div>
 </header>
@@ -167,70 +125,44 @@
   <div class="row g-5 justify-content-center align-items-stretch">
 
     <!-- Contact Info -->
-    <div class="col-lg-6 d-flex">
-      <div class="p-5 w-100 rounded-4 shadow bg-white" style="box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+    <div class="col-lg-6 d-flex" data-aos="fade-right">
+      <div class="p-5 w-100 rounded-4 shadow bg-white">
         <h2 class="mb-4 fw-bold text-gradient">📍 Contact Information</h2>
         <p class="text-muted mb-5">Feel free to reach out to us. We're here to help!</p>
 
         <div class="mb-4 d-flex align-items-start gap-3">
-          <div class="icon-circle bg-primary text-white">
-            <i class="bi bi-geo-alt-fill fs-5"></i>
-          </div>
-          <div>
-            <h6 class="mb-1">Address</h6>
-            <p class="mb-0 text-muted">Wagholi, Pune</p>
-          </div>
+          <div class="icon-circle bg-primary text-white"><i class="bi bi-geo-alt-fill fs-5"></i></div>
+          <div><h6 class="mb-1">Address</h6><p class="mb-0 text-muted">Wagholi, Pune</p></div>
         </div>
 
         <div class="mb-4 d-flex align-items-start gap-3">
-          <div class="icon-circle bg-success text-white">
-            <i class="bi bi-telephone-fill fs-5"></i>
-          </div>
-          <div>
-            <h6 class="mb-1">Phone</h6>
-               <p class="mb-0 text-muted">985 011 3269</p>
-
-          </div>
+          <div class="icon-circle bg-success text-white"><i class="bi bi-telephone-fill fs-5"></i></div>
+          <div><h6 class="mb-1">Phone</h6><p class="mb-0 text-muted">985 011 3269</p></div>
         </div>
 
         <div class="mb-4 d-flex align-items-start gap-3">
-          <div class="icon-circle bg-warning text-white">
-            <i class="bi bi-envelope-fill fs-5"></i>
-          </div>
-          <div>
-            <h6 class="mb-1">Email</h6>
-            <p class="mb-0 text-muted">
-                    <a href="mailto:info@indeedinspiring.com" class="text-decoration-none text-dark">info@indeedinspiring.com</a>
-
-            </p>
-          </div>
+          <div class="icon-circle bg-warning text-white"><i class="bi bi-envelope-fill fs-5"></i></div>
+          <div><h6 class="mb-1">Email</h6><p class="mb-0 text-muted"><a href="mailto:info@indeedinspiring.com" class="text-decoration-none text-dark">info@indeedinspiring.com</a></p></div>
         </div>
 
         <div class="mb-4 d-flex align-items-start gap-3">
-          <div class="icon-circle bg-danger text-white">
-            <i class="bi bi-clock-fill fs-5"></i>
-          </div>
-          <div>
-            <h6 class="mb-1">Working Hours</h6>
-            <p class="mb-0 text-muted">Mon - Sat: 9 AM - 6 PM</p>
-            <p class="mb-0 text-muted">Closed on holidays</p>
-          </div>
+          <div class="icon-circle bg-danger text-white"><i class="bi bi-clock-fill fs-5"></i></div>
+          <div><h6 class="mb-1">Working Hours</h6><p class="mb-0 text-muted">Mon - Sat: 9 AM - 6 PM</p><p class="mb-0 text-muted">Closed on holidays</p></div>
         </div>
 
         <div class="d-flex gap-2 mt-4">
-          <a href="https://www.facebook.com/indeedinspiring" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-facebook-f"></i></a>
-          <a href="https://twitter.com/indeedinspiring" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-twitter"></i></a>
-          <a href="https://www.instagram.com/indeedinspiring" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-instagram"></i></a>
-          <a href="https://in.linkedin.com/company/indeedinspiring" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-linkedin-in"></i></a>
-          <a href="https://www.youtube.com/@IndeedInspiringInfotech" target="_blank" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-youtube"></i></a>
-
+          <a href="#" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="btn btn-sm btn-outline-primary rounded-circle"><i class="fab fa-youtube"></i></a>
         </div>
       </div>
     </div>
 
     <!-- Contact Form -->
-    <div class="col-lg-6 d-flex">
-      <div class="p-5 w-100 rounded-4 shadow bg-white" style="box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+    <div class="col-lg-6 d-flex" data-aos="fade-left">
+      <div class="p-5 w-100 rounded-4 shadow bg-white">
         <h2 class="mb-4 fw-bold text-primary">💬 Have a Question?</h2>
         <form method="post" class="row g-3">
           {% csrf_token %}
@@ -254,14 +186,51 @@
     </div>
   </div>
 
-  <!-- MAP -->
-  <div class="mt-5 rounded overflow-hidden shadow grayscale-hover">
+
+  <!-- Google Map -->
+  <div class="mt-5 rounded overflow-hidden shadow grayscale-hover" data-aos="zoom-in-up">
     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3781.9926037925657!2d73.97708117519294!3d18.57437218252968!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c30021396241%3A0x1642338970df7542!2sIndeed%20Inspiring%20Infotech!5e0!3m2!1sen!2sin!4v1751950617126!5m2!1sen!2sin"
       width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-  </div>
+  </div>
+  </div>
 
-</div>
+<!-- AOS Script -->
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+  AOS.init({
+    duration: 1000,
+    once: false // ✅ re-animate when scrolling up again
+  });
+</script>
 
+<script>
+  const image = document.getElementById("rotatingImage");
+  let lastScrollTop = window.scrollY;
+  let rotationAngle = 0;
+  let scrollTimeout;
+
+  window.addEventListener("scroll", () => {
+    const currentScroll = window.scrollY;
+    const delta = currentScroll - lastScrollTop;
+
+    // Add rotation proportional to scroll
+    rotationAngle += delta * 0.3;  // adjust speed (0.3 is smooth)
+    rotationAngle = Math.max(Math.min(rotationAngle, 30), -30);  // clamp to ±30 degrees
+
+    image.style.transform = `rotate(${rotationAngle}deg)`;
+    image.classList.add("glow");
+
+    // Reset timer
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      rotationAngle = 0;
+      image.style.transform = `rotate(0deg)`;
+      image.classList.remove("glow");
+    }, 200);  // reset after 200ms of no scroll
+
+    lastScrollTop = currentScroll;
+  });
+</script>
 
 
 {% endblock %}
