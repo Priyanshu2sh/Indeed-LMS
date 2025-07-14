@@ -16,6 +16,10 @@
 
 <script>AOS.init();</script>
 
+<!-- ✅ HEAD section -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" />
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
+
 
 
 <style>
@@ -201,27 +205,34 @@
 
 
 
-
-<!-- ✅ Your video section -->
+<!-- ✅ Video Section with Full Clickable Area -->
 <div class="mb-10" data-aos="zoom-in">
-  <div class="position-relative rounded text-center overflow-hidden"
-       style="background-image: url({% static 'assets/img/covers/cover-2.jpg' %}); background-size: cover; background-position: center;">
-    
-    <!-- Black overlay -->
-    <div class="position-absolute top-0 start-0 w-100 h-100"
-         style="background: rgba(0, 0, 0, 0.4); z-index: 1;"></div>
-    
-    <!-- Play Button -->
-    <div class="py-12 py-md-14 position-relative z-2">
-      <a href="https://www.youtube.com/watch?v=-zjLUCwO9CM"
-         data-fancybox="video"
-         class="btn btn-white btn-lg rounded-circle shadow-lg d-inline-flex align-items-center justify-content-center"
-         style="width: 90px; height: 90px;">
-        <i class="fas fa-play fa-lg"></i>
-      </a>
+  <a href="https://www.youtube.com/watch?v=-zjLUCwO9CM"
+     data-fancybox
+     data-type="iframe"
+     class="text-decoration-none d-block">
+
+    <div class="position-relative rounded-4 shadow-lg overflow-hidden"
+         style="background-image: url('{% static "assets/img/covers/cover-2.jpg" %}'); background-size: cover; background-position: center; height: 450px; cursor: pointer;">
+      
+      <!-- Overlay -->
+      <div class="position-absolute top-0 start-0 w-100 h-100"
+           style="background: linear-gradient(to bottom right, rgba(0,0,0,0.6), rgba(0,0,0,0.4)); z-index: 1;"></div>
+
+      <!-- Play Icon Centered -->
+      <div class="position-absolute top-50 start-50 translate-middle z-2">
+        <div class="btn btn-white btn-lg rounded-circle shadow-lg d-flex align-items-center justify-content-center play-button"
+             style="width: 90px; height: 90px;">
+          <i class="fas fa-play fa-lg text-dark"></i>
+        </div>
+      </div>
+
     </div>
-  </div>
+  </a>
 </div>
+
+
+
 
 
 <!-- COUNTER SECTION -->
