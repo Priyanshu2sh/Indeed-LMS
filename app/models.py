@@ -111,14 +111,15 @@ class Lesson(models.Model):
         return self.name + " - " +self.course.title
 
 class Video(models.Model):
-    serial_numer = models.IntegerField(null=True)
+    serial_number = models.IntegerField(null=True)
     thumbnail = models.ImageField(upload_to="Media/Yt_Thumbnail", null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
-    youtube_id = models.CharField(max_length=200)
+    youtube_link = models.CharField(max_length=200, null=True, blank=True)
     time_duration = models.IntegerField(null=True)
     preview = models.BooleanField(default=False)
+    description = models.TextField(null=True, blank=True)
 
 class Comments(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -174,3 +175,11 @@ class CourseReview(models.Model):
     def __str__(self):
         return f"{self.user.first_name} - {self.course.title} - {self.rating}"
     
+class VideoProgress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    video = models.ForeignKey(Video, on_delete=models.CASCADE)
+    watched_seconds = models.FloatField(default=0)
+    completed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('user', 'video')

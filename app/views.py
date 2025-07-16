@@ -9,6 +9,7 @@ from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.db.models import Count
+import json
 
 import razorpay
 from LMS.settings import *
@@ -125,7 +126,7 @@ def COURSE_DETAILS(request, slug):
     time_duration = Video.objects.filter(course__slug = slug).aggregate(sum = Sum('time_duration'))
 
     course = Course.objects.get(slug = slug)
-    reviews = CourseReview.objects.filter(course = course, rating__in=[4, 4.5, 5]).order_by('-date')[:2]
+    reviews = CourseReview.objects.filter(course = course, rating__in=[4, 4.5, 5]).order_by('-date')
     course_rating_average = CourseReview.objects.filter(course=course).aggregate(average_rating=Sum('rating') / Count('id'))['average_rating'] or 0
 
     one_star = CourseReview.objects.filter(course=course, rating__in=[0.5, 1]).count()
@@ -266,6 +267,12 @@ def MY_COURSE(request):
 
     category = Categories.objects.all().order_by('id')
     course = UserCourse.objects.filter(user = request.user)
+    for c in course:
+        total_duration = Video.objects.filter(course=c.course).aggregate(total=Sum('time_duration'))['total'] or 0
+        hours = total_duration // 60
+        minutes = total_duration % 60
+        formatted_duration = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+        c.total_duration = formatted_duration
 
     context = {
         'course':course,
@@ -359,14 +366,48 @@ def VERIFY_PAYMENT(request):
 def WATCH_COURSE(request, slug):
     course = Course.objects.filter(slug = slug)
     lecture = request.GET.get('lecture')
-    if lecture is None:
-        lecture=1
-    video = Video.objects.get(id = lecture)
-    comments = Comments.objects.filter(video = video, rating__in=[4, 4.5, 5]).order_by('-date')[:2]
+    next = request.GET.get('next')
+    previous = request.GET.get('previous')
+    is_first_video = False
+    is_last_video = False
+
     if course.exists():
         course = course.first()
     else:
         return redirect('404')
+
+    if lecture:
+        check_lecture = 1
+        if int(lecture) != 1:
+            check_lecture = int(lecture) - 1
+        video = Video.objects.filter(serial_number=check_lecture, course=course).first()
+        video_progress = VideoProgress.objects.filter(user=request.user, video=video).first()
+        if video_progress == None or video_progress.completed == False:
+            messages.error(request, 'Please complete videos in sequence fully before moving to the next.')
+            previous_url = request.META.get('HTTP_REFERER')
+            return redirect(previous_url)
+
+    if lecture is None:
+        lecture=1
+    if next:
+        video = Video.objects.filter(serial_number=next, course=course).first()
+        video_progress = VideoProgress.objects.filter(user = request.user, video=video).first()
+        if video_progress == None or video_progress.completed == False:
+            messages.error(request, 'Please complete current video fully before moving to the next.')
+            previous_url = request.META.get('HTTP_REFERER')
+            return redirect(previous_url)
+        lecture = int(next) + 1
+    if previous:
+        lecture = int(previous) - 1
+
+    video = Video.objects.filter(serial_number=lecture, course=course).first()
+
+    last_video = Video.objects.filter(course=course).order_by('-serial_number').first()
+    is_last_video = video.id == last_video.id
+    is_first_video = video.serial_number == 1
+
+    comments = Comments.objects.filter(video=video, rating__in=[4, 4.5, 5]).order_by('-date')
+
     if request.method == 'POST':
         if not(request.user.first_name and request.user.last_name):
             messages.error(request, 'Please complete your profile before leaving a review.')
@@ -390,9 +431,65 @@ def WATCH_COURSE(request, slug):
         'course':course,
         'video':video,
         'comments':comments,
+        'is_first_video':is_first_video,
+        'is_last_video':is_last_video,
     }
     return render(request, 'course/watch-course.html', context)
 
+
+@csrf_exempt
+def save_video_progress(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        video_id = data.get("video_id")
+        seconds_watched = float(data.get("seconds_watched", 0))
+        completed = data.get("completed", False)
+        video_duration = float(data.get("video_duration", 0))
+
+        try:
+            video = Video.objects.get(id=video_id)
+        except Video.DoesNotExist:
+            return JsonResponse({"error": "Video not found"}, status=404)
+
+        progress, _ = VideoProgress.objects.get_or_create(
+            user=request.user,
+            video=video,
+        )
+
+        # Update only if watched time increased
+        if seconds_watched > progress.watched_seconds:
+            progress.watched_seconds = seconds_watched
+
+        if completed:
+            if video_duration:
+                print('video duration:', video_duration)
+                min_required_time = video_duration / 2
+                print('min required duration:', min_required_time)
+                print(progress.watched_seconds)
+                print(progress.watched_seconds >= min_required_time)
+
+                if progress.watched_seconds >= min_required_time:
+                    progress.completed = True
+                else:
+                    return JsonResponse({
+                        "status": "incomplete",
+                        "message": (
+                            "Please watch the full video without skipping to mark this as complete "
+                            "and proceed to the next video."
+                        )
+                    })
+            else:
+                # If duration not known, fallback: mark complete
+                progress.completed = True
+
+        progress.save()
+
+        if progress.completed == True:
+            return JsonResponse({"status": "completed"})
+        else:
+            return JsonResponse({"status": "ok"})
+    
+    return JsonResponse({"error": "Invalid method"}, status=400)
 
 # ------------ Blog Details Page ------------>
 

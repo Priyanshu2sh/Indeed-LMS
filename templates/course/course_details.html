@@ -457,72 +457,28 @@
                         </div>
                     </div>
 
-                  <!-- Swiper -->
-
-
-
-
-                  <!-- Swiper Container -->
-<div class="swiper mySwiper">
-  <div class="swiper-wrapper">
-    {% for review in reviews %}
-    <div class="swiper-slide">
-      <div class="review-card p-4">
-        <div class="d-flex align-items-center mb-3">
-          <img src="{% static 'assets/img/avatars/avatar-1.jpg' %}" class="avatar avatar-md rounded-circle me-3 shadow-avatar" alt="Avatar" />
-          <div>
-            <h5 class="mb-0 text-dark">{{ review.user.first_name }} {{ review.user.last_name }}</h5>
-            <small class="text-muted font-italic">{{ review.title }}</small>
-          </div>
-        </div>
-        <div class="star-rating mb-2">
-          <div class="rating" style="width:{{ review.rating|floatformat:"0" }}0%;"></div>
-        </div>
-        <p class="mb-0 text-gray-700">{{ review.content }}</p>
-      </div>
-    </div>
-    {% endfor %}
-  </div><br>
-</div>
-
-<script>
-  var swiper = new Swiper(".mySwiper", {
-    slidesPerView: 1,
-    spaceBetween: 30,
-    loop: true,
-    autoplay: {
-      delay: 1000,  // Slide every 3 seconds
-      disableOnInteraction: false, // Keeps auto-play even after interaction
-    },
-    breakpoints: {
-      768: { slidesPerView: 2 },
-      992: { slidesPerView: 3 },
-    },
-  });
-</script>
-
-
-                    <ul class="list-unstyled pt-2">
+                    <!-- Swiper Container -->
+                    <div class="swiper mySwiper">
+                    <div class="swiper-wrapper">
                         {% for review in reviews %}
-                        <li class="media d-flex">
-                            <div class="avatar avatar-xxl me-3 me-md-6 flex-shrink-0">
-                                <img src="{% static 'assets/img/avatars/avatar-1.jpg' %}" alt="..." class="avatar-img rounded-circle">
+                        <div class="swiper-slide">
+                        <div class="review-card p-4">
+                            <div class="d-flex align-items-center mb-3">
+                            <img src="{% static 'assets/img/avatars/avatar-1.jpg' %}" class="avatar avatar-md rounded-circle me-3 shadow-avatar" alt="Avatar" />
+                            <div>
+                                <h5 class="mb-0 text-dark">{{ review.user.first_name }} {{ review.user.last_name }}</h5>
+                                <small class="text-muted font-italic">{{ review.title }}</small>
                             </div>
-                            <div class="media-body flex-grow-1">
-                                <div class="d-md-flex align-items-center mb-5">
-                                    <div class="me-auto mb-4 mb-md-0">
-                                        <h5 class="mb-0">{{ review.user.first_name }} {{ review.user.last_name }}</h5>
-                                        <p class="font-size-sm font-italic">{{ review.title }}</p>
-                                    </div>
-                                    <div class="star-rating">
-                                        <div class="rating" style="width:{% if review.rating == 4 %} 80%; {% elif review.rating == 4.5 %} 93%; {% elif review.rating == 5 %} 100%; {% endif %}"></div>
-                                    </div>
-                                </div>
-                                <p class="mb-6 line-height-md">{{ review.content }}</p>
                             </div>
-                        </li>
+                            <div class="star-rating mb-2">
+                                <div class="rating" style="width:{% if review.rating == 4 %} 80%; {% elif review.rating == 4.5 %} 93%; {% elif review.rating == 5 %} 100%; {% endif %}"></div>
+                            </div>
+                            <p class="mb-0 text-gray-700">{{ review.content }}</p>
+                        </div>
+                        </div>
                         {% endfor %}
-                    </ul>
+                    </div><br>
+                    </div>
 
                     <div class="border shadow rounded p-6 p-md-9">
                         <h3 class="mb-2">Add Reviews & Rate</h3>
@@ -765,4 +721,20 @@
 
             </div>
         </div>
+
+<script>
+    var swiper = new Swiper(".mySwiper", {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        autoplay: {
+        delay: 1000,  // Slide every 3 seconds
+        disableOnInteraction: false, // Keeps auto-play even after interaction
+        },
+        breakpoints: {
+        768: { slidesPerView: 2 },
+        992: { slidesPerView: 3 },
+        },
+    });
+</script>
 {% endblock %}
