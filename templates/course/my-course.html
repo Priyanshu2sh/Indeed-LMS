@@ -5,6 +5,20 @@
 
 {% block content %}
 
+<!-- AOS CSS (optional) -->
+<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+
+<!-- GSAP + ScrollTrigger -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+<!-- Tilt.js -->
+<script src="https://cdn.jsdelivr.net/npm/vanilla-tilt@1.7.2/dist/vanilla-tilt.min.js"></script>
+
+<!-- tsParticles -->
+<script src="https://cdn.jsdelivr.net/npm/tsparticles@2.11.1/tsparticles.bundle.min.js"></script>
+
+
 <style>
    .course-card {
   border-radius: 20px;
@@ -16,6 +30,37 @@
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.08);
   position: relative;
 }
+  header.animated-header {
+    background: radial-gradient(circle at 50% 20%, #1e293b 0%, #0f172a 100%);
+    padding: 120px 0 100px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+
+  #tsparticles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+
+  header .container,
+  header .breadcrumb-animate {
+    position: relative;
+    z-index: 2;
+  }
+  .hero-card {
+    background: rgba(130, 11, 11, 0.05);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+  }
+
 
 .course-card:hover {
   transform: translateY(-10px);
@@ -100,41 +145,30 @@
 }
 
 </style>
-<!-- PAGE TITLE
-    ================================================== -->
-<!-- PAGE TITLE -->
-<header class="position-relative overflow-hidden" style="background: linear-gradient(135deg, #0f172a, #1e293b); padding: 120px 0 100px 0;">
+<!-- HEADER -->
+<header class="animated-header">
+  <!-- Particle background -->
+  <div id="tsparticles"></div>
+
   <div class="container text-center text-white py-10 position-relative z-1">
+    <!-- Tilt wrapper -->
+    <div class="tilt" data-tilt data-tilt-max="20" data-tilt-speed="400">
+      <div class="p-5 mx-auto mb-4 hero-card hero-animate" style="max-width: 600px;">
+        <img src="{% static 'assets/img/post/post-25.jpg' %}" class="img-fluid mb-3 rounded shadow-lg"
+             style="height: 90px; border: 3px solid #fbbf24;" />
 
-    <!-- Hero Card with Glass Effect -->
-    <div class="p-5 mx-auto mb-4" style="
-      max-width: 600px;
-      background: rgba(130, 11, 11, 0.05);
-      border-radius: 20px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      animation: fadeInDown 1.2s ease-out both;
-    ">
-      <!-- Icon -->
-     <img src="{% static 'assets/img/post/post-25.jpg' %}" 
-     class="img-fluid mb-3 rounded shadow-lg animate__animated animate__zoomIn"
-     style="height: 90px; border: 3px solid #fbbf24;" />
-
-
-      <!-- Heading -->
-      <h1 class="display-5 fw-bold mb-2" style="color: #fbbf24;">My Enrolled Courses</h1>
-
-      <p class="text-white-50 mb-0">
-        Track your learning journey and explore more opportunities.
-      </p>
+        <h1 class="display-5 fw-bold mb-2" style="color: #fbbf24;">My Enrolled Courses</h1>
+        <p class="text-white-50 mb-0">Track your learning journey and explore more opportunities.</p>
+      </div>
     </div>
 
     <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mt-4">
+    <nav aria-label="breadcrumb" class="mt-4 breadcrumb-animate">
       <ol class="breadcrumb breadcrumb-scroll justify-content-center bg-transparent p-0 mb-0">
         <li class="breadcrumb-item">
-          <a class="text-white text-decoration-underline" href="{% url 'home' %}"><i class="fas fa-home me-1"></i> Home</a>
+          <a class="text-white text-decoration-underline" href="{% url 'home' %}">
+            <i class="fas fa-home me-1"></i> Home
+          </a>
         </li>
         <li class="breadcrumb-item text-white active" aria-current="page">
           <i class="fas fa-book-reader me-1"></i> My Courses
@@ -143,7 +177,7 @@
     </nav>
   </div>
 
-  <!-- Decorative Bottom SVG Wave -->
+  <!-- SVG WAVE -->
   <div class="position-absolute bottom-0 start-0 w-100 z-0">
     <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
       <path fill="#ffffff" fill-opacity="1"
@@ -152,6 +186,120 @@
     </svg>
   </div>
 </header>
+
+
+<!-- GSAP + ScrollTrigger Animations -->
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.from(".hero-animate", {
+    y: -100,
+    opacity: 0,
+    duration: 1.2,
+    ease: "power2.out"
+  });
+
+  gsap.from(".breadcrumb-animate", {
+    opacity: 0,
+    y: 50,
+    delay: 0.5,
+    duration: 1
+  });
+
+  gsap.utils.toArray(".course-animate").forEach((el, i) => {
+    gsap.from(el, {
+      scrollTrigger: {
+        trigger: el,
+        start: "top 80%",
+        toggleActions: "play none none none"
+      },
+      y: 50,
+      opacity: 0,
+      delay: i * 0.1,
+      duration: 0.8,
+      ease: "power2.out"
+    });
+  });
+</script>
+
+<script>
+tsParticles.load("tsparticles", {
+  fullScreen: { enable: false },
+  background: {
+    color: "transparent"
+  },
+  fpsLimit: 60,
+  particles: {
+    number: {
+      value: 80,
+      density: { enable: true, area: 800 }
+    },
+    color: { value: ["#00ffff", "#fbbf24", "#38bdf8"] },
+    shape: {
+      type: "polygon",
+      polygon: {
+        nb_sides: 6
+      }
+    },
+    opacity: {
+      value: 0.6,
+      anim: {
+        enable: true,
+        speed: 1,
+        opacity_min: 0.3,
+        sync: false
+      }
+    },
+    size: {
+      value: { min: 2, max: 4 },
+      anim: {
+        enable: true,
+        speed: 2,
+        size_min: 0.3,
+        sync: false
+      }
+    },
+    move: {
+      enable: true,
+      speed: 1,
+      direction: "none",
+      random: true,
+      straight: false,
+      outModes: "bounce",
+      attract: {
+        enable: true,
+        rotateX: 600,
+        rotateY: 1200
+      }
+    },
+    links: {
+      enable: true,
+      distance: 130,
+      color: "#00ffff",
+      opacity: 0.5,
+      width: 1.2
+    }
+  },
+  interactivity: {
+    events: {
+      onHover: {
+        enable: true,
+        mode: "repulse"
+      },
+      resize: true
+    },
+    modes: {
+      repulse: {
+        distance: 100,
+        duration: 0.5
+      }
+    }
+  },
+  detectRetina: true
+});
+</script>
+
+
 
 
 

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    
     {% load static %}
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -45,8 +46,14 @@
 
     {% include 'components/models.html' %}
     {% include 'components/header.html' %}
+    <div >
         {% block content %} {% endblock %}
-    {% include 'components/footer.html' %}
+        </div>
+<div >
+  {% include 'components/footer.html' %}
+</div>
+
+  
 
     <!-- JAVASCRIPT
     ================================================== -->

@@ -3,6 +3,48 @@
 {% load static %}
 {% block title %}{{course.title}}{% endblock %}
 {% block content %}
+
+
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+
+<style>
+.review-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 0 10px rgba(0, 180, 216, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: auto;         /* remove fixed height */
+  padding: 1.25rem 1rem;     /* adjust padding */
+  max-width: 320px;          /* optional: to control width */
+}
+
+.review-card:hover {
+  {% comment %} transform: translateY(-4px); {% endcomment %}
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1), 0 0 12px rgba(255, 196, 0, 0.25);
+}
+
+.shadow-avatar {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  box-shadow: 0 0 0 3px #fcd34d, 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+}
+
+.star-rating {
+  color: #fbbf24;
+  font-size: 1.1rem;
+}
+</style>
+
 <!-- BREADCRUMBS
     ================================================== -->
     <div class="container">
@@ -414,6 +456,51 @@
                             </div>
                         </div>
                     </div>
+
+                  <!-- Swiper -->
+
+
+
+
+                  <!-- Swiper Container -->
+<div class="swiper mySwiper">
+  <div class="swiper-wrapper">
+    {% for review in reviews %}
+    <div class="swiper-slide">
+      <div class="review-card p-4">
+        <div class="d-flex align-items-center mb-3">
+          <img src="{% static 'assets/img/avatars/avatar-1.jpg' %}" class="avatar avatar-md rounded-circle me-3 shadow-avatar" alt="Avatar" />
+          <div>
+            <h5 class="mb-0 text-dark">{{ review.user.first_name }} {{ review.user.last_name }}</h5>
+            <small class="text-muted font-italic">{{ review.title }}</small>
+          </div>
+        </div>
+        <div class="star-rating mb-2">
+          <div class="rating" style="width:{{ review.rating|floatformat:"0" }}0%;"></div>
+        </div>
+        <p class="mb-0 text-gray-700">{{ review.content }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div><br>
+</div>
+
+<script>
+  var swiper = new Swiper(".mySwiper", {
+    slidesPerView: 1,
+    spaceBetween: 30,
+    loop: true,
+    autoplay: {
+      delay: 1000,  // Slide every 3 seconds
+      disableOnInteraction: false, // Keeps auto-play even after interaction
+    },
+    breakpoints: {
+      768: { slidesPerView: 2 },
+      992: { slidesPerView: 3 },
+    },
+  });
+</script>
+
 
                     <ul class="list-unstyled pt-2">
                         {% for review in reviews %}
