@@ -348,10 +348,10 @@
                                     </div>
 
                                   <a href="{{ i.get_absolute_url }}" class="card-img sk-thumbnail img-ratio-9 d-block">
-  <img class="rounded shadow-light-lg"
-       src="{% static 'assets/img/post/post-27.jpeg' %}"
-       alt="{{ i.title }}">
-</a>
+                                    <img class="rounded shadow-light-lg"
+                                        src="{{i.featured_image.url}}"
+                                        alt="{{ i.title }}">
+                                  </a>
 
 
                                     <span class="badge sk-fade-bottom badge-lg badge-primary badge-pill badge-float bottom-0 left-0 mb-4 ms-4">

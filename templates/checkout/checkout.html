@@ -53,49 +53,65 @@
             </div>
 
             <div id="order_review" class="woocommerce-checkout-review-order">
-                <div class="woocommerce-checkout-review-order-inner">
-                    <h3 id="order_review_heading">Your order</h3>
-                    <table class="shop_table woocommerce-checkout-review-order-table">
-                        <thead>
-                            <tr>
-                                <th class="product-name">Product</th>
-                                <th class="product-total">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="cart_item">
-                                <td class="product-name">
-                                    {{course.title}}
-                                </td>
-                                <td class="product-total">
-                                    <span class="woocommerce-Price-amount amount">
-                                        ₹ {{course.price}}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr class="cart-subtotal">
-                                <th>Discount</th>
-                                <td><span class="woocommerce-Price-amount amount">{{course.discount}}<span class="woocommerce-Price-currencySymbol">%</td>
-                            </tr>
+    <div class="woocommerce-checkout-review-order-inner">
+        <h3 id="order_review_heading">Your order</h3>
 
-                            <tr class="order-total">
-                                <th>Total</th>
-                                <td><strong><span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">₹ {% discount_calculation course.price course.discount %}</strong> </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+        <table class="shop_table woocommerce-checkout-review-order-table">
+            <thead>
+                <tr>
+                    <th class="product-name">Product</th>
+                    <th class="product-total">Total</th>
+                </tr>
+            </thead>
 
-                <div id="payment" class="woocommerce-checkout-payment">
-                    <div class="form-row place-order">
-                        <button id="rzp-button1" class="btn btn-primary btn-block">
-                            PLACE ORDER
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <tbody>
+                <tr class="cart_item">
+                    <td class="product-name">
+                        {{ course.title }}
+                    </td>
+                    <td class="product-total">
+                        ₹ {{ course.price }}
+                    </td>
+                </tr>
+            </tbody>
+
+            <tfoot>
+                <tr class="cart-discount">
+                    <th>Discount</th>
+                    <td>{{ course.discount }}%</td>
+                </tr>
+
+                <tr class="cart-subtotal">
+                    <th>Subtotal</th>
+                    <td>
+                        ₹ {% discount_calculation course.price course.discount %}
+                    </td>
+                </tr>
+
+                <tr class="tax-rate">
+                    <th>Tax</th>
+                    <td>18%</td>
+                </tr>
+
+                <tr class="order-total">
+                    <th><strong>Grand Total</strong></th>
+                    <td>
+                        <strong>₹ {% grand_total course.price course.discount %}</strong>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div id="payment" class="woocommerce-checkout-payment">
+        <div class="form-row place-order">
+            <button id="rzp-button1" class="btn btn-primary btn-block">
+                PLACE ORDER
+            </button>
+        </div>
+    </div>
+</div>
+
         </form>
     </div>
 
