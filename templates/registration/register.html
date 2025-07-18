@@ -23,11 +23,6 @@
       Access top-rated courses and start your journey today.
     </p>
 
-    <!-- Button -->
-    {% comment %} <a href="#register-form" class="btn btn-primary mt-4 px-5 py-2 rounded-pill animate__animated animate__zoomIn animate__delay-2s">
-      Get Started <i class="fas fa-arrow-right ms-2"></i>
-    </a> {% endcomment %}
-
     <!-- Decorative Glass Layer -->
     <div class="position-absolute top-50 start-50 translate-middle bg-white bg-opacity-10 rounded-circle" style="width: 500px; height: 500px; filter: blur(80px); z-index: 0;"></div>
   </div>
@@ -59,25 +54,10 @@
         <form method="post" action="{% url 'register' %}">
           {% csrf_token %}
 
-          <!-- Username -->
-          <div class="form-floating mb-4">
-            <input type="text" class="form-control bg-light" id="username" placeholder="Username" name="username" required>
-            <label for="username">Username</label>
-          </div>
-
           <!-- Email -->
           <div class="form-floating mb-4">
             <input type="email" class="form-control bg-light" id="email" placeholder="Email" name="email" required>
             <label for="email">Email</label>
-          </div>
-
-          <!-- Password -->
-          <div class="form-floating mb-4 position-relative">
-            <input type="password" class="form-control bg-light" id="password" placeholder="Password" name="password" required>
-            <label for="password">Password</label>
-            <span class="position-absolute top-50 end-0 translate-middle-y me-3" onclick="togglePassword()" style="cursor: pointer;">
-              <i id="toggleIcon" class="fas fa-eye text-muted"></i>
-            </span>
           </div>
 
           <!-- Submit Button -->
@@ -85,34 +65,10 @@
             <button class="btn btn-primary btn-lg" type="submit">Create Account</button>
           </div>
         </form>
-
-        <p class="text-center text-muted mt-4 mb-0">
-          Already have an account?
-          <a href="{% url 'login' %}" class="text-primary fw-semibold text-decoration-underline">Login</a>
-        </p>
       </div>
     </div>
   </div>
 </div>
-
-
-
-<script>
-  function togglePassword() {
-    const passwordInput = document.getElementById("password");
-    const toggleIcon = document.getElementById("toggleIcon");
-
-    if (passwordInput.type === "password") {
-      passwordInput.type = "text";
-      toggleIcon.classList.remove("fa-eye");
-      toggleIcon.classList.add("fa-eye-slash");
-    } else {
-      passwordInput.type = "password";
-      toggleIcon.classList.remove("fa-eye-slash");
-      toggleIcon.classList.add("fa-eye");
-    }
-  }
-</script>
 
 
 {% endblock %}

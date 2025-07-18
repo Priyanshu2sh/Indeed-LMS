@@ -86,7 +86,7 @@
                   <!-- Signin -->
                   <div class="collapse show" id="collapseSignin" data-bs-parent="#accountModal">
                       <div class="modal-header">
-                          <h5 class="modal-title">Log In to Your Indeed Inspiring Account!</h5>
+                          <h5 class="modal-title">LogIn / SignUp</h5>
                           <button type="button" class="close text-primary" data-bs-dismiss="modal" aria-label="Close">
                               <!-- Icon -->
                               <svg width="16" height="17" viewBox="0 0 16 17" xmlns="http://www.w3.org/2000/svg">
@@ -99,7 +99,7 @@
   
                       <div class="modal-body">
                           <!-- Form Signin -->
-                          <form class="mb-5" method="post" action="{% url 'dologin' %}">
+                          <form class="mb-5" method="post" action="{% url 'register' %}">
                             {% csrf_token %}
   
                               <!-- Email -->
@@ -110,37 +110,11 @@
                                   <input type="email" class="form-control" id="modalSigninEmail" placeholder="creativelayers" name="email">
                               </div>
   
-                              <!-- Password -->
-                              <div class="form-group mb-5">
-                                  <label for="modalSigninPassword">
-                                      Password
-                                  </label>
-                                  <input type="password" class="form-control" id="modalSigninPassword" placeholder="**********" name="password">
-                              </div>
-  
-                              <div class="d-flex align-items-center mb-5 font-size-sm">
-                                  <div class="form-check">
-                                      <input class="form-check-input text-gray-800" type="checkbox" id="autoSizingCheck">
-                                      <label class="form-check-label text-gray-800" for="autoSizingCheck">
-                                          Remember me
-                                      </label>
-                                  </div>
-  
-                                  <div class="ms-auto">
-                                      <a class="text-gray-800" data-bs-toggle="collapse" href="#collapseForgotPassword" role="button" aria-expanded="false" aria-controls="collapseForgotPassword">Forgot Password</a>
-                                  </div>
-                              </div>
-  
                               <!-- Submit -->
                               <button class="btn btn-block btn-primary" type="submit">
                                   LOGIN
                               </button>
                           </form>
-  
-                          <!-- Text -->
-                          <p class="mb-0 font-size-sm text-center">
-                              Don't have an account? <a class="text-underline" data-bs-toggle="collapse" href="#collapseSignup" role="button" aria-expanded="false" aria-controls="collapseSignup">Sign up</a>
-                          </p>
                       </div>
                   </div>
   

@@ -29,7 +29,10 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+if os.getenv('ENVIRONMENT') == 'Local':
+    ALLOWED_HOSTS = ['127.0.0.1']
+elif os.getenv('ENVIRONMENT') == 'Server':
+    ALLOWED_HOSTS = ['']
 
 
 # Application definition
@@ -44,6 +47,7 @@ INSTALLED_APPS = [
     'app',
     'crispy_forms',
     'crispy_bootstrap4',
+    'rest_framework',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -78,6 +82,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'LMS.wsgi.application'
+
+AUTH_USER_MODEL = 'app.User'
 
 
 # Database
@@ -138,14 +144,16 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = 'register'
 
 
-EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'pksharma6160752@gmail.com'
-EMAIL_HOST_PASSWORD = 'agvevrxxsmuzcrkp'
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'prushaltech@gmail.com'
+EMAIL_HOST_PASSWORD = 'gufirwicaactesmp'
+DEFAULT_FROM_EMAIL = 'prushaltech@gmail.com'
 
 
 RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID')

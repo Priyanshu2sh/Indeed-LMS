@@ -36,8 +36,8 @@ urlpatterns = [
     path('search',views.SEARCH_COURSE, name='search_course'),
 
     path('accounts/register', user_login.REGISTER, name='register'),
+    path('accounts/verify', user_login.VERIFY_OTP, name='verify_otp'),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('dologin', user_login.DO_LOGIN, name='dologin'),
     path('accounts/profiles', user_login.PROFILE, name='profile'),
     path('accounts/profiles/update', user_login.PROFILE_UPDATE, name='profile_update'),
     path('checkout/<slug:slug>', views.CHECKOUT, name='checkout'),
@@ -46,5 +46,7 @@ urlpatterns = [
     path('course/watch-course/<slug:slug>', views.WATCH_COURSE, name='watch_course'),
     path("save-video-progress/", views.save_video_progress, name="save_video_progress"),
     path('blog-detail/', views.blog_detail, name='blog_detail'),
+    path('api/check_user_in_lms/', user_login.check_user_exists),
+    path('api/update_user_in_lms/', user_login.update_user),
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

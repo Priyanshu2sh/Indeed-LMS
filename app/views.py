@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.db.models import Count
 import json
+from datetime import datetime, timedelta
 
 import razorpay
 from LMS.settings import *
@@ -40,7 +41,14 @@ def HOME(request):
 def SINGLE_COURSE(request):
     category = Categories.get_all_category(Categories)
     level = Level.objects.all()
-    course = Course.objects.all()
+    course = Course.objects.all().order_by('-id')
+    for c in course:
+        total_duration = Video.objects.filter(course=c).aggregate(total=Sum('time_duration'))['total'] or 0
+        hours = total_duration // 60
+        minutes = total_duration % 60
+        formatted_duration = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
+        c.total_duration = formatted_duration
+
     FreeCourse_count = Course.objects.filter(price = 0).count()
     PaidCourse_count = Course.objects.filter(price__gte = 1).count()
     context = {
@@ -121,7 +129,7 @@ def SEARCH_COURSE(request):
 def COURSE_DETAILS(request, slug):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login first')
-        return redirect('login')
+        return redirect('register')
     category = Categories.get_all_category(Categories)
     time_duration = Video.objects.filter(course__slug = slug).aggregate(sum = Sum('time_duration'))
 
@@ -166,7 +174,7 @@ def COURSE_DETAILS(request, slug):
         messages.success(request, 'Comment added successfully!')
         
     try:
-        check_enroll = UserCourse.objects.get(user = request.user, course = course)
+        check_enroll = UserCourse.objects.get(user = request.user, course = course, is_active=True)
     except UserCourse.DoesNotExist:
         check_enroll = None
 
@@ -208,11 +216,16 @@ def CHECKOUT(request,slug):
     action = request.GET.get('action')
     order = None
     if course.price == 0:
-        course = UserCourse(
+        usercourse = UserCourse(
             user = request.user,
             course = course,
         )
-        course.save()
+
+        if course.is_subscription:
+            usercourse.is_active = True
+            usercourse.next_billing_date = datetime.now().date() + timedelta(days=30)
+        usercourse.save()
+
         messages.success(request, 'Enrolled in Course successfully')
         return redirect('my_course')
     
@@ -263,7 +276,7 @@ def CHECKOUT(request,slug):
 def MY_COURSE(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login first')
-        return redirect('login')
+        return redirect('register')
 
     category = Categories.objects.all().order_by('id')
     course = UserCourse.objects.filter(user = request.user)
@@ -337,6 +350,12 @@ def VERIFY_PAYMENT(request):
                 user=payment.user,
                 course=payment.course,
             )
+
+            if payment.course.is_subscription:
+                usercourse.is_active = True
+                usercourse.next_billing_date = datetime.now().date() + timedelta(days=30)
+
+            usercourse.save()
 
             payment.user_course = usercourse
             payment.save()
