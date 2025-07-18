@@ -32,7 +32,7 @@ DEBUG = True
 if os.getenv('ENVIRONMENT') == 'Local':
     ALLOWED_HOSTS = ['127.0.0.1']
 elif os.getenv('ENVIRONMENT') == 'Server':
-    ALLOWED_HOSTS = ['']
+    ALLOWED_HOSTS = ['indeedinspiring.in','192.168.1.52']
 
 
 # Application definition
