@@ -364,15 +364,7 @@ tsParticles.load("tsparticles", {
         <a href="{{ i.course.get_absolute_url }}">
         <div class="card course-card p-3">
           <div class="course-img-container position-relative">
-            {% if forloop.counter == 1 %} 
-              <img src="{% static 'assets/img/post/post-32.jpg' %}" alt="{{ i.course.title }}">
-            {% elif forloop.counter == 2 %}
-              <img src="{% static 'assets/img/post/post-30.jpg' %}" alt="{{ i.course.title }}">
-            {% elif forloop.counter == 3 %}
-              <img src="{% static 'assets/img/post/post-31.jpg' %}" alt="{{ i.course.title }}">
-            {% else %}
-              <img src="{% static 'assets/img/post/post-32.jpg' %}" alt="{{ i.course.title }}">
-            {% endif %}
+              <img src="{{i.course.featured_image}}" alt="{{ i.course.title }}">
             <div class="img-overlay"></div>
             <span class="discount-badge">-{{ i.course.discount }}%</span>
           </div>
@@ -381,7 +373,7 @@ tsParticles.load("tsparticles", {
      
             <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="badge category-pill">{{ i.course.category.name }}</span>
-            <img src="{% static 'assets/img/post/post-34.jpg' %}" alt="Author" class="author-avatar" />
+            <img src="{{i.course.author.author_profile}}" alt="Author" class="author-avatar" />
             </div>
 
 

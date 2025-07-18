@@ -279,15 +279,7 @@
   <!-- Updated Image with Loop-Based Source -->
   <a href="{{ i.get_absolute_url }}" class="card-img sk-thumbnail img-ratio-9 d-block">
     <img class="rounded shadow-light-lg"
-      src="{% if forloop.counter == 1 %}
-              {% static 'assets/img/post/post-32.jpg' %}
-            {% elif forloop.counter == 2 %}
-              {% static 'assets/img/post/post-30.jpg' %}
-            {% elif forloop.counter == 3 %}
-              {% static 'assets/img/post/post-31.jpg' %}
-            {% else %}
-              {% static 'assets/img/post/post-32.jpg' %}
-            {% endif %}"
+    src="{{i.featured_image}}"
       alt="{{ i.title }}">
   </a>
 

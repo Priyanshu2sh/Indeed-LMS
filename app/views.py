@@ -295,37 +295,6 @@ def MY_COURSE(request):
     }
     return render(request, 'course/my-course.html', context)
 
-
-# @csrf_exempt
-# def VERIFY_PAYMENT(request):
-#     if request.method == 'POST':
-#         data = request.POST
-#         try:
-#             client.utility.verify_payment_signature(data)
-#             razorpay_order_id = data['razorpay_order_id']
-#             razorpay_payment_id = data['razorpay_order_id']
-
-#             payment = Payment.objects.get(order_id = razorpay_order_id)
-#             payment.payment_id = razorpay_payment_id
-#             payment.status = True
-
-#             usercourse = UserCourse(
-#                 user = payment.user,
-#                 course = payment.course,
-#             )
-#             usercourse.save()
-#             payment.user_course = usercourse
-#             payment.save()
-
-#             context = {
-#                 'data': data,
-#                 'payment': payment,
-#             }
-#             return render(request, 'verify_payment/success.html', context)
-#         except:
-#             return render(request, 'verify_payment/fail.html')
-
-
 @csrf_exempt
 def VERIFY_PAYMENT(request):
     if request.method == "POST":
@@ -336,22 +305,26 @@ def VERIFY_PAYMENT(request):
                 'razorpay_payment_id': data.get('razorpay_payment_id'),
                 'razorpay_signature': data.get('razorpay_signature'),
             }
+            print(params_dict)
 
             # Proper signature verification
             client.utility.verify_payment_signature(params_dict)
 
             razorpay_order_id = params_dict['razorpay_order_id']
             razorpay_payment_id = params_dict['razorpay_payment_id']
-
+            print(False)
             payment = Payment.objects.get(order_id=razorpay_order_id)
+            print(payment)
             payment.payment_id = razorpay_payment_id
             payment.status = True
 
             # Create user-course relationship
-            usercourse = UserCourse.objects.create(
+            usercourse, _ = UserCourse.objects.get_or_create(
                 user=payment.user,
                 course=payment.course,
+                
             )
+            usercourse.paid=True
 
             if payment.course.is_subscription:
                 usercourse.is_active = True
@@ -378,6 +351,7 @@ def VERIFY_PAYMENT(request):
 
         except Exception as e:
             # Any other unexpected error
+            print(e)
             return render(request, 'verify_payment/fail.html', {'error': str(e)})
 
     return render(request, 'verify_payment/fail.html', {'error': 'Invalid request method'})
