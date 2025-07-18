@@ -48,5 +48,8 @@ urlpatterns = [
     path('blog-detail/<int:pk>', views.blog_detail, name='blog_detail'),
     path('api/check_user_in_lms/', user_login.check_user_exists),
     path('api/update_user_in_lms/', user_login.update_user),
+    
+    
+    path('blog/<int:post_id>/', views.add_blog_comment, name='add_blog_comment'),
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

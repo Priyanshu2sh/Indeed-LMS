@@ -522,6 +522,41 @@ def blog_detail(request, pk):
     return render(request, 'main/home_content/blog_details.html', {'post': post, "tags": tags, "comments": comments, "other_posts":other_posts})
 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+
+def add_blog_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    print('jbk')
+    # Handle comment post
+    if request.method == 'POST':
+        
+        if not request.user.is_authenticated:
+            messages.error(request, 'Please login first!')
+            return redirect('register')
+
+        if not request.user.first_name or not request.user.last_name:
+            messages.error(request, 'Please update your profile first!')
+            return redirect('profile')
+        
+        content = request.POST.get('message')
+        print("Content received:", content) 
+        if content:
+            PostComments.objects.create(
+                post=post,
+                user=request.user,
+                content=content
+            )
+            messages.success(request, 'Comment added successfully')
+            return redirect('blog_detail', pk=post.id)
+
+    return render(request, 'main/home_content/blog_details.html', {
+        'post': post,
+        'comments': comments
+    })
+
+
 # def blog_detail(request, slug):
 #     blog = get_object_or_404(Blog, slug=slug)
 

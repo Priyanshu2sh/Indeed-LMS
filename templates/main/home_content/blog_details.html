@@ -92,7 +92,8 @@
         <h4 class="mb-4 fw-bold text-primary border-bottom pb-2">
           <i class="fas fa-pen-alt me-2"></i>Leave a Comment
         </h4>
-        <form method="post">
+       <form method="post" action="{% url 'add_blog_comment' post.id %}">
+
           {% csrf_token %}
          
           <div class="mb-3">
@@ -129,7 +130,7 @@
           <a class="btn btn-info"><i class="fab fa-twitter me-2"></i>12,345 Followers</a>
           <a class="btn btn-danger"><i class="fab fa-youtube me-2"></i>12,345 Subscribers</a>
           <a class="btn btn-secondary"><i class="fab fa-linkedin me-2"></i>12,345 Connects</a>
-          <a class="btn btn-warning text-white"><i class="fab fa-instagram me-2"></i>12,345 Followers</a>
+          <a class="btn btn-warning"><i class="fab fa-instagram me-2"></i>12,345 Followers</a>
         </div>
       </div>
 
@@ -153,11 +154,23 @@
       <!-- Tags Section -->
 <div class="bg-white p-4 mt-4 rounded shadow-sm">
   <h5 class="mb-3">Tags</h5>
-  <div class="d-flex flex-wrap gap-2">
-    {% for tag in tags %}
-    <a class="badge bg-primary text-white text-decoration-none px-3 py-2 rounded-pill">{{tag.name}}</a>
-    {% endfor %}
-  </div>
+    <div class="d-flex flex-wrap gap-2">
+      {% for tag in tags %}
+        <a class="badge text-decoration-none px-3 py-2 rounded-pill 
+          {% if forloop.counter|add:'-1'|divisibleby:"5" %}bg-primary text-white
+          {% elif forloop.counter|add:'-2'|divisibleby:"5" %}bg-info text-dark
+          {% elif forloop.counter|add:'-3'|divisibleby:"5" %}bg-danger text-dark
+          {% elif forloop.counter|add:'-4'|divisibleby:"5" %}bg-secondary text-dark
+          {% elif forloop.counter|add:'-5'|divisibleby:"5" %}bg-warning text-dark
+          {% else %}bg-primary text-white{% endif %}">
+          {{ tag.name }}
+        </a>
+      {% endfor %}
+    </div>
+
+
+
+
 </div>
 
     </div>
