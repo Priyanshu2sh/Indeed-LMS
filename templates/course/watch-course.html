@@ -33,6 +33,12 @@
     <!-- Theme CSS -->
     <link rel="stylesheet" href="{% static 'assets/css/theme.min.css' %}">
 
+    
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+
     <title>watch - {{course.title}}</title>
 
     <style>
@@ -41,14 +47,17 @@
   border-radius: 16px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08), 0 0 12px rgba(0, 180, 216, 0.08);
   transition: all 0.3s ease;
-  max-width: 320px;
-  padding: 1.25rem 1rem;
+  width: 400px;        
+  min-width: 400px;
+  max-width: 400px;
+  padding: 1.5rem 1.25rem; 
   min-height: auto;
+
 }
 
-.comment-card:hover {
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 0 14px rgba(255, 200, 0, 0.25);
-}
+{% comment %} .comment-card:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12), 0 0 14px rgba(15, 14, 9, 0.25);
+} {% endcomment %}
 
 .shadow-avatar {
   width: 48px;
@@ -57,12 +66,29 @@
   box-shadow: 0 0 0 3px #fcd34d, 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+.swiper-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+
 .swiper-slide {
+  width: auto !important;
   display: flex;
   justify-content: center;
   align-items: start;
+  height: auto;
+  margin-right: 40px; 
 }
-</style>
+
+.swiper-wrapper .swiper-slide:last-child {
+  margin-right: 0;
+}
+
+.commentSwiper {
+  padding-bottom: 30px;
+}
+    </style>
 
 
 </head>
@@ -167,11 +193,14 @@
                                         <i class="fa fa-youtube-play" aria-hidden="true" style="color: red;"></i>
 
                                     </div>
-                                    <a href="?lecture={{video.serial_number}}">
-                                    <div class="ms-4">
-                                        {{video.title}}
+                                    <div class="d-flex align-items-center ms-4 mb-2">
+                                    <input type="checkbox" name="video_checkbox" value="{{ video.serial_number }}" class="me-2" checked />
+                                    <a href="?lecture={{ video.serial_number }}" class="text-decoration-none text-dark">
+                                        {{ video.title }}
+                                    </a>
                                     </div>
-                                </a>
+
+
                                 </div>
 
                                 <div class="d-flex align-items-center overflow-auto overflow-md-visible flex-shrink-all">
@@ -300,9 +329,10 @@
                     </div>
                     </div>
 
-                    <div class="border shadow rounded p-6 p-md-9">
+                      <div class="border shadow rounded p-6 p-md-9 text-center">
                         <h3 class="mb-2">Add Reviews & Rate</h3>
                         <div class="">What is it like to Course?</div>
+                          <div class="d-flex justify-content-center">
                         <form method="post">
                             {% csrf_token %}
                             <div class="clearfix">
@@ -337,6 +367,7 @@
                                     <input type="radio" id="starhalf" name="rating" value="0.5" />
                                     <label class="half" for="starhalf" title="Sucks big time - 0.5 stars"></label>
                                 </fieldset>
+                            </div>
                             </div>
 
                             <div class="form-group mb-6">
@@ -393,19 +424,17 @@
 
 <script>
   var commentSwiper = new Swiper(".commentSwiper", {
-    slidesPerView: 1,
-    spaceBetween: 30,
-    loop: true,
-    loopAdditionalSlides: 3,
-    loopFillGroupWithBlank: true,
-    autoplay: {
-      delay: 1000,
-      disableOnInteraction: false,
-    },
-    breakpoints: {
-      768: { slidesPerView: 2 },
-      992: { slidesPerView: 3 },
-    },
+   slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        autoplay: {
+        delay: 3000,  // Slide every 3 seconds
+        disableOnInteraction: false, // Keeps auto-play even after interaction
+        },
+        breakpoints: {
+        768: { slidesPerView: 2 },
+        992: { slidesPerView: 3 },
+        },
   });
 </script>
 
