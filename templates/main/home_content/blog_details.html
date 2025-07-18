@@ -8,8 +8,8 @@
   <div class="bg-white rounded shadow-sm p-3 mb-4">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">The Future of AI in Education</li>
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{post.title}}</li>
       </ol>
     </nav>
   </div>
@@ -21,29 +21,28 @@
       <!-- Blog Post Section -->
       <div class="bg-white rounded shadow-sm p-4 mb-4">
         <div class="position-relative mb-4">
-          <img src="{% static 'assets/img/blog/ai3.jpg' %}" alt="Blog Image" class="img-fluid rounded shadow-sm w-100">
-          <span class="badge bg-dark position-absolute bottom-0 start-0 m-3 px-4 py-2">Technology</span>
+          <img src="{{post.featured_image.url}}" alt="Blog Image" class="img-fluid rounded shadow-sm w-100">
+          <span class="badge bg-dark position-absolute bottom-0 start-0 m-3 px-4 py-2">{{post.category}}</span>
         </div>
 
-        <h1 class="mb-3 fw-bold">The Future of AI in Education</h1>
+        <h1 class="mb-3 fw-bold">{{post.title}}</h1>
 
         <div class="mb-4 d-flex flex-wrap align-items-center text-muted">
-          <div class="me-3"><i class="fas fa-user me-1"></i> Admin</div>
-          <div class="me-3"><i class="fas fa-calendar-alt me-1"></i> July 12, 2025</div>
+          <div class="me-3"><i class="fas fa-user me-1"></i>{{post.author.first_name}} {{post.author.last_name}}</div>
+          <div class="me-3"><i class="fas fa-calendar-alt me-1"></i>{{post.date_posted}}</div>
           <div><i class="fas fa-tags me-1"></i>
-            <span class="badge bg-secondary me-1">AI</span>
-            <span class="badge bg-secondary me-1">Education</span>
-            <span class="badge bg-secondary me-1">Trends</span>
+            {% for tag in tags %}
+            <span class="badge bg-secondary me-1">{{tag.name}}</span>
+            {% endfor %}
           </div>
         </div>
 
         <div class="lead" style="line-height: 1.9;">
-          <p>Artificial Intelligence is reshaping how students learn and how educators teach. From personalized learning to AI tutors, the classroom is transforming rapidly.</p>
-          <p>Experts believe that within the next decade, most institutions will integrate AI tools in curriculum design, evaluation systems, and student support services.</p>
-          <p>However, ethical concerns, data privacy, and proper teacher training remain significant challenges.</p>
+          <p>{{post.content}}</p>
         </div>
       </div>
 
+      {% comment %}
       <!-- Related Posts -->
       <div class="bg-white rounded shadow-sm p-4 mb-4">
         <h4 class="mb-4">You May Also Like</h4>
@@ -68,40 +67,24 @@
           </div>
         </div>
       </div>
+      {% endcomment %}
 
       <!-- Comments Section -->
       <div class="bg-white rounded shadow-sm p-4 mb-4">
         <h4 class="mb-4 fw-bold border-bottom pb-2">
-          <i class="fas fa-comments text-primary me-2"></i>3 Comments
+          <i class="fas fa-comments text-primary me-2"></i>{{comments|length}} Comments
         </h4>
 
-        <!-- Single Comment -->
+        {% for comment in comments %}
         <div class="d-flex mb-4 pb-3 border-bottom">
           <img src="{% static 'assets/img/post/post-34.jpg' %}" class="rounded-circle me-3 border" style="width: 50px; height: 50px;" alt="user">
           <div>
-            <h6 class="mb-1 text-danger fw-bold">Priyansh Paatil</h6>
-            <small class="text-muted fst-italic">July 12, 2025, 6:00 PM</small>
-            <p class="mt-2 text-secondary mb-0">This article is very insightful. Looking forward to more on AI in schools!</p>
+            <h6 class="mb-1 text-danger fw-bold">{{comment.user.first_name}} {{comment.user.last_name}}</h6>
+            <small class="text-muted fst-italic">{{comment.date}}</small>
+            <p class="mt-2 text-secondary mb-0">{{comment.content}}</p>
           </div>
         </div>
-
-        <div class="d-flex mb-4 pb-3 border-bottom">
-          <img src="{% static 'assets/img/post/post-34.jpg' %}" class="rounded-circle me-3 border" style="width: 50px; height: 50px;" alt="user">
-          <div>
-            <h6 class="mb-1 text-danger fw-bold">Reyansh Jain</h6>
-            <small class="text-muted fst-italic">July 11, 2025, 9:45 AM</small>
-            <p class="mt-2 text-secondary mb-0">AI tutors will change the way we study. Awesome post!</p>
-          </div>
-        </div>
-
-        <div class="d-flex mb-4 pb-3">
-          <img src="{% static 'assets/img/post/post-34.jpg' %}" class="rounded-circle me-3 border" style="width: 50px; height: 50px;" alt="user">
-          <div>
-            <h6 class="mb-1 text-danger fw-bold">Ravi Kumar</h6>
-            <small class="text-muted fst-italic">July 10, 2025, 3:30 PM</small>
-            <p class="mt-2 text-secondary mb-0">Please write more on AI and ethics in the next post!</p>
-          </div>
-        </div>
+        {% endfor %}
       </div>
 
       <!-- Leave a Comment -->
@@ -151,23 +134,19 @@
       </div>
 
       <div class="bg-white p-4 rounded shadow-sm">
-        <h5 class="mb-3">Trending</h5>
-        <div class="d-flex mb-3">
-          <img src="{% static 'assets/img/blog/ai.jpg' %}" class="me-3 rounded" style="width: 80px; height: 60px;" alt="">
-          <div>
-            <small class="text-danger fw-bold">Tech</small> /
-            <small class="text-muted">July 5, 2025</small><br>
-            <a href="#" class="text-dark fw-medium">AI in School Curriculum</a>
+        <h5 class="mb-3">You May Also Like</h5>
+        {% for other_post in other_posts %}
+        <a href="{% url 'blog_detail' other_post.id %}">
+          <div class="d-flex mb-3">
+            <img src="{{other_post.featured_image.url}}" class="me-3 rounded" style="width: 80px; height: 60px;" alt="">
+            <div>
+              <small class="text-danger fw-bold">{{other_post.category}}</small> /
+              <small class="text-muted">{{other_post.date_posted}}</small><br>
+              <a href="#" class="text-dark fw-medium">{{other_post.title}}</a>
+            </div>
           </div>
-        </div>
-        <div class="d-flex mb-3">
-          <img src="{% static 'assets/img/blog/ai1.jpg' %}" class="me-3 rounded" style="width: 80px; height: 60px;" alt="">
-          <div>
-            <small class="text-danger fw-bold">EdTech</small> /
-            <small class="text-muted">July 3, 2025</small><br>
-            <a href="#" class="text-dark fw-medium">Top Virtual Classroom Tools</a>
-          </div>
-        </div>
+        </a>
+        {% endfor %}
       </div>
 
 
@@ -175,13 +154,9 @@
 <div class="bg-white p-4 mt-4 rounded shadow-sm">
   <h5 class="mb-3">Tags</h5>
   <div class="d-flex flex-wrap gap-2">
-    <a href="#" class="badge bg-primary text-white text-decoration-none px-3 py-2 rounded-pill">AI</a>
-    <a href="#" class="badge bg-secondary text-white text-decoration-none px-3 py-2 rounded-pill">Education</a>
-    <a href="#" class="badge bg-danger text-white text-decoration-none px-3 py-2 rounded-pill">Trends</a>
-    <a href="#" class="badge bg-success text-white text-decoration-none px-3 py-2 rounded-pill">EdTech</a>
-    <a href="#" class="badge bg-warning text-dark text-decoration-none px-3 py-2 rounded-pill">Innovation</a>
-    <a href="#" class="badge bg-info text-white text-decoration-none px-3 py-2 rounded-pill">Machine Learning</a>
-    <a href="#" class="badge bg-dark text-white text-decoration-none px-3 py-2 rounded-pill">Future</a>
+    {% for tag in tags %}
+    <a class="badge bg-primary text-white text-decoration-none px-3 py-2 rounded-pill">{{tag.name}}</a>
+    {% endfor %}
   </div>
 </div>
 

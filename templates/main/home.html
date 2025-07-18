@@ -501,43 +501,45 @@
 
     <div class="row row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
       <!-- Card 1 -->
+      {% for post in posts %}
       <div class="col-md mb-5">
         <div class="card border shadow p-2 rounded-lg lift sk-fade">
           <div class="card-zoom position-relative">
-          <a href="{% url 'blog_detail' %}" class="card-img d-block sk-thumbnail img-ratio-3">
-            <img class="rounded shadow-light-lg img-fluid" src="{% static 'assets/img/post/post-21.jpg' %}" alt="..." />
+          <a href="{% url 'blog_detail' post.id %}" class="card-img d-block sk-thumbnail img-ratio-3">
+            <img class="rounded shadow-light-lg img-fluid" src="{{post.featured_image.url}}" alt="..." />
           </a>
 
-          <a href="{% url 'blog_detail' %}" class="badge sk-fade-bottom badge-lg badge-purple badge-pill badge-float bottom-0 left-0 mb-4 ms-4 px-5 me-4">
-            <span class="text-white fw-normal font-size-sm">Figma</span>
+          <a href="{% url 'blog_detail' post.id %}" class="badge sk-fade-bottom badge-lg badge-purple badge-pill badge-float bottom-0 left-0 mb-4 ms-4 px-5 me-4">
+            <span class="text-white fw-normal font-size-sm">{{post.category}}</span>
           </a>
 
           </div>
           <div class="card-footer px-2 pb-0 pt-4">
             <ul class="nav mx-n3 mb-3">
               <li class="nav-item px-3">
-                <a href="{% url 'blog_detail' %}"class="d-flex align-items-center text-gray-800">
+                <a href="{% url 'blog_detail' post.id %}"class="d-flex align-items-center text-gray-800">
                   <div class="me-3 d-flex">
                     <i class="bi bi-person-fill"></i>
                   </div>
-                  <div class="font-size-sm">Jack Wilson</div>
+                  <div class="font-size-sm">{{post.author.first_name}} {{post.author.last_name}}</div>
                 </a>
               </li>
               <li class="nav-item px-3">
-                <a href="{% url 'blog_detail' %}" class="d-flex align-items-center text-gray-800">
+                <a href="{% url 'blog_detail' post.id %}" class="d-flex align-items-center text-gray-800">
                   <div class="me-2 d-flex">
                     <i class="bi bi-calendar-event"></i>
                   </div>
-                  <div class="font-size-sm">06 April, 2024</div>
+                  <div class="font-size-sm">{{post.date_posted}}</div>
                 </a>
               </li>
             </ul>
-            <ahref="{% url 'blog_detail' %}" class="d-block">
-              <h5 class="line-clamp-2 h-48 h-lg-52">Top UI Design Tips for Beginners Using Figma</h5>
+            <ahref="{% url 'blog_detail' post.id %}" class="d-block">
+              <h5 class="line-clamp-2 h-48 h-lg-52">{{post.title}}</h5>
             </a>
           </div>
         </div>
       </div>    
+      {% endfor %}
     </div>
   </div>
 </section>

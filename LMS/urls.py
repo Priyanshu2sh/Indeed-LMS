@@ -45,7 +45,7 @@ urlpatterns = [
     path('verify_payment', views.VERIFY_PAYMENT, name='verify_payment'),
     path('course/watch-course/<slug:slug>', views.WATCH_COURSE, name='watch_course'),
     path("save-video-progress/", views.save_video_progress, name="save_video_progress"),
-    path('blog-detail/', views.blog_detail, name='blog_detail'),
+    path('blog-detail/<int:pk>', views.blog_detail, name='blog_detail'),
     path('api/check_user_in_lms/', user_login.check_user_exists),
     path('api/update_user_in_lms/', user_login.update_user),
 

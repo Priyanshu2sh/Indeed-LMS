@@ -24,6 +24,7 @@ def BASE(request):
 def HOME(request):
     category = Categories.objects.all().order_by('id')
     course = Course.objects.filter(status = 'PUBLISH').order_by('-id')
+    posts = Post.objects.filter().order_by('-id')
     for c in course:
         total_duration = Video.objects.filter(course=c).aggregate(total=Sum('time_duration'))['total'] or 0
         hours = total_duration // 60
@@ -34,6 +35,7 @@ def HOME(request):
     context = {
         'category':category,
         'course':course,
+        'posts':posts,
     }
     return render(request, 'main/home.html',context)
 
@@ -512,8 +514,12 @@ def save_video_progress(request):
 
 # ------------ Blog Details Page ------------>
 
-def blog_detail(request):
-    return render(request, 'main/home_content/blog_details.html')
+def blog_detail(request, pk):
+    post = Post.objects.get(id=pk)
+    tags = Tag.objects.filter(post=post)
+    comments = PostComments.objects.filter(post=post).order_by('-date')
+    other_posts = Post.objects.all().exclude(id=post.id)[:5]
+    return render(request, 'main/home_content/blog_details.html', {'post': post, "tags": tags, "comments": comments, "other_posts":other_posts})
 
 
 # def blog_detail(request, slug):
