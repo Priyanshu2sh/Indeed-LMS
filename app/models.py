@@ -249,14 +249,15 @@ class Post(models.Model):
         ('Trending','Trending')
     )
 
-    featured_image = models.ImageField(upload_to='images')
+    featured_image = models.ImageField(upload_to='Media/post_images')
     title = models.CharField(max_length=100)
-    author_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(choices=CATEGORY, max_length=200)
     date = models.DateField(auto_now_add=True)
     content = models.TextField()
     slug = models.SlugField(max_length=500, null=True, blank=True, unique=True)
     section = models.CharField(choices=SECTION, max_length=200)
+    date_posted = models.DateField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
         if not self.section:
@@ -298,4 +299,4 @@ class PostComments(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.user.name} on {self.post.title}"
+        return f"Comment by {self.user.first_name} on {self.post.title}"
