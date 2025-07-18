@@ -527,10 +527,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 def add_blog_comment(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    print('jbk')
-    # Handle comment post
     if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
         
         if not request.user.is_authenticated:
             messages.error(request, 'Please login first!')
@@ -540,32 +538,15 @@ def add_blog_comment(request, post_id):
             messages.error(request, 'Please update your profile first!')
             return redirect('profile')
         
-        content = request.POST.get('message')
-        print("Content received:", content) 
-        if content:
-            PostComments.objects.create(
-                post=post,
-                user=request.user,
-                content=content
-            )
-            messages.success(request, 'Comment added successfully')
+        content = request.POST.get('message') 
+        if not content:
+            messages.error(request, 'Please add valid comment!')
             return redirect('blog_detail', pk=post.id)
 
-    return render(request, 'main/home_content/blog_details.html', {
-        'post': post,
-        'comments': comments
-    })
-
-
-# def blog_detail(request, slug):
-#     blog = get_object_or_404(Blog, slug=slug)
-
-#     # Get related & trending posts
-#     trending_posts = Blog.objects.order_by('-views')[:5]
-#     related_posts = Blog.objects.filter(category=blog.category).exclude(id=blog.id)[:2]
-
-#     return render(request, 'main/home_content/blog_details.html', {
-#         'blog': blog,
-#         'trending_posts': trending_posts,
-#         'related_posts': related_posts,
-#     })
+        PostComments.objects.create(
+            post=post,
+            user=request.user,
+            content=content
+        )
+        messages.success(request, 'Comment added successfully')
+        return redirect('blog_detail', pk=post.id)
