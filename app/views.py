@@ -356,78 +356,104 @@ def VERIFY_PAYMENT(request):
 
     return render(request, 'verify_payment/fail.html', {'error': 'Invalid request method'})
 
-        
+
 
 def WATCH_COURSE(request, slug):
-    course = Course.objects.filter(slug = slug)
+    course = Course.objects.filter(slug=slug).first()
+    if not course:
+        return redirect('404')
+
     lecture = request.GET.get('lecture')
     next = request.GET.get('next')
     previous = request.GET.get('previous')
     is_first_video = False
     is_last_video = False
 
-    if course.exists():
-        course = course.first()
-    else:
-        return redirect('404')
+    # Get all completed video serial numbers for the current user and course
+    completed_videos = VideoProgress.objects.filter(
+        user=request.user,
+        video__course=course,
+        completed=True
+    ).values_list('video__serial_number', flat=True)
 
     if lecture:
-        check_lecture = 1
-        if int(lecture) != 1:
-            check_lecture = int(lecture) - 1
-        video = Video.objects.filter(serial_number=check_lecture, course=course).first()
-        video_progress = VideoProgress.objects.filter(user=request.user, video=video).first()
-        if video_progress == None or video_progress.completed == False:
+        check_lecture = max(1, int(lecture) - 1)
+        prev_video = Video.objects.filter(serial_number=check_lecture, course=course).first()
+        prev_progress = VideoProgress.objects.filter(user=request.user, video=prev_video).first()
+        if not prev_progress or not prev_progress.completed:
             messages.error(request, 'Please complete videos in sequence fully before moving to the next.')
-            previous_url = request.META.get('HTTP_REFERER')
-            return redirect(previous_url)
+            return redirect(request.META.get('HTTP_REFERER', '/'))
 
     if lecture is None:
-        lecture=1
+        lecture = 1
+    else:
+        lecture = int(lecture)
+
     if next:
-        video = Video.objects.filter(serial_number=next, course=course).first()
-        video_progress = VideoProgress.objects.filter(user = request.user, video=video).first()
-        if video_progress == None or video_progress.completed == False:
+        next_video = Video.objects.filter(serial_number=int(next), course=course).first()
+        if not next_video:
+            messages.error(request, 'Next video does not exist.')
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
+        progress = VideoProgress.objects.filter(user=request.user, video=next_video).first()
+        if not progress or not progress.completed:
             messages.error(request, 'Please complete current video fully before moving to the next.')
-            previous_url = request.META.get('HTTP_REFERER')
-            return redirect(previous_url)
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+
         lecture = int(next) + 1
+
     if previous:
         lecture = int(previous) - 1
 
     video = Video.objects.filter(serial_number=lecture, course=course).first()
+    if not video:
+        messages.error(request, 'This video does not exist.')
+        return redirect(request.META.get('HTTP_REFERER', '/'))
 
     last_video = Video.objects.filter(course=course).order_by('-serial_number').first()
-    is_last_video = video.id == last_video.id
+    if last_video and video:
+        is_last_video = video.id == last_video.id
     is_first_video = video.serial_number == 1
+
+    # ✅ Check if all videos in course are completed
+    all_video_serials = list(Video.objects.filter(course=course).values_list('serial_number', flat=True))
+    completed_serials = list(completed_videos)
+    
+    last_video_progress = VideoProgress.objects.filter(video=last_video, user=request.user).first()
+
+    # Ensure the current video is also marked completed
+
+    if next and set(all_video_serials) == set(completed_serials) and last_video==video and last_video_progress and last_video_progress.completed:
+        messages.success(request, f'🎉 Congratulations! your {course.title} course is completed.')
+        return redirect('my_course')
 
     comments = Comments.objects.filter(video=video, rating__in=[4, 4.5, 5]).order_by('-date')
 
     if request.method == 'POST':
-        if not(request.user.first_name and request.user.last_name):
+        if not (request.user.first_name and request.user.last_name):
             messages.error(request, 'Please complete your profile before leaving a review.')
             return redirect('profile')
-        
+
         rating = request.POST.get('rating')
         title = request.POST.get('title')
         content = request.POST.get('content')
 
-        comment = Comments(
+        Comments.objects.create(
             user=request.user,
             video=video,
             rating=float(rating) if rating else 0,
             title=title,
             content=content
         )
-        comment.save()
         messages.success(request, 'Comment added successfully!')
-    
+
     context = {
-        'course':course,
-        'video':video,
-        'comments':comments,
-        'is_first_video':is_first_video,
-        'is_last_video':is_last_video,
+        'course': course,
+        'video': video,
+        'comments': comments,
+        'is_first_video': is_first_video,
+        'is_last_video': is_last_video,
+        'completed_videos': completed_videos,
     }
     return render(request, 'course/watch-course.html', context)
 
