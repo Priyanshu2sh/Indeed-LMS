@@ -23,7 +23,7 @@ def REGISTER(request):
             else:
                 user_profile = UserProfile(user=user, otp=otp)
         else:
-            check_url = 'http://127.0.0.1:8001/accounts/api/check_user_in_indeed/'
+            check_url = 'https://indeedinspiring.com/accounts/api/check_user_in_indeed/'
             try:
                 res = requests.post(check_url, data={'email': email}, timeout=5)
             except requests.exceptions.RequestException:
@@ -93,7 +93,7 @@ def PROFILE_UPDATE(request):
         user.email = email
         user.save()
         
-        check_url = 'http://127.0.0.1:8001/accounts/api/update_user_in_indeed/'
+        check_url = 'https://indeedinspiring.com/accounts/api/update_user_in_indeed/'
         try:
             res = requests.post(check_url, data={'email': email, "first_name": first_name, "last_name": last_name}, timeout=5)
         except requests.exceptions.RequestException:

@@ -25,14 +25,14 @@ load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')  
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 if os.getenv('ENVIRONMENT') == 'Local':
-    ALLOWED_HOSTS = ['127.0.0.1']
+    DEBUG = True
+    ALLOWED_HOSTS = ['*', 'localhost', '127.0.0.1']
 elif os.getenv('ENVIRONMENT') == 'Server':
-    ALLOWED_HOSTS = ['']
+    DEBUG = False
+    ALLOWED_HOSTS = ['indeedinspiring.in','192.168.1.52']
 
 
 # Application definition
