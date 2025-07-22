@@ -208,6 +208,10 @@ def COURSE_DETAILS(request, slug):
 def PAGE_NOT_FOUND(request, exception):
     return render(request, 'error/404.html', status=404)
 
+from django.http import HttpResponse
+def debug_check(request):
+    return HttpResponse(f'DEBUG is: {settings.DEBUG}')
+
 
 def CHECKOUT(request,slug):
     course = Course.objects.get(slug = slug)

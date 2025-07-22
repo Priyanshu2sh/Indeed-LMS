@@ -25,6 +25,7 @@ handler404 = views.PAGE_NOT_FOUND
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('check-debug/', views.debug_check),
 
     path('base',views.BASE, name='base'),
     path('404',views.PAGE_NOT_FOUND,name='404'),
