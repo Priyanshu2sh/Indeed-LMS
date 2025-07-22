@@ -109,11 +109,8 @@ def CONTACT_US(request):
         return redirect('contact_us')
     return render(request, 'main/contact_us.html')
 
-from django.http import HttpResponse
 def ABOUT_US(request):
-    from os import getenv
-    return HttpResponse(f'DEBUG: {settings.DEBUG}, ENVIRONMENT: {getenv("ENVIRONMENT")}')
-    # return render(request, 'main/about_us.html')
+    return render(request, 'main/about_us.html')
 
 
 def SEARCH_COURSE(request):
