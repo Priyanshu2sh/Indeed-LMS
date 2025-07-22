@@ -88,6 +88,39 @@
 .commentSwiper {
   padding-bottom: 30px;
 }
+  /* Hide default checkbox */
+  .custom-checkbox input[type="checkbox"] {
+    display: none;
+  }
+
+  /* Custom checkbox box */
+  .custom-checkbox label {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 2px solid #28a745; /* Green border */
+    border-radius: 4px;
+    position: relative;
+    cursor: not-allowed; /* readonly effect */
+    margin-right: 5px;
+  }
+
+  /* Checkmark appearance */
+  .custom-checkbox input[type="checkbox"]:checked + label::after {
+    content: '✓';
+    color: white;
+    font-size: 14px;
+    position: absolute;
+    top: -2px;
+    left: -1px;
+  }
+
+  /* Checked box background */
+  .custom-checkbox input[type="checkbox"]:checked + label {
+    background-color: #28a745;
+    border-color: #28a745;
+  }
     </style>
 
 
@@ -193,12 +226,23 @@
                                         <i class="fa fa-youtube-play" aria-hidden="true" style="color: red;"></i>
 
                                     </div>
-                                    <div class="d-flex align-items-center ms-4 mb-2">
-                                    <input type="checkbox" name="video_checkbox" value="{{ video.serial_number }}" class="me-2" checked />
-                                    <a href="?lecture={{ video.serial_number }}" class="text-decoration-none text-dark">
-                                        {{ video.title }}
-                                    </a>
-                                    </div>
+                           <div class="d-flex align-items-center ms-4 mb-2 custom-checkbox">
+  <input type="checkbox"
+    id="video_{{ video.serial_number }}"
+    name="video_checkbox"
+    value="{{ video.serial_number }}"
+    title="{% if video.serial_number in completed_videos %}Completed{% else %}Not completed{% endif %}"
+    {% if video.serial_number in completed_videos %}checked{% endif %}
+    onclick="return false;" />
+
+  <!-- Custom styled label that shows checkbox look -->
+  <label for="video_{{ video.serial_number }}"></label>
+
+  <!-- Video title -->
+  <a href="?lecture={{ video.serial_number }}" class="text-decoration-none text-dark ms-1">
+    {{ video.title }}
+  </a>
+</div>
 
 
                                 </div>
@@ -280,7 +324,8 @@
                             </div>
                         </div>
 
-                        <div id="player" style="display:none;"></div>
+                        <div id="player" style="display: none; width: 100%; max-width: 1000px; margin: auto;"></div>
+
                     </div>
  
                         <!-- Empty div for the YouTube player -->
@@ -293,20 +338,24 @@
                     </p>
                     <br>
 
-                    <div class="d-md-flex align-items-center justify-content-between mb-8">
-                        {% if is_first_video == False %}
-                        <a href="?previous={{video.serial_number}}" class="btn btn-teal d-flex align-items-center text-white mb-5 mb-md-0 btn-block mw-md-280p justify-content-center">
-                            <i class="fas fa-arrow-left font-size-xs"></i>
-                            <span class="ms-3">Previous</span>
-                        </a>
-                        {% endif %}
-                        {% if is_last_video == False %}
-                        <a href="?next={{video.serial_number}}" class="btn btn-teal d-flex align-items-center text-white btn-block mw-md-280p justify-content-center mt-0">
-                            <span class="me-3">Next</span>
-                            <i class="fas fa-arrow-right font-size-xs"></i>
-                        </a>
-                        {% endif %}
-                    </div>
+                   <div class="d-md-flex align-items-center justify-content-between mb-8">
+    {% if is_first_video == False %}
+    <a href="?previous={{ video.serial_number }}" 
+       class="btn btn-teal d-flex align-items-center text-white mb-5 mb-md-0 btn-block mw-md-280p justify-content-center gap-2">
+        <i class="fas fa-arrow-left font-size-xs"></i>
+        <span>Previous</span>
+    </a>
+    {% endif %}
+    
+    {% if is_last_video == False %}
+    <a href="?next={{ video.serial_number }}" 
+       class="btn btn-teal d-flex align-items-center text-white btn-block mw-md-280p justify-content-center mt-0 gap-2">
+        <span>Next</span>
+        <i class="fas fa-arrow-right font-size-xs"></i>
+    </a>
+    {% endif %}
+</div>
+
 
                     <!-- Comment Swiper -->
                     <h3 class="mb-6">Comments</h3>
@@ -452,8 +501,8 @@
         document.getElementById("player").style.display = "block";
 
         player = new YT.Player('player', {
-            height: '390',
-            width: '640',
+            height: '500',     
+            width: '1000', 
             videoId: videoId,
             events: {
                 'onReady': onPlayerReady,

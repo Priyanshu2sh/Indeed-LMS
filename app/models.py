@@ -232,6 +232,8 @@ class VideoProgress(models.Model):
 
     class Meta:
         unique_together = ('user', 'video')
+        
+        
 
 class Post(models.Model):
     

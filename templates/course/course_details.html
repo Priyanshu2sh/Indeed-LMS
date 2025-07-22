@@ -7,8 +7,10 @@
 
 <!-- Swiper CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" />
 <!-- Swiper JS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script>
 
 <style>
 .review-card {
@@ -429,7 +431,7 @@
                                         </a>   
                                         {% else %}
                                         {% if video.preview == True %}
-                                        <a href="https://www.youtube.com/watch?v={{video.youtube_id}}" class="rounded" data-fancybox>
+                                        <a href="{{video.youtube_link}}" class="rounded" data-fancybox>
                                             <div class="ms-4">
                                                 {{video.title}}
                                             </div>
@@ -662,4 +664,22 @@
         },
     });
 </script>
+<script>
+  Fancybox.bind("[data-fancybox]", {
+    Html: {
+      video: {
+        autoplay: true
+      }
+    },
+    // This ensures the iframe has proper permissions
+    iframe: {
+      preload: false,
+      attr: {
+        allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen",
+        allowfullscreen: "true"
+      }
+    }
+  });
+</script>
+
 {% endblock %}
