@@ -109,9 +109,11 @@ def CONTACT_US(request):
         return redirect('contact_us')
     return render(request, 'main/contact_us.html')
 
-
+from django.http import HttpResponse
 def ABOUT_US(request):
-    return render(request, 'main/about_us.html')
+    from os import getenv
+    return HttpResponse(f'DEBUG: {settings.DEBUG}, ENVIRONMENT: {getenv("ENVIRONMENT")}')
+    # return render(request, 'main/about_us.html')
 
 
 def SEARCH_COURSE(request):
@@ -207,11 +209,6 @@ def COURSE_DETAILS(request, slug):
 
 def PAGE_NOT_FOUND(request, exception):
     return render(request, 'error/404.html', status=404)
-
-from django.http import HttpResponse
-def debug_check(request):
-    return HttpResponse(f'DEBUG is: {settings.DEBUG}')
-
 
 def CHECKOUT(request,slug):
     course = Course.objects.get(slug = slug)
