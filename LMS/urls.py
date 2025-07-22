@@ -21,6 +21,7 @@ from app import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+handler404 = views.PAGE_NOT_FOUND
 
 urlpatterns = [
     path('admin/', admin.site.urls),

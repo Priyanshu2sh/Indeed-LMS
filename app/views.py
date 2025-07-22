@@ -9,6 +9,7 @@ from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.db.models import Count
+from django.conf.urls import handler404
 import json
 from datetime import datetime, timedelta
 
@@ -204,13 +205,8 @@ def COURSE_DETAILS(request, slug):
     return render(request,'course/course_details.html',context)
 
 
-def PAGE_NOT_FOUND(request):
-    category = Categories.get_all_category(Categories)
-
-    context = {
-        'category':category,
-    }
-    return render(request,'error/404.html',context)
+def PAGE_NOT_FOUND(request, exception):
+    return render(request, 'error/404.html', status=404)
 
 
 def CHECKOUT(request,slug):
