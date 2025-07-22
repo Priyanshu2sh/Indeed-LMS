@@ -52,3 +52,5 @@ nohup.out
 
 # Ignore Excel files
 *.xlsx
+
+settings.py
