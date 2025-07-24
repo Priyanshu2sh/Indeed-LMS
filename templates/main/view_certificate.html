@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Python Certificate{% endblock %}
+
+{% block content %}
+<style>
+
+
+  .certificate-container {
+    max-width: 750px;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+
+  .certificate-container:hover {
+    transform: scale(1.01);
+  }
+
+  .certificate-image {
+    width: 100%;
+    height: auto;
+    border-bottom: 2px solid #eee;
+  }
+
+  .certificate-body {
+    padding: 30px;
+  }
+
+  .certificate-title {
+    font-family: 'Georgia', serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: #2e7d32;
+  }
+
+  .certificate-text {
+    font-size: 16px;
+    color: #555;
+    margin-top: 15px;
+  }
+
+  .btn-custom {
+    border-radius: 30px;
+    padding: 10px 25px;
+    font-weight: 500;
+  }
+
+  .glow-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #43a047;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 14px;
+    box-shadow: 0 0 8px #66bb6a;
+    font-weight: bold;
+  }
+  h2{
+    color: #205183ff;
+  }
+  .shape-left {
+  left: 0;
+  max-width: 0;
+  overflow: hidden;
+}
+</style>
+
+<div class="container py-5">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold">🎓 {{ user_course.course.title }} Course Certificate</h2>
+    <p class="text-muted">Proudly presented to students who completed the course</p>
+  </div>
+
+  <div class="position-relative certificate-container">
+    <div class="glow-badge">Verified</div>
+
+    <img src="{% static 'assets/img/certificates/certificate1.jpg' %}" alt="Python Certificate" class="certificate-image" />
+
+    <div class="certificate-body text-center">
+      <h5 class="certificate-title">Certificate of Completion</h5>
+
+      <p class="certificate-text">
+        This is to certify that <strong>{{user_course.user.first_name}}&nbsp;{{user_course.user.last_name}}</strong> has successfully completed the
+        <strong>{{ user_course.course.title }}</strong> course, mastering the core concepts such as data types, loops,
+        conditionals, functions, object-oriented programming, and more.
+      </p>
+
+      <div class="d-flex justify-content-center gap-3 mt-4">
+        <a href="{% static 'assets/certificates/sample_python_certificate.pdf' %}" download class="btn btn-success btn-custom">
+          <i class="fas fa-download me-2"></i>Download
+        </a>
+        <a href="{% url 'my_certificate' %}" class="btn btn-outline-secondary btn-custom">
+    <i class="fas fa-arrow-left me-2"></i>Back
+  </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

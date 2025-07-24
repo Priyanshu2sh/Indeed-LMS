@@ -183,6 +183,7 @@ class UserCourse(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     paid = models.BooleanField(default=0)
     date = models.DateTimeField(auto_now_add = True)
+    completed = models.BooleanField(default=False)
 
     # NEW FIELDS
     is_active = models.BooleanField(default=True)  # To cancel/expire subscription

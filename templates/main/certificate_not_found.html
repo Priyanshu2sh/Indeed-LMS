@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Python Certificate{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center">
+    {% comment %} <h2 class="mb-4 fw-bold">Certificate</h2> {% endcomment %}
+
+    <div class="col-12 text-center py-5">
+      <!-- Certificate Icon -->
+      <div class="mb-4">
+        <i class="fas fa-file-alt text-secondary" 
+           style="font-size: 120px; animation: float 3s ease-in-out infinite;"></i>
+      </div>
+
+      <h3 class="fw-bold text-secondary">Oops! No Certificates Yet</h3>
+      <p class="text-muted">You haven't earned any certificate yet. Keep learning and come back later!</p>
+
+      <!-- Explore Courses Button -->
+      <a href="{% url 'single_course' %}" class="btn btn-primary mt-3 px-4 py-2">
+        <i class="fas fa-book-reader me-2"></i>Explore Courses
+      </a>
+    </div>
+
+    <style>
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+    </style>
+
+  </div>
+</div>
+{% endblock %}
