@@ -101,7 +101,15 @@ class Course(models.Model):
     Deadline = models.CharField(max_length=100, null=True)
     slug = models.SlugField(default='', max_length=500, null=True, blank=True)
     status = models.CharField(choices=STATUS,max_length=100,null=True)
-    Certificate = models.CharField(null=True, max_length=100)
+    certificate = models.CharField(choices=(('Yes', 'Yes'), ('No', 'No')), max_length=100, default='No')
+    certificate_type = models.CharField(
+        max_length=10,
+        choices=(
+            ('Auto', 'Auto'),
+            ('Manual', 'Manual'),
+        ),
+        default='Auto'
+    )
 
     is_subscription = models.BooleanField(default=False)  # True = monthly subscription
 
