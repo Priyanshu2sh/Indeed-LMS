@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Certificates{% endblock %}
+
+{% block content %}
+
+<style>
+  header.animated-header {
+    background: radial-gradient(circle at 50% 20%, #929eb1ff 0%, #0f172a 100%);
+    padding: 120px 0 100px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .certificate-card {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .certificate-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .certificate-img {
+    height: 200px;
+    width: 100%;
+    object-fit: cover;
+    border-bottom: 2px solid #fbbf24;
+  }
+
+  .card-title {
+    color: #0f172a;
+    font-weight: 600;
+  }
+
+  .card-text {
+    color: #475569;
+  }
+
+  .btn-view {
+    background: linear-gradient(135deg, #fb8524ff, #f08f63);
+    color: #fff;
+    border: none;
+    transition: background 0.3s ease;
+    font-weight: 500;
+    border-radius: 8px;
+  }
+
+  .btn-view:hover {
+    background: linear-gradient(135deg, #f08f63, #fbbf24);
+    color: #fff;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .shape-left {
+  left: 0;
+  max-width: 0;
+  overflow: hidden;
+}
+</style>
+
+{% if user_course %}
+<!-- HEADER SECTION -->
+<header class="animated-header position-relative">
+  <div id="tsparticles" class="position-absolute w-100 h-100" style="z-index: 0;"></div>
+
+  <div class="container text-center text-black py-10 position-relative z-1">
+    <div class="tilt" data-tilt data-tilt-max="20" data-tilt-speed="400">
+      <div class="p-5 mx-auto mb-4 hero-card hero-animate text-slide" style="max-width: 600px;">
+        <img src="{% static 'assets/img/certificates/trophy3.jpg' %}" class="img-fluid mb-3 rounded shadow-lg"
+             style="height: 90px; border: 3px solid #fb8524ff;" />
+        <h1 class="display-5 fw-bold mb-2 slide-title" style="color: #fb9949ff;">My Certificates</h1>
+        <p class="text-white-50 mb-0 slide-subtitle">Browse your course certificates and show your achievements.</p>
+      </div>
+    </div>
+
+    <nav aria-label="breadcrumb" class="mt-4 breadcrumb-animate">
+      <ol class="breadcrumb breadcrumb-scroll justify-content-center bg-transparent p-0 mb-0">
+        <li class="breadcrumb-item">
+          <a class="text-white text-decoration-underline" href="{% url 'home' %}">
+            <i class="fas fa-home me-1"></i> Home
+          </a>
+        </li>
+        <li class="breadcrumb-item text-white active" aria-current="page">
+          <i class="fas fa-certificate me-1"></i> My Certificates
+        </li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Bottom Wave -->
+  <div class="position-absolute bottom-0 start-0 w-100 z-0">
+    <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#ffffff" fill-opacity="1"
+            d="M0,64L48,69.3C96,75,192,85,288,85.3C384,85,480,75,576,69.3C672,64,768,64,864,64C960,64,1056,64,1152,64C1248,64,1344,64,1392,64L1440,64L1440,120L1392,120C1344,120,1248,120,1152,120C1056,120,960,120,864,120C768,120,672,120,576,120C480,120,384,120,288,120C192,120,96,120,48,120L0,120Z">
+      </path>
+    </svg>
+  </div>
+</header>
+
+<!-- CERTIFICATE CARDS SECTION -->
+<div class="container py-5">
+  <div class="row justify-content-center mb-4">
+      </div>
+
+  <div class="row">
+    {% for i in user_course %}
+    <div class="col-lg-4 col-md-6 mb-4 certificate-item">
+      <div class="card certificate-card h-100">
+        <img src="{{ i.course.featured_image.url }}" class="certificate-img" alt="{{ i.course.title }}">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ i.course.category }}</h5>
+          <p class="card-text">Certificate for completing {{ i.course.title }}</p>
+          <div class="mt-auto">
+            <a href="{% url 'view_certificate' i.pk %}" class="btn btn-view w-100">View Certificate</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% else %}
+<!-- NO CERTIFICATES SECTION -->
+<div class="container py-5">
+  <div class="col-12 text-center py-5">
+    <div class="mb-4">
+      <i class="fas fa-file-alt text-secondary" style="font-size: 120px; animation: float 3s ease-in-out infinite;"></i>
+    </div>
+    <h3 class="fw-bold text-secondary">Oops! No Certificates Yet</h3>
+    <p class="text-muted">You haven't earned any certificate yet. Keep learning and come back later!</p>
+    <a href="{% url 'single_course' %}" class="btn btn-primary mt-3 px-4 py-2">
+      <i class="fas fa-book-reader me-2"></i>Explore Courses
+    </a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- GSAP + ScrollTrigger -->
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.from(".hero-animate", {
+    y: -100,
+    opacity: 0,
+    duration: 1.2,
+    ease: "power2.out"
+  });
+
+  gsap.from(".breadcrumb-animate", {
+    opacity: 0,
+    y: 50,
+    delay: 0.5,
+    duration: 1
+  });
+
+  gsap.from(".slide-title", {
+    scrollTrigger: {
+      trigger: ".slide-title",
+      start: "top 90%",
+      toggleActions: "play none none none"
+    },
+    x: -100,
+    opacity: 0,
+    duration: 1,
+    ease: "power2.out"
+  });
+
+  gsap.from(".slide-subtitle", {
+    scrollTrigger: {
+      trigger: ".slide-subtitle",
+      start: "top 90%",
+      toggleActions: "play none none none"
+    },
+    x: -100,
+    opacity: 0,
+    delay: 0.2,
+    duration: 1,
+    ease: "power2.out"
+  });
+</script>
+
+<!-- tsparticles -->
+<script>
+  tsParticles.load("tsparticles", {
+    fullScreen: { enable: false },
+    background: { color: "transparent" },
+    fpsLimit: 60,
+    particles: {
+      number: { value: 80, density: { enable: true, area: 800 } },
+      color: { value: ["#00ffff", "#fbbf24", "#38bdf8"] },
+      shape: { type: "polygon", polygon: { nb_sides: 6 } },
+      opacity: { value: 0.6, anim: { enable: true, speed: 1, opacity_min: 0.3 } },
+      size: { value: { min: 2, max: 4 }, anim: { enable: true, speed: 2, size_min: 0.3 } },
+      move: { enable: true, speed: 1, random: true, outModes: "bounce" },
+      links: { enable: true, distance: 130, color: "#00ffff", opacity: 0.5, width: 1.2 }
+    },
+    interactivity: {
+      events: { onHover: { enable: true, mode: "repulse" }, resize: true },
+      modes: { repulse: { distance: 100, duration: 0.5 } }
+    },
+    detectRetina: true
+  });
+</script>
+
+<!-- Filter Search Script -->
+<script>
+  function filterCertificates() {
+    const input = document.getElementById("certificateSearch").value.toLowerCase();
+    const cards = document.querySelectorAll(".certificate-item");
+
+    cards.forEach(card => {
+      const text = card.innerText.toLowerCase();
+      card.style.display = text.includes(input) ? "block" : "none";
+    });
+  }
+</script>
+{% endblock %}

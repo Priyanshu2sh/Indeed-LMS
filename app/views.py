@@ -414,6 +414,19 @@ def WATCH_COURSE(request, slug):
     completed_serials = list(completed_videos)
     
     last_video_progress = VideoProgress.objects.filter(video=last_video, user=request.user).first()
+    
+    # Check if all course videos are completed AND user is currently on last video
+    if (
+        set(all_video_serials) == set(completed_serials) and
+        last_video == video and
+        last_video_progress and last_video_progress.completed
+    ):
+        user_course = UserCourse.objects.filter(user=request.user, course=course).first()
+        if user_course and not user_course.completed:
+            user_course.completed = True
+            user_course.save()
+            messages.success(request, f'🎉 Congratulations! Your "{course.title}" course is now marked as completed!')
+            return redirect('my_course')
 
     # Ensure the current video is also marked completed
 
@@ -544,3 +557,16 @@ def add_blog_comment(request, post_id):
         )
         messages.success(request, 'Comment added successfully')
         return redirect('blog_detail', pk=post.id)
+    
+ 
+def my_certificate(request):
+    user_course = UserCourse.objects.filter(user=request.user, completed=True)
+    return render(request, 'main/my_certificate.html', {'user_course': user_course})
+
+def certificate_not_found(request):
+    return render(request, 'main/certificate_not_found.html')
+    
+def view_certificate(request, pk):
+    user_course = UserCourse.objects.get(id=pk)
+    return render(request, 'main/view_certificate.html', {'user_course': user_course})
+    
