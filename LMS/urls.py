@@ -55,5 +55,6 @@ urlpatterns = [
     path('my-certificate/', views.my_certificate, name='my_certificate'),
     path('certificate-not-found/', views.certificate_not_found, name='certificate_not_found'),
     path('certificates/<int:pk>', views.view_certificate, name='view_certificate'),
+    path('start_assessment/<int:pk>', views.start_assessment, name='start_assessment'),
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

@@ -381,6 +381,28 @@
 
             </div>
 
+
+            {% if assessments %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                    <h5>📝 Course Assessments</h5>
+                    </div>
+                    <div class="card-body">
+                    {% for a in assessments %}
+                        <div class="mb-3 p-2 border rounded">
+                        <strong>{{ a.title }}</strong><br>
+                        {% if a.user_completed %}
+                            ✅ Completed — Score: {{ a.score }}%
+                        {% else %}
+                            <a href="{% url 'start_assessment' a.id %}" class="btn btn-sm btn-primary mt-2">Take Assessment</a>
+                        {% endif %}
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+
               <div id="Curriculum" class="mb-8">
                     <ul class="nav course-tab-v1 border-bottom h4 mb-8">
                         <li class="nav-item">

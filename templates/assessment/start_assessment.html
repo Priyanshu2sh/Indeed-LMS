@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load course_tags %}
+{% load static %}
+{% block title %}{{course.title}}{% endblock %}
+{% block content %}
+<h3>{{ assessment.title }}</h3>
+<form method="post">
+  {% csrf_token %}
+  {% for q in questions %}
+    <div class="mb-3">
+      <strong>{{ forloop.counter }}. {{ q.question }}</strong><br>
+      <input type="radio" name="question_{{ q.id }}" value="A"> {{ q.option_a }}<br>
+      <input type="radio" name="question_{{ q.id }}" value="B"> {{ q.option_b }}<br>
+      <input type="radio" name="question_{{ q.id }}" value="C"> {{ q.option_c }}<br>
+      <input type="radio" name="question_{{ q.id }}" value="D"> {{ q.option_d }}<br>
+    </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-success">Submit Assessment</button>
+</form>
+
+{% endblock %}

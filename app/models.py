@@ -110,6 +110,16 @@ class Course(models.Model):
         ),
         default='Auto'
     )
+    assessment_type = models.CharField(
+        choices=(
+            ('Day', 'Day'),
+            ('Final', 'Final'),
+            ('No', 'No'),
+        ),
+        max_length=20,
+        default='No',
+    )
+
 
     is_subscription = models.BooleanField(default=False)  # True = monthly subscription
 
@@ -311,3 +321,31 @@ class PostComments(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.first_name} on {self.post.title}"
+    
+class Assessment(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='assessments')
+    day_number = models.PositiveIntegerField(null=True, blank=True)  # Only for day-wise
+    title = models.CharField(max_length=200)
+    instructions = models.TextField(blank=True, null=True)
+    is_final = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['day_number']
+
+class MCQQuestion(models.Model):
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE, related_name='questions')
+    question = models.TextField()
+    option_a = models.CharField(max_length=300)
+    option_b = models.CharField(max_length=300)
+    option_c = models.CharField(max_length=300)
+    option_d = models.CharField(max_length=300)
+    correct_option = models.CharField(max_length=1, choices=[('A','A'),('B','B'),('C','C'),('D','D')])
+
+class UserAssessmentProgress(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
+    is_completed = models.BooleanField(default=False)
+    score = models.FloatField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'assessment')

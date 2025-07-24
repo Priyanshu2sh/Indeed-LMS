@@ -181,6 +181,20 @@ def COURSE_DETAILS(request, slug):
         check_enroll = None
 
     latest_courses = Course.objects.filter(status = 'PUBLISH').order_by('-id')[:5]
+
+    assessments = Assessment.objects.filter(course=course).order_by('day_number')
+    for a in assessments:
+        user_progress = UserAssessmentProgress.objects.filter(user=request.user, assessment=a).first()
+        if user_progress:
+            a.user_completed = user_progress.is_completed
+            a.score = user_progress.score
+        else:
+            a.user_completed = False
+    # user_progress = {
+    #     a.assessment.id: a
+    #     for a in UserAssessmentProgress.objects.filter(user=request.user, assessment__in=assessments)
+    # }
+    print(user_progress)
     
     context = {
         'course':course,
@@ -200,6 +214,8 @@ def COURSE_DETAILS(request, slug):
         'three_star_percent': three_star_percent,
         'four_star_percent': four_star_percent,
         'five_star_percent': five_star_percent,
+        'assessments': assessments,
+        'user_progress': user_progress,
     }
     return render(request,'course/course_details.html',context)
 
@@ -560,6 +576,9 @@ def add_blog_comment(request, post_id):
     
  
 def my_certificate(request):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login first!')
+        return redirect('register')
     user_course = UserCourse.objects.filter(user=request.user, completed=True)
     return render(request, 'main/my_certificate.html', {'user_course': user_course})
 
@@ -570,3 +589,33 @@ def view_certificate(request, pk):
     user_course = UserCourse.objects.get(id=pk)
     return render(request, 'main/view_certificate.html', {'user_course': user_course})
     
+@login_required
+def start_assessment(request, pk):
+    assessment = get_object_or_404(Assessment, id=pk)
+    questions = assessment.questions.all()
+
+    if request.method == 'POST':
+        total_questions = questions.count()
+        correct_answers = 0
+
+        for q in questions:
+            user_answer = request.POST.get(f'question_{q.id}')
+            if user_answer == q.correct_option:
+                correct_answers += 1
+
+        score = round((correct_answers / total_questions) * 100, 2)
+
+        # Save or update progress
+        UserAssessmentProgress.objects.update_or_create(
+            user=request.user,
+            assessment=assessment,
+            defaults={'is_completed': True, 'score': score}
+        )
+
+        messages.success(request, f"You completed the assessment with a score of {score}%")
+        return redirect('course_details', slug=assessment.course.slug)  # redirect back
+
+    return render(request, 'assessment/start_assessment.html', {
+        'assessment': assessment,
+        'questions': questions,
+    })
