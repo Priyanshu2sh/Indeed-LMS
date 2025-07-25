@@ -166,13 +166,13 @@
         .then(response => response.json())
         .then(data => {
             const options = {
-                "key": "rzp_test_3m0nI9PuRgv7Ky",
+                "key": "rzp_live_BV6MSWWJv5zygc",
                 "amount": data.amount,
                 "currency": "INR",
                 "name": "Indeed Inspiring Online Course",
                 "description": "Payment For " + data.course_title,
                 "order_id": data.order_id,
-                "callback_url": "http://127.0.0.1:8001/verify_payment",
+                "callback_url": "https://indeedinspiring.com/lms/verify_payment",
                 "prefill": {
                     "name": data.notes.name,
                     "email": data.notes.email,
