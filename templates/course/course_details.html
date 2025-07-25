@@ -49,6 +49,26 @@
   max-width: 0;
   overflow: hidden;
 }
+
+.transition-hover {
+    transition: all 0.3s ease;
+  }
+
+.transition-hover:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+    border-color: #0f172a;
+}
+
+.bg-gradient {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+ }
+  canvas[id^="scoreGauge"] {
+  display: block;
+  margin: 0 auto;
+   width: 90%;
+  max-height: 100px;
+}
 </style>
 
 <!-- BREADCRUMBS
@@ -72,6 +92,8 @@
             </ol>
         </nav>
     </div>
+
+    {% include 'components/msg.html' %}
 
     <!-- COURSE
     ================================================== -->
@@ -381,26 +403,63 @@
 
             </div>
 
+                            
 
-            {% if assessments %}
-                <div class="card mt-4">
-                    <div class="card-header">
-                    <h5>📝 Course Assessments</h5>
+                {% if assessments %}
+                <div class="card mt-5 border-0 shadow-lg rounded-4 overflow-hidden">
+                    <div class="card-header bg-gradient text-white d-flex align-items-center" style="background: linear-gradient(to right, #0f172a, #1e293b);">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i> Course Assessments</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body bg-light p-4">
                     {% for a in assessments %}
-                        <div class="mb-3 p-2 border rounded">
-                        <strong>{{ a.title }}</strong><br>
-                        {% if a.user_completed %}
-                            ✅ Completed — Score: {{ a.score }}%
-                        {% else %}
-                            <a href="{% url 'start_assessment' a.id %}" class="btn btn-sm btn-primary mt-2">Take Assessment</a>
-                        {% endif %}
+                        <div class="bg-white border rounded-3 p-4 mb-4 shadow-sm transition-hover">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="w-100">
+                            <h6 class="mb-2 text-dark d-flex align-items-center">
+                                <i class="fas fa-book-open me-2 text-primary"></i>
+                                {{ a.title }}
+                            </h6>
+
+                     {% if a.user_completed %}
+                            <span class="badge px-3 py-2 rounded-pill text-white shadow-sm fw-semibold"
+                                    style="background: linear-gradient(135deg, #22c55e, #16a34a); font-size: 0.875rem;">
+                                ✅ Completed
+                            </span>
+
+                    <div class="card border-0 shadow-lg rounded-4 p-4 d-flex align-items-center">
+                            <canvas id="scoreGauge{{ a.id }}" data-score="{{ a.score }}"></canvas>
+
+                                <div class="mt-4 text-center">
+                                    <h4 class="mb-1">Your Score</h4>
+                                    <h3 class="fw-bold text-primary">{{ a.score }}%</h3>
+                                    <p class="text-muted">
+                                    ✅ Correct: <strong>{{ a.correct }}</strong> |
+                                    ❌ Wrong: <strong>{{ a.wrong }}</strong>
+                                    </p>
+                                </div>
+                                </div>
+
+                            {% else %}
+                                <a href="{% url 'start_assessment' a.id %}" class="btn btn-primary btn-sm mt-3 rounded-pill px-3">
+                                <i class="fas fa-pencil-alt me-1"></i> Take Assessment
+                                </a>
+                            {% endif %}
+                            </div>
+
+                            <div class="ms-4">
+                            {% if a.user_completed %}
+                                <i class="fas fa-check-circle fa-2x text-success"></i>
+                            {% else %}
+                                <i class="fas fa-hourglass-start fa-2x text-warning"></i>
+                            {% endif %}
+                            </div>
+                        </div>
                         </div>
                     {% endfor %}
                     </div>
                 </div>
                 {% endif %}
+
 
 
               <div id="Curriculum" class="mb-8">
@@ -708,5 +767,47 @@
     }
   });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const canvases = document.querySelectorAll('canvas[id^="scoreGauge"]');
+    
+    canvases.forEach((canvas) => {
+      const scoreStr = canvas.getAttribute('data-score');
+      const score = parseFloat(scoreStr.replace('%', '').trim());
+
+      if (isNaN(score)) {
+        console.error('Invalid score for chart:', scoreStr);
+        return;
+      }
+
+      const ctx = canvas.getContext('2d');
+      const color = score < 40 ? '#ef4444' : score < 70 ? '#f59e0b' : '#22c55e';
+
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          datasets: [{
+            data: [score, 100 - score],
+            backgroundColor: [color, '#e5e7eb'],
+            borderWidth: 0,
+            cutout: '60%',
+            circumference: 180,
+            rotation: 270,
+          }]
+        },
+        options: {
+          plugins: {
+            tooltip: { enabled: false },
+            legend: { display: false },
+          }
+        }
+      });
+    });
+  });
+</script>
+
+
 
 {% endblock %}

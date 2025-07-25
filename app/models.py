@@ -346,6 +346,8 @@ class UserAssessmentProgress(models.Model):
     assessment = models.ForeignKey(Assessment, on_delete=models.CASCADE)
     is_completed = models.BooleanField(default=False)
     score = models.FloatField(default=0)
+    correct = models.IntegerField(default=0)
+    wrong = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ('user', 'assessment')

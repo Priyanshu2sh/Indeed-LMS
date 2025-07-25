@@ -188,13 +188,10 @@ def COURSE_DETAILS(request, slug):
         if user_progress:
             a.user_completed = user_progress.is_completed
             a.score = user_progress.score
+            a.correct = user_progress.correct
+            a.wrong = user_progress.wrong
         else:
             a.user_completed = False
-    # user_progress = {
-    #     a.assessment.id: a
-    #     for a in UserAssessmentProgress.objects.filter(user=request.user, assessment__in=assessments)
-    # }
-    print(user_progress)
     
     context = {
         'course':course,
@@ -214,8 +211,7 @@ def COURSE_DETAILS(request, slug):
         'three_star_percent': three_star_percent,
         'four_star_percent': four_star_percent,
         'five_star_percent': five_star_percent,
-        'assessments': assessments,
-        'user_progress': user_progress,
+        'assessments': assessments
     }
     return render(request,'course/course_details.html',context)
 
@@ -592,7 +588,18 @@ def view_certificate(request, pk):
 @login_required
 def start_assessment(request, pk):
     assessment = get_object_or_404(Assessment, id=pk)
+    previous_assessment_day = assessment.day_number - 1
     questions = assessment.questions.all()
+
+    if previous_assessment_day > 0:
+        # Check if user has already completed this assessment
+        previous_result = UserAssessmentProgress.objects.filter(
+            user=request.user, assessment__day_number=previous_assessment_day, is_completed=True
+        ).first()
+        if not previous_result:
+            messages.error(request, "Please complete previous assessment first.")
+            return redirect('course_details', slug=assessment.course.slug)
+
 
     if request.method == 'POST':
         total_questions = questions.count()
@@ -603,13 +610,14 @@ def start_assessment(request, pk):
             if user_answer == q.correct_option:
                 correct_answers += 1
 
+        wrong_answers = total_questions - correct_answers
         score = round((correct_answers / total_questions) * 100, 2)
 
         # Save or update progress
         UserAssessmentProgress.objects.update_or_create(
             user=request.user,
             assessment=assessment,
-            defaults={'is_completed': True, 'score': score}
+            defaults={'is_completed': True, 'score': score,'correct': correct_answers,'wrong': wrong_answers}
         )
 
         messages.success(request, f"You completed the assessment with a score of {score}%")
