@@ -1,0 +1,5 @@
+.shape-left {
+  left: 0;
+  max-width: 0;
+  overflow: hidden;
+}
