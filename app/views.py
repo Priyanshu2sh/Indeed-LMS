@@ -192,6 +192,12 @@ def COURSE_DETAILS(request, slug):
             a.wrong = user_progress.wrong
         else:
             a.user_completed = False
+            
+    if request.user.is_authenticated:
+        wishlist_courses = Course.objects.filter(wishlist__user=request.user)
+    else:
+        wishlist_courses = Course.objects.none()
+
     
     context = {
         'course':course,
@@ -211,7 +217,9 @@ def COURSE_DETAILS(request, slug):
         'three_star_percent': three_star_percent,
         'four_star_percent': four_star_percent,
         'five_star_percent': five_star_percent,
-        'assessments': assessments
+        'assessments': assessments,
+        'request': request,
+        'wishlist_courses': wishlist_courses
     }
     return render(request,'course/course_details.html',context)
 
@@ -627,3 +635,21 @@ def start_assessment(request, pk):
         'assessment': assessment,
         'questions': questions,
     })
+
+
+def wishlist_view(request):
+    wishlist_courses = Wishlist.objects.filter(user=request.user).select_related('course')
+    return render(request, 'main/wishlist.html', {'wishlist_courses': wishlist_courses})
+
+def add_to_wishlist(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, course=course)
+
+    if not created:
+        wishlist_item.delete()
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+def remove_from_wishlist(request, course_id):
+    Wishlist.objects.filter(user=request.user, course_id=course_id).delete()
+    messages.success(request, 'Course removed from wishlist.')
+    return redirect('wishlist')

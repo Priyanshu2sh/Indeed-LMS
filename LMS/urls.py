@@ -56,5 +56,8 @@ urlpatterns = [
     path('certificate-not-found/', views.certificate_not_found, name='certificate_not_found'),
     path('certificates/<int:pk>', views.view_certificate, name='view_certificate'),
     path('start_assessment/<int:pk>', views.start_assessment, name='start_assessment'),
+    path('wishlist/', views.wishlist_view, name='wishlist'),
+    path('wishlist/add/<int:course_id>/', views.add_to_wishlist, name='add_to_wishlist'),
+    path('wishlist/remove/<int:course_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
