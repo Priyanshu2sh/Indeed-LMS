@@ -106,7 +106,8 @@
                      {% if user.is_authenticated and not user.first_name %}
                      <li class="nav-item dropdown border-0 px-1 px-md-3">
                          <a class="nav-link dropdown-toggle" id="user" data-bs-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">
-                           Welcome, {{user.email}}
+                        Welcome, {{ user.email|slice:":5" }}...
+
                         </a>
 
                         <ul class="dropdown-menu border-xl shadow-none" aria-labelledby="user">
@@ -120,6 +121,11 @@
                                     Enrolled Courses
                                 </a>
                             </li>
+                             <li class="dropdown-item">
+                                    <a class="dropdown-link" href="{% url 'wishlist' %}">
+                                        Wishlist
+                                    </a>
+                                </li>
                             <li class="dropdown-item">
                                 <a onclick="logout()" class="dropdown-link">
                                     Logout
@@ -130,7 +136,7 @@
                     {% elif user.is_authenticated %}
                      <li class="nav-item dropdown border-0 px-1 px-md-3">
                          <a class="nav-link dropdown-toggle" id="user" data-bs-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false">
-                           Welcome, {{user.first_name}}&nbsp;{{user.last_name}}
+                           Welcome, {{user.first_name|slice:":5" }}...
                         </a>
 
                         <ul class="dropdown-menu border-xl shadow-none" aria-labelledby="user">
@@ -144,6 +150,11 @@
                                     Enrolled Courses
                                 </a>
                             </li>
+                              <li class="dropdown-item">
+                                    <a class="dropdown-link" href="{% url 'wishlist' %}">
+                                        Wishlist
+                                    </a>
+                                </li>
                             <li class="dropdown-item">
                                 <a onclick="logout()" class="dropdown-link">
                                     Logout
@@ -169,10 +180,6 @@
 
             <!-- Search, Account & Cart -->
             <ul class="navbar-nav flex-row ms-n4 ms-sm-auto ms-xl-0 me-n2 me-md-n4">
-
-
-
-
 
                 <li class="nav-item border-0 px-1 px-md-3 d-none d-370-block d-xl-block">
                     <a class="nav-link d-flex p-3 bg-white-all rounded-circle search-mobile text-gigas icon-xs" data-bs-toggle="collapse" href="#collapseSearchMobile" role="button" aria-expanded="false" aria-controls="collapseSearchMobile">
