@@ -32,6 +32,12 @@ def HOME(request):
         minutes = total_duration % 60
         formatted_duration = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
         c.total_duration = formatted_duration
+        
+        c.is_wishlist = False
+        if request.user.is_authenticated:
+            wishlist = Wishlist.objects.filter(user=request.user, course=c)
+            if wishlist:
+                c.is_wishlist = True
 
     context = {
         'category':category,
@@ -51,6 +57,12 @@ def SINGLE_COURSE(request):
         minutes = total_duration % 60
         formatted_duration = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
         c.total_duration = formatted_duration
+        
+        c.is_wishlist = False
+        if request.user.is_authenticated:
+            wishlist = Wishlist.objects.filter(user=request.user, course=c)
+            if wishlist:
+                c.is_wishlist = True
 
     FreeCourse_count = Course.objects.filter(price = 0).count()
     PaidCourse_count = Course.objects.filter(price__gte = 1).count()
