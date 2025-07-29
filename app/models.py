@@ -1,4 +1,5 @@
 # from django.contrib.auth.models import User
+from datetime import datetime
 import random
 from django.db import models
 from django.utils.text import slugify
@@ -102,14 +103,7 @@ class Course(models.Model):
     slug = models.SlugField(default='', max_length=500, null=True, blank=True)
     status = models.CharField(choices=STATUS,max_length=100,null=True)
     certificate = models.CharField(choices=(('Yes', 'Yes'), ('No', 'No')), max_length=100, default='No')
-    certificate_type = models.CharField(
-        max_length=10,
-        choices=(
-            ('Auto', 'Auto'),
-            ('Manual', 'Manual'),
-        ),
-        default='Auto'
-    )
+    template = models.ImageField(null=True, upload_to="Media/certificate_templates")
     assessment_type = models.CharField(
         choices=(
             ('Day', 'Day'),
@@ -206,6 +200,9 @@ class UserCourse(models.Model):
     # NEW FIELDS
     is_active = models.BooleanField(default=True)  # To cancel/expire subscription
     next_billing_date = models.DateField(null=True, blank=True)
+
+    # CERTIFICATE MANAGEMENT
+    certificate_issued = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.first_name + " - " + self.course.title
@@ -363,3 +360,39 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user} -> {self.course.title}"
+    
+class Certificate(models.Model):
+    user_course = models.ForeignKey(UserCourse, on_delete=models.CASCADE)
+    unique_id = models.CharField(max_length=8, unique=True)
+    randrand = models.CharField(max_length=100)
+    downloaded = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.user_course.user.email + ' - ' + self.user_course.course.title
+
+    def save(self, *args, **kwargs):
+        if self.user_course.course.certificate == 'No':
+            print(f"The certificate for {self.user_course.user.email} - {self.user_course.course.title} could not be issued because the course is not eligible for certification.")
+            return
+
+        if not self.pk:  # Only generate the ID if it's a new instance
+            # Generate the unique ID based on last two digits of the year, month, and serial number
+            now = datetime.now()
+            year = str(now.year)[-2:]  # Last two digits of the year
+            month = str(now.month).zfill(2)  # Zero padding for single digit months
+
+            # Find the highest serial number for the current year and month
+            max_serial = Certificate.objects.filter( unique_id__startswith=year + month ).aggregate(models.Max('unique_id'))['unique_id__max']
+            serial_number = int(max_serial[-4:]) + 1 if max_serial else 1
+
+            # Format the serial number with leading zeros
+            serial_number = str(serial_number).zfill(4)
+            self.unique_id = year + month + serial_number
+            big_random_integer = random.randint(1000000000,9999999999)
+            self.randrand = str(self.user_course.user.first_name).strip()+'-'+str(self.user_course.user.last_name).strip()+'-'+str(big_random_integer)+str(self.unique_id)
+
+            user_course = UserCourse.objects.get(id = self.user_course.id)
+            user_course.certificate_issued = True
+            user_course.save()
+
+        super().save(*args, **kwargs)  # Call the original save method

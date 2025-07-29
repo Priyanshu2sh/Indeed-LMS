@@ -52,8 +52,7 @@ urlpatterns = [
     
     
     path('blog/<int:post_id>/', views.add_blog_comment, name='add_blog_comment'),
-    path('my-certificate/', views.my_certificate, name='my_certificate'),
-    path('certificate-not-found/', views.certificate_not_found, name='certificate_not_found'),
+    path('my-certificates/', views.my_certificates, name='my_certificates'),
     path('certificates/<int:pk>', views.view_certificate, name='view_certificate'),
     path('start_assessment/<int:pk>', views.start_assessment, name='start_assessment'),
     path('wishlist/', views.wishlist_view, name='wishlist'),

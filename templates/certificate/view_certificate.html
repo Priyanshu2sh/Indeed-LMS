@@ -81,7 +81,7 @@
   <div class="position-relative certificate-container">
     <div class="glow-badge">Verified</div>
 
-    <img src="{% static 'assets/img/certificates/certificate1.jpg' %}" alt="Python Certificate" class="certificate-image" />
+    <img src="data:image/png;base64,{{ img_base64 }}" alt="{{user_course.course.title}} Certificate" class="certificate-image" />
 
     <div class="certificate-body text-center">
       <h5 class="certificate-title">Certificate of Completion</h5>
