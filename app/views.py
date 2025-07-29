@@ -654,6 +654,9 @@ def wishlist_view(request):
     return render(request, 'main/wishlist.html', {'wishlist_courses': wishlist_courses})
 
 def add_to_wishlist(request, course_id):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login first!')
+        return redirect('register')
     course = get_object_or_404(Course, id=course_id)
     wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, course=course)
 
