@@ -35,6 +35,12 @@ def HOME(request):
         minutes = total_duration % 60
         formatted_duration = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
         c.total_duration = formatted_duration
+        
+        c.is_wishlist = False
+        if request.user.is_authenticated:
+            wishlist = Wishlist.objects.filter(user=request.user, course=c)
+            if wishlist:
+                c.is_wishlist = True
 
     context = {
         'category':category,
@@ -54,6 +60,12 @@ def SINGLE_COURSE(request):
         minutes = total_duration % 60
         formatted_duration = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
         c.total_duration = formatted_duration
+        
+        c.is_wishlist = False
+        if request.user.is_authenticated:
+            wishlist = Wishlist.objects.filter(user=request.user, course=c)
+            if wishlist:
+                c.is_wishlist = True
 
     FreeCourse_count = Course.objects.filter(price = 0).count()
     PaidCourse_count = Course.objects.filter(price__gte = 1).count()
@@ -648,6 +660,9 @@ def wishlist_view(request):
     return render(request, 'main/wishlist.html', {'wishlist_courses': wishlist_courses})
 
 def add_to_wishlist(request, course_id):
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login first!')
+        return redirect('register')
     course = get_object_or_404(Course, id=course_id)
     wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, course=course)
 
