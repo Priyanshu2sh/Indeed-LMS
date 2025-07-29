@@ -1,4 +1,6 @@
+import base64
 from collections import defaultdict
+from io import BytesIO
 from time import time
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -12,6 +14,7 @@ from django.db.models import Count
 from django.conf.urls import handler404
 import json
 from datetime import datetime, timedelta
+from .generate_certificate import generate_custom_certificate
 
 import razorpay
 from LMS.settings import *
@@ -378,84 +381,84 @@ def WATCH_COURSE(request, slug):
         return redirect('404')
 
     lecture = request.GET.get('lecture')
-    next = request.GET.get('next')
+    next_param = request.GET.get('next')
     previous = request.GET.get('previous')
     is_first_video = False
     is_last_video = False
 
-    # Get all completed video serial numbers for the current user and course
-    completed_videos = VideoProgress.objects.filter(
-        user=request.user,
-        video__course=course,
-        completed=True
-    ).values_list('video__serial_number', flat=True)
-
+    # Fallback to lecture 1
     if lecture:
-        check_lecture = max(1, int(lecture) - 1)
-        prev_video = Video.objects.filter(serial_number=check_lecture, course=course).first()
+        lecture = int(lecture)
+    elif next_param:
+        lecture = int(next_param) + 1
+    elif previous:
+        lecture = int(previous) - 1
+    else:
+        lecture = 1
+
+    # Get completed video serials
+    completed_serials = list(
+        VideoProgress.objects.filter(
+            user=request.user,
+            video__course=course,
+            completed=True
+        ).values_list('video__serial_number', flat=True)
+    )
+
+    all_video_serials = list(
+        Video.objects.filter(course=course).values_list('serial_number', flat=True)
+    )
+
+    if lecture == 1:
+        is_first_video = True
+        if max(all_video_serials) == lecture:
+            is_last_video = True
+
+    # Prevent skipping — check previous video progress (for lecture & next clicks)
+    if lecture > 1:
+        prev_video = Video.objects.filter(serial_number=lecture - 1, course=course).first()
         prev_progress = VideoProgress.objects.filter(user=request.user, video=prev_video).first()
         if not prev_progress or not prev_progress.completed:
-            messages.error(request, 'Please complete videos in sequence fully before moving to the next.')
+            messages.error(request, 'Please complete previous videos fully before moving ahead.')
             return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    if lecture is None:
-        lecture = 1
-    else:
-        lecture = int(lecture)
+        is_first_video = prev_video.serial_number == 1
+        last_video = Video.objects.filter(course=course).order_by('-serial_number').first()
+        is_last_video = last_video and prev_video.id == last_video.id
 
-    if next:
-        next_video = Video.objects.filter(serial_number=int(next), course=course).first()
-        if not next_video:
-            messages.error(request, 'Next video does not exist.')
-            return redirect(request.META.get('HTTP_REFERER', '/'))
+        # ⚠️ Check if all videos completed and current video is last
+        last_video_progress = VideoProgress.objects.filter(video=last_video, user=request.user).first()
 
-        progress = VideoProgress.objects.filter(user=request.user, video=next_video).first()
-        if not progress or not progress.completed:
-            messages.error(request, 'Please complete current video fully before moving to the next.')
-            return redirect(request.META.get('HTTP_REFERER', '/'))
+        if (
+            set(all_video_serials) == set(completed_serials) and
+            prev_video == last_video and
+            last_video_progress and last_video_progress.completed
+        ):
+            user_course = UserCourse.objects.filter(user=request.user, course=course).first()
+            if user_course and not user_course.completed:
+                user_course.completed = True
+                user_course.save()
 
-        lecture = int(next) + 1
+                # Create certificate if not exists
+                certificate, created = Certificate.objects.get_or_create(user_course=user_course)
+                if created:
+                    generate_custom_certificate(certificate.pk)
 
-    if previous:
-        lecture = int(previous) - 1
+                messages.success(request, f'🎉 Congratulations! Your "{course.title}" course is now marked as completed!')
+                return redirect('my_course')
 
+            if user_course and user_course.completed:
+                return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+    # Load the video to be played
     video = Video.objects.filter(serial_number=lecture, course=course).first()
+
     if not video:
         messages.error(request, 'This video does not exist.')
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
-    last_video = Video.objects.filter(course=course).order_by('-serial_number').first()
-    if last_video and video:
-        is_last_video = video.id == last_video.id
-    is_first_video = video.serial_number == 1
-
-    # ✅ Check if all videos in course are completed
-    all_video_serials = list(Video.objects.filter(course=course).values_list('serial_number', flat=True))
-    completed_serials = list(completed_videos)
-    
-    last_video_progress = VideoProgress.objects.filter(video=last_video, user=request.user).first()
-    
-    # Check if all course videos are completed AND user is currently on last video
-    if (
-        set(all_video_serials) == set(completed_serials) and
-        last_video == video and
-        last_video_progress and last_video_progress.completed
-    ):
-        user_course = UserCourse.objects.filter(user=request.user, course=course).first()
-        if user_course and not user_course.completed:
-            user_course.completed = True
-            user_course.save()
-            messages.success(request, f'🎉 Congratulations! Your "{course.title}" course is now marked as completed!')
-            return redirect('my_course')
-
-    # Ensure the current video is also marked completed
-
-    if next and set(all_video_serials) == set(completed_serials) and last_video==video and last_video_progress and last_video_progress.completed:
-        messages.success(request, f'🎉 Congratulations! your {course.title} course is completed.')
-        return redirect('my_course')
-
-    comments = Comments.objects.filter(video=video, rating__in=[4, 4.5, 5]).order_by('-date')
-
+    # Handle review form POST
     if request.method == 'POST':
         if not (request.user.first_name and request.user.last_name):
             messages.error(request, 'Please complete your profile before leaving a review.')
@@ -474,13 +477,15 @@ def WATCH_COURSE(request, slug):
         )
         messages.success(request, 'Comment added successfully!')
 
+    comments = Comments.objects.filter(video=video, rating__in=[4, 4.5, 5]).order_by('-date')
+
     context = {
         'course': course,
         'video': video,
         'comments': comments,
         'is_first_video': is_first_video,
         'is_last_video': is_last_video,
-        'completed_videos': completed_videos,
+        'completed_videos': completed_serials,
     }
     return render(request, 'course/watch-course.html', context)
 
@@ -510,12 +515,8 @@ def save_video_progress(request):
 
         if completed:
             if video_duration:
-                print('video duration:', video_duration)
                 min_required_time = video_duration / 2
-                print('min required duration:', min_required_time)
-                print(progress.watched_seconds)
-                print(progress.watched_seconds >= min_required_time)
-
+                
                 if progress.watched_seconds >= min_required_time:
                     progress.completed = True
                 else:
@@ -546,7 +547,7 @@ def blog_detail(request, pk):
     tags = Tag.objects.filter(post=post)
     comments = PostComments.objects.filter(post=post).order_by('-date')
     other_posts = Post.objects.all().exclude(id=post.id)[:5]
-    return render(request, 'main/home_content/blog_details.html', {'post': post, "tags": tags, "comments": comments, "other_posts":other_posts})
+    return render(request, 'main/blog_details.html', {'post': post, "tags": tags, "comments": comments, "other_posts":other_posts})
 
 
 from django.contrib.auth.decorators import login_required
@@ -579,19 +580,24 @@ def add_blog_comment(request, post_id):
         return redirect('blog_detail', pk=post.id)
     
  
-def my_certificate(request):
+def my_certificates(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login first!')
         return redirect('register')
-    user_course = UserCourse.objects.filter(user=request.user, completed=True)
-    return render(request, 'main/my_certificate.html', {'user_course': user_course})
-
-def certificate_not_found(request):
-    return render(request, 'main/certificate_not_found.html')
+    user_course = UserCourse.objects.filter(user=request.user, completed=True, certificate_issued=True)
+    return render(request, 'certificate/my_certificate.html', {'user_course': user_course})
     
 def view_certificate(request, pk):
     user_course = UserCourse.objects.get(id=pk)
-    return render(request, 'main/view_certificate.html', {'user_course': user_course})
+    certificate = Certificate.objects.get(user_course=user_course)
+    img = generate_custom_certificate(certificate.pk)
+
+    # Convert to base64
+    buffer = BytesIO()
+    img.save(buffer, format='PNG')  # or 'JPEG' if that's your format
+    img_base64 = base64.b64encode(buffer.getvalue()).decode()
+
+    return render(request, 'certificate/view_certificate.html', {'user_course': user_course, "certificate": certificate, 'img_base64': img_base64})
     
 @login_required
 def start_assessment(request, pk):
