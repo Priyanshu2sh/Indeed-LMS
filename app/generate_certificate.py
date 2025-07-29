@@ -41,9 +41,6 @@ def generate_custom_certificate(certificate):
 
     # Draw the QR code on the original image
 
-
-    print(BASE_DIR)
-
     # opens the image
     img = Image.open(data["template"])
 
@@ -112,7 +109,7 @@ def generate_custom_certificate(certificate):
     # saves the image in png format
     # img.save(BASE_DIR / 'certificates/{}.png'.format(data["name"])) 
     # img.save(BASE_DIR / 'certificates/{}.png'.format(name)) 
-    print("## image generated ##")
+
     # certificate.certificate = img
     # certificate.save()
     return img
