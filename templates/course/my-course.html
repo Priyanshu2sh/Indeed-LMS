@@ -328,7 +328,7 @@ tsParticles.load("tsparticles", {
         <div class="d-xl-flex align-items-center">
             <p class="mb-xl-0">We found <span class="text-dark">{{course|length}} courses</span> available for you</p>
             <div class="ms-xl-auto d-xl-flex flex-wrap">
-                <div class="mb-4 mb-xl-0 ms-xl-6">
+                <div class="mb-4 mb-xl-0 ms-xl-6 me-xl-4">
                     <!-- Search -->
                     <form class="">
                         <div class="input-group input-group-filter">
@@ -347,7 +347,7 @@ tsParticles.load("tsparticles", {
                     </form>
                 </div>
 
-                <div class="mb-4 mb-xl-0 ms-xl-6">
+                <div class="mb-4 mb-xl-0 ms-xl-0 me-2">
                     <select class="form-select form-select-sm text-dark shadow-none dropdown-menu-end" data-choices>
                         <option>All Categories</option>
                         {% for c in category %}
@@ -356,17 +356,18 @@ tsParticles.load("tsparticles", {
                     </select>
                 </div>
 
-                <div class="mb-4 mb-xl-0 ms-xl-6">
-                    <div class="border rounded d-flex align-items-center px-3 py-1" style="height: auto; ">
-                    <span class="me-2" style="margin-left: 10%;">Sort by:</span>
+            
+                <!-- Right (Sort Dropdown) -->
+                <div class="d-flex align-items-center gap-2 mt-4 mt-lg-0">
+                <label for="sortSelect" class="text-dark fw-semibold mb-0">Sort by:</label>
+                <select id="sortSelect"
+                        class="form-select form-select-sm bg-white text-dark border rounded-2 px-3 py-2 stylish-dropdown">
+                    <option value="default">Default</option>
+                    <option value="low">Price Low to High</option>
+                    <option value="high">Price High to Low</option>
+                </select>
+                </div>
 
-                        <select class="form-select form-select-sm text-dark border-0 bg-transparent shadow-none" style="width: auto;">
-                        <option>Default</option>
-                        <option>Price Low to High</option>
-                        <option>Price High to low</option>
-                        </select>
-                    </div>
-                    </div>
 
             </div>
         </div>
