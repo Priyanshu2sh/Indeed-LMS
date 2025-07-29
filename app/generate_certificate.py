@@ -2,6 +2,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 import qrcode
 from .models import Certificate
+from django.conf import settings
 
 import base64
 from io import BytesIO
@@ -11,15 +12,21 @@ BASE_DIR = Path(__file__).resolve().parent
 
 
 
-def generate_custom_certificate(pk):
+def generate_custom_certificate(certificate):
 
-    certificate = Certificate.objects.get(pk=pk)
+    certificate = Certificate.objects.get(pk=certificate.pk)
+
+    if settings.ENVIRONMENT == 'Local':
+        url = "127.0.0.1:8000/certification/"+certificate.randrand,
+    elif settings.ENVIRONMENT == 'Server':
+        url = "indeedinspiring.com/lms/certification/"+certificate.randrand,
+    
     
     data = {
     "name": certificate.user_course.user.first_name +' '+ certificate.user_course.user.last_name ,
     "id": str(certificate.unique_id),
     "template": certificate.user_course.course.template,
-    "url": "indeedinspiring.com/lms/certification/"+certificate.randrand,
+    "url": url
     }
     # Generate the QR code
     qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=4, border=2)

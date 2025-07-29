@@ -166,13 +166,13 @@
         .then(response => response.json())
         .then(data => {
             const options = {
-                "key": "rzp_test_YGFEIyqabOGDP2",
+                "key": "{{razorpay_key_id}}",
                 "amount": data.amount,
                 "currency": "INR",
                 "name": "Indeed Inspiring Online Course",
                 "description": "Payment For " + data.course_title,
                 "order_id": data.order_id,
-                "callback_url": "http://127.0.0.1:8000/verify_payment",
+                "callback_url": "{{callback_url}}",
                 "prefill": {
                     "name": data.notes.name,
                     "email": data.notes.email,

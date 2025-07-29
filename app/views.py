@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.shortcuts import redirect, render
 from app.models import *
 from django.template.loader import render_to_string
-from django.http import JsonResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
@@ -246,6 +246,12 @@ def CHECKOUT(request,slug):
     course = Course.objects.get(slug = slug)
     action = request.GET.get('action')
     order = None
+    razorpay_key_id = settings.RAZORPAY_KEY_ID
+    if settings.ENVIRONMENT == 'Local':
+        callback_url = "http://127.0.0.1:8000/verify_payment"
+    if settings.ENVIRONMENT == 'Server':
+        callback_url = "http://127.0.0.1:8000/verify_payment"
+
     if course.price == 0:
         usercourse = UserCourse(
             user = request.user,
@@ -299,6 +305,8 @@ def CHECKOUT(request,slug):
     context = {
         'course': course,
         'order': order,
+        'razorpay_key_id': razorpay_key_id,
+        'callback_url': callback_url,
 
     }
     return render(request,'checkout/checkout.html', context)
@@ -454,7 +462,7 @@ def WATCH_COURSE(request, slug):
                 # Create certificate if not exists
                 certificate, created = Certificate.objects.get_or_create(user_course=user_course)
                 if created:
-                    generate_custom_certificate(certificate.pk)
+                    generate_custom_certificate(certificate)
 
                 messages.success(request, f'🎉 Congratulations! Your "{course.title}" course is now marked as completed!')
                 return redirect('my_course')
@@ -602,7 +610,7 @@ def my_certificates(request):
 def view_certificate(request, pk):
     user_course = UserCourse.objects.get(id=pk)
     certificate = Certificate.objects.get(user_course=user_course)
-    img = generate_custom_certificate(certificate.pk)
+    img = generate_custom_certificate(certificate)
 
     # Convert to base64
     buffer = BytesIO()
@@ -674,3 +682,24 @@ def remove_from_wishlist(request, course_id):
     Wishlist.objects.filter(user=request.user, course_id=course_id).delete()
     messages.success(request, 'Course removed from wishlist.')
     return redirect('wishlist')
+
+def display_certificate(request, randrand):
+    try:
+        certificate = get_object_or_404(Certificate, randrand=randrand)
+        
+        # if certificate.course.certification_date is None:
+        #     raise TypeError("Error: Certification date missing")
+        
+        generated_image = generate_custom_certificate(certificate)
+
+        buffer = BytesIO()
+        generated_image.save(buffer, format='PNG')
+        buffer.seek(0)
+        
+        return FileResponse(buffer, content_type='image/png')
+    except Exception as e:
+        return HttpResponse(f"""
+        <div style="text-align:center;margin:30px;">
+        <p style="font-size:24px;">Certificate Not Found.</p>
+        <p>{e}</p>
+        </div>""")
