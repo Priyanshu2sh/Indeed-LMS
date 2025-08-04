@@ -266,7 +266,7 @@
                         </div>
                         {% endif %}
                         {% if check_enroll is None %}
-                        <a class="btn btn-primary btn-block mb-3" href="/checkout/{{course.slug}}">ENROLL</a>
+                        <a class="btn btn-primary btn-block mb-3" href="{% url 'checkout' course.slug %}">ENROLL</a>
                         {% else %}
                         <button class="btn btn-primary btn-block mb-3" type="button" name="button" disabled>ALREADY ENROLLED</button>
                         {% endif %}

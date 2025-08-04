@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% load static %}
+{% block content %}
+<style>
+    .shape-left {
+        left: 0;
+        max-width: 0;
+        overflow: hidden;
+        }
+</style>
+<section class="py-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="mb-4">Cancellation and Refund Policy</h2>
+        <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
+
+        <p>We understand that plans may change. Below are our policies regarding cancellations and refunds:</p>
+
+        <h5 class="mt-4">1. Training Programs / Workshops</h5>
+        <ul class="ps-3">
+            <li>Cancellation requests made at least 7 days before the start of the program are eligible for a full refund.</li>
+            <li>No refunds will be provided for cancellations made less than 7 days before program start.</li>
+        </ul>
+
+        <h5 class="mt-4">2. Online Courses / Digital Products</h5>
+        <p>Once accessed or downloaded, these are non-refundable unless there is a proven technical issue.</p>
+
+        <h5 class="mt-4">3. Internship Enrollments</h5>
+        <p>Any paid fees for internship processing are non-refundable once the process has begun.</p>
+
+        <h5 class="mt-4">4. How to Request a Refund</h5>
+        <p>Email us at <a href="mailto:info@indeedinspiring.com" class="text-decoration-underline text-light">info@indeedinspiring.com</a> with your name, course details, and payment reference.</p>
+    </div>
+</section>
+{% endblock %}

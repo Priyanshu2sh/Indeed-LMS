@@ -61,5 +61,10 @@ urlpatterns = [
     path('certification/<str:randrand>', views.display_certificate, name='display_certificate'),
     path('wishlist/ajax-toggle/', views.toggle_wishlist_ajax, name='toggle_wishlist_ajax'),
 
+    path('terms-and-conditions/', views.terms_and_conditions, name='terms_and_conditions'),
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+    path('cancellation-refund/', views.cancellation_refund, name='cancellation_refund'),
+    path('shipping-exchange/', views.shipping_exchange, name='shipping_exchange'),
+
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
