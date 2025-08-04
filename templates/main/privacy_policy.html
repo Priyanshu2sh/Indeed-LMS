@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% load static %}
+{% block content %}
+<style>
+    .shape-left {
+        left: 0;
+        max-width: 0;
+        overflow: hidden;
+        }
+</style>
+<section class="py-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="mb-4">Privacy Policy</h2>
+        <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
+
+        <p>At Indeed Inspiring Infotech, your privacy is important to us. This Privacy Policy describes how we collect, use, and protect your personal information.</p>
+
+        <h5 class="mt-4">1. Information We Collect</h5>
+        <ul class="ps-3">
+            <li>Name, email address, phone number, educational details, and resume (if applying for internship or job-related services)</li>
+            <li>Browsing data through cookies and analytics tools</li>
+        </ul>
+
+        <h5 class="mt-4">2. Use of Information</h5>
+        <ul class="ps-3">
+            <li>To provide services (e.g., enroll you in a course or internship)</li>
+            <li>To send important communications regarding your engagement with us</li>
+            <li>To improve our website and user experience</li>
+        </ul>
+
+        <h5 class="mt-4">3. Sharing of Information</h5>
+        <p>We do not sell your data. Information may be shared with our internal teams or verified partners only for service delivery.</p>
+
+        <h5 class="mt-4">4. Data Security</h5>
+        <p>We use industry-standard security measures to protect your data. However, no method of transmission over the internet is 100% secure.</p>
+
+        <h5 class="mt-4">5. Your Rights</h5>
+        <p>You may access, update, or request deletion of your personal data by contacting us at: 
+            <a href="mailto:info@indeedinspiring.com" class="text-decoration-underline text-light">info@indeedinspiring.com</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

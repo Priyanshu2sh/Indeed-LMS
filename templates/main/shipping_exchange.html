@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% load static %}
+{% block content %}
+<style>
+    .shape-left {
+        left: 0;
+        max-width: 0;
+        overflow: hidden;
+        }
+</style>
+<section class="py-5 bg-dark text-light">
+    <div class="container">
+        <h2 class="mb-4">Shipping and Exchange Policy</h2>
+        <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
+
+        <p>This policy applies if we offer any physical goods like course kits, merchandise, or certificates.</p>
+
+        <h5 class="mt-4">1. Shipping</h5>
+        <ul class="ps-3">
+            <li>Orders are shipped within 5–10 business days via reliable courier services.</li>
+            <li>Shipping charges (if any) are mentioned at checkout.</li>
+        </ul>
+
+        <h5 class="mt-4">2. Exchange</h5>
+        <p>Damaged or defective items can be exchanged within 7 days of receipt. To request an exchange, email us with a photo of the damage and invoice details.</p>
+
+        <h5 class="mt-4">3. Digital Products</h5>
+        <p>No shipping applicable. Access is provided via email or LMS login.</p>
+    </div>
+</section>
+{% endblock %}

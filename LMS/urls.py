@@ -59,5 +59,10 @@ urlpatterns = [
     path('wishlist/add/<int:course_id>/', views.add_to_wishlist, name='add_to_wishlist'),
     path('wishlist/remove/<int:course_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
     path('certification/<str:randrand>', views.display_certificate, name='display_certificate'),
+    path('terms-and-conditions/', views.terms_and_conditions, name='terms_and_conditions'),
+    path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
+    path('cancellation-refund/', views.cancellation_refund, name='cancellation_refund'),
+    path('shipping-exchange/', views.shipping_exchange, name='shipping_exchange'),
+
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

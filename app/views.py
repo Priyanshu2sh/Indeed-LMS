@@ -703,3 +703,16 @@ def display_certificate(request, randrand):
         <p style="font-size:24px;">Certificate Not Found.</p>
         <p>{e}</p>
         </div>""")
+
+
+def terms_and_conditions(request):
+    return render(request, 'main/terms_and_conditions.html')
+
+def privacy_policy(request):
+    return render(request, 'main/privacy_policy.html')
+
+def cancellation_refund(request):
+    return render(request, 'main/cancellation_refund.html')
+
+def shipping_exchange(request):
+    return render(request, 'main/shipping_exchange.html')
