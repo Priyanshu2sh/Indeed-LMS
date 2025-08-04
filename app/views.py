@@ -53,8 +53,20 @@ def HOME(request):
 def SINGLE_COURSE(request):
     category = Categories.get_all_category(Categories)
     level = Level.objects.all()
-    course = Course.objects.all().order_by('-id')
+    # course = Course.objects.all().order_by('-id')
+    
+    sort_option = request.GET.get('sort', 'default')
+    
+    if sort_option == 'low':
+        course = Course.objects.all().order_by('price')
+    elif sort_option == 'high':
+        course = Course.objects.all().order_by('-price')
+    else:
+        course = Course.objects.all().order_by('-id')  # Default newest first
+    
+    
     for c in course:
+        print(c.price)
         total_duration = Video.objects.filter(course=c).aggregate(total=Sum('time_duration'))['total'] or 0
         hours = total_duration // 60
         minutes = total_duration % 60
@@ -311,25 +323,50 @@ def CHECKOUT(request,slug):
     }
     return render(request,'checkout/checkout.html', context)
 
-
 def MY_COURSE(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login first')
         return redirect('register')
 
-    category = Categories.objects.all().order_by('id')
-    course = UserCourse.objects.filter(user = request.user)
-    for c in course:
+    selected_category = request.GET.get('category')
+    search_query = request.GET.get('search', '').strip()
+
+    # All enrolled courses
+    all_user_courses = UserCourse.objects.filter(user=request.user).select_related('course')
+    print("Total enrolled:", all_user_courses.count())
+
+    # Get enrolled course categories
+    category_ids = all_user_courses.values_list('course__category__id', flat=True).distinct()
+    category = Categories.objects.filter(id__in=category_ids).order_by('id')
+
+    # Apply combined filters
+    if selected_category and selected_category.isdigit():
+        all_user_courses = all_user_courses.filter(course__category__id=selected_category)
+        print("After category filter:", all_user_courses.count())
+
+    if search_query:
+        print("Search query:", search_query)
+        all_user_courses = all_user_courses.filter(course__title__icontains=search_query)
+        print("After search filter:", all_user_courses.count())
+
+    # Debug enrolled course titles
+    for uc in all_user_courses:
+        print("Matched course title:", uc.course.title)
+
+    # Add total duration
+    for c in all_user_courses:
         total_duration = Video.objects.filter(course=c.course).aggregate(total=Sum('time_duration'))['total'] or 0
         hours = total_duration // 60
         minutes = total_duration % 60
-        formatted_duration = f"{hours}h {minutes}m" if hours > 0 else f"{minutes}m"
-        c.total_duration = formatted_duration
+        c.total_duration = f"{hours}h {minutes}m" if hours else f"{minutes}m"
 
     context = {
-        'course':course,
-        'category':category,
+        'course': all_user_courses,
+        'category': category,
+        'selected_category': int(selected_category) if selected_category and selected_category.isdigit() else None,
+        'search_query': search_query,
     }
+
     return render(request, 'course/my-course.html', context)
 
 @csrf_exempt
@@ -459,8 +496,10 @@ def WATCH_COURSE(request, slug):
                 user_course.completed = True
                 user_course.save()
 
+                print('qqqqqq')
                 # Create certificate if not exists
                 certificate, created = Certificate.objects.get_or_create(user_course=user_course)
+                print('aaaaaaaaaaaa')
                 if created:
                     generate_custom_certificate(certificate)
 
@@ -479,10 +518,9 @@ def WATCH_COURSE(request, slug):
         return redirect(request.META.get('HTTP_REFERER', '/'))
 
     # Handle review form POST
-    if request.method == 'POST':
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         if not (request.user.first_name and request.user.last_name):
-            messages.error(request, 'Please complete your profile before leaving a review.')
-            return redirect('profile')
+            return JsonResponse({'status': 'error', 'message': 'Please complete your profile before leaving a review.'})
 
         rating = request.POST.get('rating')
         title = request.POST.get('title')
@@ -495,7 +533,7 @@ def WATCH_COURSE(request, slug):
             title=title,
             content=content
         )
-        messages.success(request, 'Comment added successfully!')
+        return JsonResponse({'status': 'success', 'message': 'Comment added successfully!'})
 
     comments = Comments.objects.filter(video=video, rating__in=[4, 4.5, 5]).order_by('-date')
 
@@ -682,6 +720,21 @@ def remove_from_wishlist(request, course_id):
     Wishlist.objects.filter(user=request.user, course_id=course_id).delete()
     messages.success(request, 'Course removed from wishlist.')
     return redirect('wishlist')
+
+
+
+
+@login_required
+def toggle_wishlist_ajax(request):
+    course_id = request.POST.get('course_id')
+    course = get_object_or_404(Course, id=course_id)
+    wishlist_item, created = Wishlist.objects.get_or_create(user=request.user, course=course)
+
+    if not created:
+        wishlist_item.delete()
+        return JsonResponse({'status': 'removed'})
+    return JsonResponse({'status': 'added'})
+
 
 def display_certificate(request, randrand):
     try:

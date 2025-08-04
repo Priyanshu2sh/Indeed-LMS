@@ -59,5 +59,7 @@ urlpatterns = [
     path('wishlist/add/<int:course_id>/', views.add_to_wishlist, name='add_to_wishlist'),
     path('wishlist/remove/<int:course_id>/', views.remove_from_wishlist, name='remove_from_wishlist'),
     path('certification/<str:randrand>', views.display_certificate, name='display_certificate'),
+    path('wishlist/ajax-toggle/', views.toggle_wishlist_ajax, name='toggle_wishlist_ajax'),
+
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

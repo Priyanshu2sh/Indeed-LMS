@@ -38,6 +38,30 @@
   overflow: hidden;
 }
 
+.animated-header {
+  animation: fadeInUp 1.2s ease-out both;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wave-svg-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  line-height: 0;
+}
+
+
     </style>
 
 <script>
@@ -68,10 +92,9 @@
         });
     });
     </script>
-
 <!-- COURSES SECTION HEADER -->
 <header class="py-12 py-md-14 text-white text-center position-relative"
-        style="background: linear-gradient(135deg, #1e293b 0%, #38bdf8 100%), url('{% static 'assets/img/illustrations/illustration-courses.svg' %}') no-repeat center bottom / contain; overflow: hidden;">
+        style="background: linear-gradient(135deg, #1e293b 0%, #38bdf8 100%),  url('{% static 'assets/img/illustrations/illustration-courses.svg' %}') no-repeat center bottom / contain; overflow: hidden;">
 
   <!-- Optional blur overlay -->
   <div class="blur-overlay"></div>
@@ -99,7 +122,7 @@
     </nav>
   </div>
 
-  <!-- Decorative SVG wave at bottom -->
+  <!-- Decorative SVG wave -->
   <div class="wave-svg-bottom">
     <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg">
       <path fill="#ffffff" fill-opacity="1"
@@ -121,15 +144,19 @@
     </p>
 
     <!-- Right (Sort Dropdown) -->
-    <div class="d-flex align-items-center gap-3 mt-4 mt-lg-0">
-  <label for="sortSelect" class="text-dark fw-semibold mb-0 " style="margin-left:-40%;">Sort by:</label>
-  <select id="sortSelect"
-          class="form-select form-select-sm bg-white text-dark border rounded-2 px-3 py-2 stylish-dropdown">
-    <option value="default">Default</option>
-    <option value="low">Price Low to High</option>
-    <option value="high">Price High to Low</option>
-  </select>
+<div class="d-flex align-items-center gap-3 mt-4 mt-lg-0">
+  <label for="sortSelect" class="text-dark fw-semibold mb-0" style="margin-left:-40%;">Sort by:</label>
+  <form method="get" id="sortForm">
+    <select name="sort" id="sortSelect"
+            class="form-select form-select-sm bg-white text-dark border rounded-2 px-3 py-2 stylish-dropdown"
+            onchange="document.getElementById('sortForm').submit();">
+      <option value="default" {% if request.GET.sort == 'default' or not request.GET.sort %}selected{% endif %}>Default</option>
+      <option value="low" {% if request.GET.sort == 'low' %}selected{% endif %}>Price Low to High</option>
+      <option value="high" {% if request.GET.sort == 'high' %}selected{% endif %}>Price High to Low</option>
+    </select>
+  </form>
 </div>
+
 
 
   </div>
@@ -271,13 +298,13 @@
         <path d="M8.9999 5.43958C7.03671 5.43958 5.43945 7.03683 5.43945 9.00003C5.43945 10.9632 7.03671 12.5605 8.9999 12.5605C10.9631 12.5605 12.5603 10.9632 12.5603 9.00003C12.5603 7.03683 10.9631 5.43958 8.9999 5.43958ZM8.9999 11.3736C7.69103 11.3736 6.62629 10.3089 6.62629 9.00003C6.62629 7.6912 7.69107 6.62642 8.9999 6.62642C10.3087 6.62642 11.3735 7.6912 11.3735 9.00003C11.3735 10.3089 10.3088 11.3736 8.9999 11.3736Z" fill="currentColor"/>
       </svg>
     </a> {% endcomment %}
+<a href="javascript:void(0);"
+   class="wishlist-toggle-btn badge badge-lg badge-rounded-circle font-size-base badge-float badge-float-inside top-0 left-60 p-2 d-inline-flex text-white justify-content-center align-items-center w-36 h-36
+          {% if i.is_wishlist %}bg-danger{% else %}badge-secondary{% endif %}"
+   data-course-id="{{ i.id }}">
+    <i class="{% if i.is_wishlist %}fas{% else %}far{% endif %} fa-heart wishlist-icon"></i>
+</a>
 
-          <a href="{% url 'add_to_wishlist' i.id %}" 
-        class="badge badge-lg badge-rounded-circle font-size-base badge-float badge-float-inside top-0 left-60 p-2 d-inline-flex text-white justify-content-center align-items-center w-36 h-36 
-                {% if i.is_wishlist %}bg-danger{% else %}badge-secondary{% endif %}">
-      <i class="{% if i.is_wishlist %}fas{% else %}far{% endif %} fa-heart"></i>
- </a>
- 
  </div>
     
 
@@ -393,5 +420,46 @@
             </div>
         </div>
     </div>
+
+
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+$(document).ready(function() {
+    $('.wishlist-toggle-btn').click(function(e) {
+        e.preventDefault();
+        const btn = $(this);
+        const courseId = btn.data('course-id');
+
+        $.ajax({
+            url: "{% url 'toggle_wishlist_ajax' %}",  // Make sure this name is in urls.py
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            },
+            data: {
+                'course_id': courseId
+            },
+            success: function(response) {
+                const icon = btn.find('.wishlist-icon');
+                if (response.status === 'added') {
+                    btn.removeClass('badge-secondary').addClass('bg-danger');
+                    icon.removeClass('far').addClass('fas');
+                } else if (response.status === 'removed') {
+                    btn.removeClass('bg-danger').addClass('badge-secondary');
+                    icon.removeClass('fas').addClass('far');
+                }
+            },
+            error: function(xhr) {
+                alert("Something went wrong: " + xhr.status);
+            }
+        });
+    });
+});
+</script>
+
 
 {% endblock %}

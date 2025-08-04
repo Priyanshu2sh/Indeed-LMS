@@ -88,40 +88,45 @@
 .commentSwiper {
   padding-bottom: 30px;
 }
-  /* Hide default checkbox */
-  .custom-checkbox input[type="checkbox"] {
-    display: none;
-  }
 
-  /* Custom checkbox box */
-  .custom-checkbox label {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background-color: #fff;
-    border: 2px solid #28a745; /* Green border */
-    border-radius: 4px;
-    position: relative;
-    cursor: not-allowed; /* readonly effect */
-    margin-right: 5px;
-  }
 
-  /* Checkmark appearance */
-  .custom-checkbox input[type="checkbox"]:checked + label::after {
-    content: '✓';
-    color: white;
-    font-size: 14px;
-    position: absolute;
-    top: -2px;
-    left: -1px;
-  }
+/* Hide default checkbox */
+.custom-checkbox input[type="checkbox"] {
+  display: none;
+}
 
-  /* Checked box background */
-  .custom-checkbox input[type="checkbox"]:checked + label {
-    background-color: #28a745;
-    border-color: #28a745;
-  }
-  .shape-left {
+/* Custom circular checkbox */
+.custom-checkbox label {
+  display: inline-block;
+  width: 39px;
+  height: 25px;
+  background-color: #fff;
+  border: 2px solid #28a745; 
+  border-radius: 50%; 
+  position: relative;
+  cursor: not-allowed;
+  margin-right: 5px;
+  margin-bottom: 5px;
+}
+
+
+.custom-checkbox input[type="checkbox"]:checked + label {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+.custom-checkbox input[type="checkbox"]:checked + label::after {
+  content: '✓';
+  color: white;
+  ont-size: 16px; 
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.shape-left {
   left: 0;
   max-width: 0;
   overflow: hidden;
@@ -231,23 +236,24 @@
                                         <i class="fa fa-youtube-play" aria-hidden="true" style="color: red;"></i>
 
                                     </div>
+
                            <div class="d-flex align-items-center ms-4 mb-2 custom-checkbox">
-  <input type="checkbox"
-    id="video_{{ video.serial_number }}"
-    name="video_checkbox"
-    value="{{ video.serial_number }}"
-    title="{% if video.serial_number in completed_videos %}Completed{% else %}Not completed{% endif %}"
-    {% if video.serial_number in completed_videos %}checked{% endif %}
-    onclick="return false;" />
+                                <input type="checkbox"
+                                    id="video_{{ video.serial_number }}"
+                                    name="video_checkbox"
+                                    value="{{ video.serial_number }}"
+                                    title="{% if video.serial_number in completed_videos %}Completed{% else %}Not completed{% endif %}"
+                                    {% if video.serial_number in completed_videos %}checked{% endif %}
+                                    onclick="return false;" />
 
-  <!-- Custom styled label that shows checkbox look -->
-  <label for="video_{{ video.serial_number }}"></label>
+                                <!-- Custom styled label that shows checkbox look -->
+                                <label for="video_{{ video.serial_number }}"></label>
 
-  <!-- Video title -->
-  <a href="?lecture={{ video.serial_number }}" class="text-decoration-none text-dark ms-1">
-    {{ video.title }}
-  </a>
-</div>
+                                <!-- Video title -->
+                                <a href="?lecture={{ video.serial_number }}" class="text-decoration-none text-dark ms-1">
+                                    {{ video.title }}
+                                </a>
+                                </div>
 
 
                                 </div>
@@ -475,22 +481,28 @@
 </body>
 
 <script src="https://www.youtube.com/iframe_api"></script>
-
 <script>
-  var commentSwiper = new Swiper(".commentSwiper", {
-   slidesPerView: 1,
-        spaceBetween: 30,
-        loop: true,
-        autoplay: {
-        delay: 3000,  // Slide every 3 seconds
-        disableOnInteraction: false, // Keeps auto-play even after interaction
+  document.addEventListener("DOMContentLoaded", function () {
+    new Swiper(".commentSwiper", {
+      slidesPerView: 1,
+      spaceBetween: 30,
+      loop: true,
+      autoplay: {
+        delay: 3000,
+        disableOnInteraction: false,
+      },
+      breakpoints: {
+        768: {
+          slidesPerView: 2,
         },
-        breakpoints: {
-        768: { slidesPerView: 2 },
-        992: { slidesPerView: 3 },
+        992: {
+          slidesPerView: 3,
         },
+      },
+    });
   });
 </script>
+
 
 <script>
     var player;
@@ -595,7 +607,36 @@
 
 </script>
 
-
+<script>
+$(document).ready(function () {
+    $('form').submit(function (e) {
+        e.preventDefault();
+        
+        var form = $(this);
+        var url = window.location.href;
+        
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: form.serialize(),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    alert(response.message);
+                    form.trigger("reset");
+                } else if (response.status === 'error') {
+                    alert(response.message);
+                }
+            },
+            error: function () {
+                alert("Something went wrong. Please try again.");
+            }
+        });
+    });
+});
+</script>
 
 </html>
 

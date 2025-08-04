@@ -106,11 +106,12 @@
                 </h1>
                 <p class="me-xl-13 mb-5">{{course.description|truncatewords:15}}</p>
                 
-<a href="{% url 'add_to_wishlist' course.id %}" 
-   class="badge badge-lg badge-rounded-circle font-size-base badge-float badge-float-inside top-0 text-white 
-          {% if course in wishlist_courses %}bg-danger{% else %}badge-secondary{% endif %}">
-    <i class="{% if course in wishlist_courses %}fas{% else %}far{% endif %} fa-heart"></i>
-</a>
+                <a href="javascript:void(0);"
+                class="wishlist-toggle-btn badge badge-lg badge-rounded-circle font-size-base badge-float badge-float-inside top-0 text-white
+                        {% if course in wishlist_courses %}bg-danger{% else %}badge-secondary{% endif %}"
+                data-course-id="{{ course.id }}">
+                    <i class="{% if course in wishlist_courses %}fas{% else %}far{% endif %} fa-heart wishlist-icon"></i>
+                </a>
 
 
 
@@ -146,7 +147,6 @@
                         </div>
                     </div>
                 </div>
-
 
 <div>
 
@@ -827,5 +827,43 @@
       alert("Your device or browser does not support Bluetooth/Nearby Share.");
     }
   }
+</script>
+
+  <script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+$(document).ready(function() {
+    $('.wishlist-toggle-btn').click(function(e) {
+        e.preventDefault();
+        const btn = $(this);
+        const courseId = btn.data('course-id');
+
+        $.ajax({
+            url: "{% url 'toggle_wishlist_ajax' %}",  // Make sure this name is in urls.py
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            },
+            data: {
+                'course_id': courseId
+            },
+            success: function(response) {
+                const icon = btn.find('.wishlist-icon');
+                if (response.status === 'added') {
+                    btn.removeClass('badge-secondary').addClass('bg-danger');
+                    icon.removeClass('far').addClass('fas');
+                } else if (response.status === 'removed') {
+                    btn.removeClass('bg-danger').addClass('badge-secondary');
+                    icon.removeClass('fas').addClass('far');
+                }
+            },
+            error: function(xhr) {
+                alert("Something went wrong: " + xhr.status);
+            }
+        });
+    });
+});
 </script>
 {% endblock %}
