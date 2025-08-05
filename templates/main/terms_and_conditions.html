@@ -1,38 +1,153 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}Terms and Conditions{% endblock %}
 {% load static %}
+
 {% block content %}
 <style>
-    .shape-left {
+    .policy-wrapper {
+        background-color: #ffffff;
+        padding: 60px 20px;
+        min-height: 100vh;
+    }
+
+    .policy-container {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+        max-width: 1000px;
+        max-height: 90vh;
+        overflow-y: auto;
+        margin: 0 auto;
+        {% comment %} overflow: hidden; {% endcomment %}
+        padding: 30px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .policy-scrollbox {
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 15px;
+        scroll-behavior: smooth;
+    }
+
+    .policy-container h2 {
+        font-size: 24px;
+        font-weight: bold;
+        color: #28a745;
+        border-bottom: 2px solid #28a745;
+        padding-bottom: 12px;
+        margin-bottom: 20px;
+    }
+
+    .policy-container h5 {
+        margin-top: 25px;
+        color: #28a745;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .policy-container p,
+    .policy-container li {
+        color: #343a40;
+        font-size: 20px;
+        line-height: 1.7;
+    }
+
+    .policy-container ul {
+        list-style-type: disc;
+        padding-left: 1.5rem;
+    }
+
+    .agree-button {
+        margin-top: 30px;
+        text-align: center;
+    }
+
+    .agree-button button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .agree-button button:hover {
+        background-color: #20c997;
+        transform: scale(1.05);
+    }
+
+    /* Scrollbar style for webkit */
+    .policy-scrollbox::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .policy-scrollbox::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+
+    .policy-scrollbox::-webkit-scrollbar-thumb:hover {
+        background: #aaa;
+    }
+        .shape-left {
         left: 0;
         max-width: 0;
         overflow: hidden;
-        }
+    }
 </style>
-<section class="py-5 bg-dark text-light">
-    <div class="container">
-        <h2 class="mb-4">Terms and Conditions</h2>
-        <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
 
-        <p>Welcome to IndeedInspiring.com. These Terms and Conditions govern your use of our website and services provided by Indeed Inspiring Infotech (“we”, “our”, or “us”). By accessing this site or using our services, you agree to be bound by these terms.</p>
+<section class="policy-wrapper">
+    <div class="policy-container">
+        <h2>Terms & Conditions</h2>
+        <div class="policy-scrollbox">
+            <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
 
-        <h5 class="mt-4">1. Use of Website</h5>
-        <ul class="ps-3">
-            <li>You must be at least 18 years of age to use this site.</li>
-            <li>You agree not to misuse the website in any way that disrupts its functionality or accesses unauthorized content.</li>
-        </ul>
+            <p>
+                Welcome to <strong>IndeedInspiring.com</strong>. These Terms and Conditions govern your use of our website and services provided by 
+                <strong>Indeed Inspiring Infotech</strong> (“we”, “our”, or “us”). By accessing this site or using our services, you agree to be bound by these terms.
+            </p>
 
-        <h5 class="mt-4">2. Intellectual Property</h5>
-        <p>All content on this website, including text, images, logos, and videos, is the property of Indeed Inspiring Infotech. You may not reproduce, distribute, or create derivative works without our explicit written permission.</p>
+            <h5>1. Use of Website</h5>
+            <ul>
+                <li>You must be at least 18 years of age to use this site.</li>
+                <li>You agree not to misuse the website or attempt unauthorized access.</li>
+            </ul>
 
-        <h5 class="mt-4">3. Services and Products</h5>
-        <p>We offer online and offline training, internships, workshops, and consulting services. Details are provided in respective program sections. Service availability may be subject to location, instructor, or technology limitations.</p>
+            <h5>2. Intellectual Property</h5>
+            <ul>
+                <li>All content on this website (text, images, logos, videos) is owned by <strong>Indeed Inspiring Infotech</strong>.</li>
+                <li>You may not reproduce, distribute, or create derivative works without our explicit written permission.</li>
+            </ul>
 
-        <h5 class="mt-4">4. Limitation of Liability</h5>
-        <p>We are not liable for any indirect, incidental, or consequential damages resulting from the use of our site or services.</p>
+            <h5>3. Services and Products</h5>
+            <ul>
+                <li>We offer online and offline training, internships, workshops, and consulting services.</li>
+                <li>Details are provided in the respective program sections.</li>
+                <li>Service availability may be subject to location, instructor, or technology limitations.</li>
+            </ul>
 
-        <h5 class="mt-4">5. Changes to Terms</h5>
-        <p>We reserve the right to modify these Terms at any time. Continued use of the site after such changes implies acceptance.</p>
+            <h5>4. Limitation of Liability</h5>
+            <ul>
+                <li>We are not liable for any indirect, incidental, or consequential damages resulting from the use of our site or services.</li>
+            </ul>
+
+            <h5>5. Changes to Terms</h5>
+            <ul>
+                <li>We reserve the right to modify these Terms at any time.</li>
+                <li>Continued use of the site after such changes implies your acceptance of the updated Terms.</li>
+            </ul>
+        </div>
+
+        {% comment %} <div class="agree-button">
+            <button onclick="alert('Thank you for agreeing to the Terms and Conditions!')">
+                I Agree
+            </button>
+        </div> {% endcomment %}
     </div>
 </section>
 {% endblock %}

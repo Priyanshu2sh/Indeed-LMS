@@ -1,32 +1,89 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}Shipping & Exchange Policy{% endblock %}
 {% load static %}
 {% block content %}
+
 <style>
+    .policy-container {
+        background: white;
+        color: #f8f9fa;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        line-height: 1.7;
+    }
+
+    .policy-container h2 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        border-bottom: 2px solid #28a745;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        color: #28a745;
+    }
+
+    .policy-container h5 {
+        color: #28a745;
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-top: 30px;
+    }
+
+    .policy-container ul {
+        list-style: disc;
+        margin-left: 1.5rem;
+    }
+
+    .policy-container p,
+    .policy-container li {
+        color: #343a40;
+        font-size: 20px;
+        line-height: 1.7;
+    }
+
+    .policy-container a {
+        color: #28a745;
+        text-decoration: underline;
+    }
+
+    .policy-container a:hover {
+        color: #20c997;
+    }
+
     .shape-left {
         left: 0;
         max-width: 0;
         overflow: hidden;
-        }
+    }
 </style>
-<section class="py-5 bg-dark text-light">
+
+<section class="py-5 bg-white">
     <div class="container">
-        <h2 class="mb-4">Shipping and Exchange Policy</h2>
-        <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
+        <div class="policy-container">
+            <h2>Shipping and Exchange Policy</h2>
+            <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
 
-        <p>This policy applies if we offer any physical goods like course kits, merchandise, or certificates.</p>
+            <p>This policy applies to any physical goods, such as course kits, merchandise, or certificates.</p>
 
-        <h5 class="mt-4">1. Shipping</h5>
-        <ul class="ps-3">
-            <li>Orders are shipped within 5–10 business days via reliable courier services.</li>
-            <li>Shipping charges (if any) are mentioned at checkout.</li>
-        </ul>
+            <h5>1. Shipping</h5>
+            <ul>
+                <li>Orders are shipped within 5–10 business days using reliable courier services.</li>
+                <li>Shipping charges (if any) will be clearly mentioned during the checkout process.</li>
+            </ul>
 
-        <h5 class="mt-4">2. Exchange</h5>
-        <p>Damaged or defective items can be exchanged within 7 days of receipt. To request an exchange, email us with a photo of the damage and invoice details.</p>
+            <h5>2. Exchange</h5>
+            <ul>
+                <li>We accept exchanges for damaged or defective items within 7 days of receipt.</li>
+                <li>To request an exchange, please email us at <a href="mailto:info@indeedinspiring.com">info@indeedinspiring.com</a> with a photo of the item and your invoice details.</li>
+            </ul>
 
-        <h5 class="mt-4">3. Digital Products</h5>
-        <p>No shipping applicable. Access is provided via email or LMS login.</p>
+            <h5>3. Digital Products</h5>
+            <ul>
+                <li>No shipping applicable.</li>
+                <li>Access is provided via email or LMS login.</li>
+            </ul>
+        </div>
     </div>
 </section>
+
 {% endblock %}

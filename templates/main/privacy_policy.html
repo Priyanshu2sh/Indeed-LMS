@@ -1,44 +1,133 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}Privacy Policy{% endblock %}
 {% load static %}
 {% block content %}
+
 <style>
-    .shape-left {
+    .policy-section {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        padding: 60px 0;
+    }
+
+    .policy-container {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+        max-height: 80vh;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #28a745 #f0f0f0;
+    }
+
+    /* Custom scrollbar for WebKit */
+    .policy-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .policy-container::-webkit-scrollbar-track {
+        background: #f0f0f0;
+        border-radius: 10px;
+    }
+
+    .policy-container::-webkit-scrollbar-thumb {
+        background-color: #28a745;
+        border-radius: 10px;
+    }
+
+    .policy-container h2 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        border-bottom: 2px solid #28a745;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        color: #28a745;
+    }
+
+    .policy-container h5 {
+        color: #28a745;
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-top: 30px;
+    }
+
+    .policy-container ul {
+        list-style: disc;
+        margin-left: 1.5rem;
+    }
+
+    .policy-container p,
+    .policy-container li {
+          color: #343a40;
+        font-size: 20px;
+        line-height: 1.7;
+    }
+
+    .policy-container a {
+        color: #28a745;
+        text-decoration: underline;
+    }
+
+    .policy-container a:hover {
+        color: #20c997;
+    }
+            .shape-left {
         left: 0;
         max-width: 0;
         overflow: hidden;
-        }
+    }
 </style>
-<section class="py-5 bg-dark text-light">
+
+<section class="policy-section">
     <div class="container">
-        <h2 class="mb-4">Privacy Policy</h2>
-        <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
+        <div class="policy-container">
+            <h2>Privacy Policy</h2>
+            <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
 
-        <p>At Indeed Inspiring Infotech, your privacy is important to us. This Privacy Policy describes how we collect, use, and protect your personal information.</p>
+            <p>At <strong>Indeed Inspiring Infotech</strong>, your privacy is important to us. This policy outlines how we collect, use, and protect your personal data.</p>
 
-        <h5 class="mt-4">1. Information We Collect</h5>
-        <ul class="ps-3">
-            <li>Name, email address, phone number, educational details, and resume (if applying for internship or job-related services)</li>
-            <li>Browsing data through cookies and analytics tools</li>
-        </ul>
+            <h5>1. Information We Collect</h5>
+            <ul>
+                <li>Name, email address, phone number</li>
+                <li>Educational details and resume (for internship/job services)</li>
+                <li>Browsing data via cookies and analytics tools</li>
+            </ul>
 
-        <h5 class="mt-4">2. Use of Information</h5>
-        <ul class="ps-3">
-            <li>To provide services (e.g., enroll you in a course or internship)</li>
-            <li>To send important communications regarding your engagement with us</li>
-            <li>To improve our website and user experience</li>
-        </ul>
+            <h5>2. Use of Information</h5>
+            <ul>
+                <li>To provide services like course or internship enrollment</li>
+                <li>To send important communications regarding your engagement with us </li>
+                <li>To improve our website and user experience</li>
+            </ul>
 
-        <h5 class="mt-4">3. Sharing of Information</h5>
-        <p>We do not sell your data. Information may be shared with our internal teams or verified partners only for service delivery.</p>
+            <h5>3. Sharing of Information</h5>
+            <ul>
+                <li><strong>We do not sell</strong> your personal information to anyone</li>
+                <li>Information may be shared with our internal teams or verified partners only for service delivery</li>
+            </ul>
 
-        <h5 class="mt-4">4. Data Security</h5>
-        <p>We use industry-standard security measures to protect your data. However, no method of transmission over the internet is 100% secure.</p>
+            <h5>4. Data Security</h5>
+            <ul>
+                <li>We use industry-standard security measures to protect your data</li>
+                <li>However, no method of transmission over the internet is 100% secure.</li>
+            </ul>
 
-        <h5 class="mt-4">5. Your Rights</h5>
-        <p>You may access, update, or request deletion of your personal data by contacting us at: 
-            <a href="mailto:info@indeedinspiring.com" class="text-decoration-underline text-light">info@indeedinspiring.com</a>
-        </p>
+            <h5>5. Your Rights</h5>
+            <ul>
+                <li>You can:
+                    <ul>
+                        <li>Access your personal data</li>
+                        <li>Request updates or corrections</li>
+                        <li>Ask for complete data deletion</li>
+                    </ul>
+                </li>
+                <li>For any requests, write to: 
+                    <a href="mailto:info@indeedinspiring.com">info@indeedinspiring.com</a>
+                </li>
+            </ul>
+
     </div>
 </section>
+
 {% endblock %}

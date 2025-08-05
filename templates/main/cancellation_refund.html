@@ -1,35 +1,95 @@
 {% extends 'base.html' %}
-{% block title %}Home{% endblock %}
+{% block title %}Cancellation & Refund Policy{% endblock %}
 {% load static %}
 {% block content %}
+
 <style>
+    .policy-container {
+         background: white;
+        color: #f8f9fa;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        line-height: 1.7;
+     
+
+    }
+
+    .policy-container h2 {
+        font-size: 2.5rem;
+        font-weight: 600;
+        border-bottom: 2px solid #28a745;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        color: #28a745;
+    }
+
+    .policy-container h5 {
+        color: #28a745;
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-top: 30px;
+    }
+
+    .policy-container ul {
+        list-style: disc;
+        margin-left: 1.5rem;
+    }
+
+    .policy-container p,
+    .policy-container li {
+         color: #343a40;
+        font-size: 20px;
+        line-height: 1.7;
+    }
+
+    .policy-container a {
+        color: #28a745;
+        text-decoration: underline;
+    }
+
+    .policy-container a:hover {
+        color: #20c997;
+    }
+
     .shape-left {
         left: 0;
         max-width: 0;
         overflow: hidden;
-        }
+    }
 </style>
-<section class="py-5 bg-dark text-light">
+
+<section class="py-5 bg-white">
     <div class="container">
-        <h2 class="mb-4">Cancellation and Refund Policy</h2>
-        <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
+        <div class="policy-container">
+            <h2>Cancellation and Refund Policy</h2>
+            <p class="text-muted"><strong>Effective Date:</strong> 1 August 2025</p>
 
-        <p>We understand that plans may change. Below are our policies regarding cancellations and refunds:</p>
+            <p>We understand that plans may change. Below are our policies regarding cancellations and refunds:</p>
 
-        <h5 class="mt-4">1. Training Programs / Workshops</h5>
-        <ul class="ps-3">
-            <li>Cancellation requests made at least 7 days before the start of the program are eligible for a full refund.</li>
-            <li>No refunds will be provided for cancellations made less than 7 days before program start.</li>
-        </ul>
+            <h5>1. Training Programs / Workshops</h5>
+            <ul>
+                <li>Cancellation requests made at least 7 days before the start of the program are eligible for a full refund.</li>
+                <li>No refunds will be provided for cancellations made less than 7 days before the program start.</li>
+            </ul>
 
-        <h5 class="mt-4">2. Online Courses / Digital Products</h5>
-        <p>Once accessed or downloaded, these are non-refundable unless there is a proven technical issue.</p>
+            <h5>2. Online Courses / Digital Products</h5>
+            <ul>
+                <li>Once accessed or downloaded, these are non-refundable unless there is a proven technical issue.</li>
+            </ul>
 
-        <h5 class="mt-4">3. Internship Enrollments</h5>
-        <p>Any paid fees for internship processing are non-refundable once the process has begun.</p>
+            <h5>3. Internship Enrollments</h5>
+            <ul>
+                <li>Any paid fees for internship processing are non-refundable once the process has begun.</li>
+            </ul>
 
-        <h5 class="mt-4">4. How to Request a Refund</h5>
-        <p>Email us at <a href="mailto:info@indeedinspiring.com" class="text-decoration-underline text-light">info@indeedinspiring.com</a> with your name, course details, and payment reference.</p>
+            <h5>4. How to Request a Refund</h5>
+            <ul>
+                <li>Email us at <a href="mailto:info@indeedinspiring.com">info@indeedinspiring.com</a> with your name, course details, and payment reference.</li>
+            </ul>
+        </div>
+
     </div>
 </section>
+
 {% endblock %}
