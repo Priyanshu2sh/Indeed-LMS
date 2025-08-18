@@ -465,7 +465,7 @@
 
 
 
-              <div id="Curriculum" class="mb-8">
+                <div id="Curriculum" class="mb-8">
                     <ul class="nav course-tab-v1 border-bottom h4 mb-8">
                         <li class="nav-item">
                             <a class="nav-link" href="#Overview" data-bs-toggle="smooth-scroll" data-bs-offset="0">Overview</a>
@@ -559,6 +559,21 @@
                     </div>
                 </div>
 
+                {% if not course_enquiry %}
+                <h2>Enquire about "{{ course.title }}</h2>
+
+                <form method="POST" action="{% url 'course_enquiry' course.slug %}">
+                    {% csrf_token %}
+
+                    <!-- Enquiry Message -->
+                    <div class="mb-3">
+                        <label for="message">Your Message</label>
+                        <textarea name="message" rows="4" class="form-control" placeholder="Ask your questions here..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Send Enquiry</button>
+                </form>
+                {% endif %}
                
                 <div id="Reviews" class="mb-8">
                     <ul class="nav course-tab-v1 border-bottom h4 mb-8">
@@ -829,41 +844,41 @@
   }
 </script>
 
-  <script>
-function getCSRFToken() {
-    return document.querySelector('[name=csrfmiddlewaretoken]').value;
-}
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
 
-$(document).ready(function() {
-    $('.wishlist-toggle-btn').click(function(e) {
-        e.preventDefault();
-        const btn = $(this);
-        const courseId = btn.data('course-id');
+    $(document).ready(function() {
+        $('.wishlist-toggle-btn').click(function(e) {
+            e.preventDefault();
+            const btn = $(this);
+            const courseId = btn.data('course-id');
 
-        $.ajax({
-            url: "{% url 'toggle_wishlist_ajax' %}",  // Make sure this name is in urls.py
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCSRFToken()
-            },
-            data: {
-                'course_id': courseId
-            },
-            success: function(response) {
-                const icon = btn.find('.wishlist-icon');
-                if (response.status === 'added') {
-                    btn.removeClass('badge-secondary').addClass('bg-danger');
-                    icon.removeClass('far').addClass('fas');
-                } else if (response.status === 'removed') {
-                    btn.removeClass('bg-danger').addClass('badge-secondary');
-                    icon.removeClass('fas').addClass('far');
+            $.ajax({
+                url: "{% url 'toggle_wishlist_ajax' %}",  // Make sure this name is in urls.py
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                },
+                data: {
+                    'course_id': courseId
+                },
+                success: function(response) {
+                    const icon = btn.find('.wishlist-icon');
+                    if (response.status === 'added') {
+                        btn.removeClass('badge-secondary').addClass('bg-danger');
+                        icon.removeClass('far').addClass('fas');
+                    } else if (response.status === 'removed') {
+                        btn.removeClass('bg-danger').addClass('badge-secondary');
+                        icon.removeClass('fas').addClass('far');
+                    }
+                },
+                error: function(xhr) {
+                    alert("Something went wrong: " + xhr.status);
                 }
-            },
-            error: function(xhr) {
-                alert("Something went wrong: " + xhr.status);
-            }
+            });
         });
     });
-});
 </script>
 {% endblock %}

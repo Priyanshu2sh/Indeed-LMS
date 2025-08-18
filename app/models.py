@@ -396,3 +396,12 @@ class Certificate(models.Model):
             user_course.save()
 
         super().save(*args, **kwargs)  # Call the original save method
+
+class CourseEnquiry(models.Model):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='enquiries')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # optional, for logged-in users
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Enquiry by {self.user.email} for {self.course.title}"

@@ -15,7 +15,6 @@ from django.conf.urls import handler404
 import json
 from datetime import datetime, timedelta
 from .generate_certificate import generate_custom_certificate
-
 import razorpay
 from LMS.settings import *
 
@@ -225,7 +224,10 @@ def COURSE_DETAILS(request, slug):
     else:
         wishlist_courses = Course.objects.none()
 
-    
+
+    course_enquiry = CourseEnquiry.objects.filter(course=course, user=request.user).first()
+    if not course_enquiry:
+        course_enquiry = False
     context = {
         'course':course,
         'category':category,
@@ -246,7 +248,8 @@ def COURSE_DETAILS(request, slug):
         'five_star_percent': five_star_percent,
         'assessments': assessments,
         'request': request,
-        'wishlist_courses': wishlist_courses
+        'wishlist_courses': wishlist_courses,
+        'course_enquiry': course_enquiry
     }
     return render(request,'course/course_details.html',context)
 
@@ -769,3 +772,24 @@ def cancellation_refund(request):
 
 def shipping_exchange(request):
     return render(request, 'main/shipping_exchange.html')
+
+def course_enquiry(request, slug):
+    user = request.user
+    course = get_object_or_404(Course, slug=slug)
+
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        if not message:
+            messages.error(request, 'Please enter a message.')
+            return redirect('course_enquiry', slug=slug)
+        
+        CourseEnquiry.objects.create(
+            course=course,
+            user=user,
+            message=message
+        )
+
+        messages.success(request, 'Your enquiry has been submitted!')
+        return redirect('course_details', slug=slug)
+
+    return render(request, 'courses/course_enquiry.html', {'course': course})
