@@ -205,7 +205,7 @@ class UserCourse(models.Model):
     certificate_issued = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.first_name + " - " + self.course.title
+        return self.user.email + " - " + self.course.title
 
 
 class Payment(models.Model):
@@ -218,7 +218,7 @@ class Payment(models.Model):
     status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.first_name + " - " + self.course.title
+        return self.user.email + " - " + self.course.title
     
 class ContactUs(models.Model):
     name = models.CharField(max_length=255)
@@ -238,7 +238,7 @@ class CourseReview(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.first_name} - {self.course.title} - {self.rating}"
+        return f"{self.user.email} - {self.course.title} - {self.rating}"
     
 class VideoProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
