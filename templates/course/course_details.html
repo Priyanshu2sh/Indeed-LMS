@@ -559,6 +559,38 @@
                     </div>
                 </div>
 
+                <div id="Instructor" class="mb-8">
+                    <ul class="nav course-tab-v1 border-bottom h4 mb-8">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#Overview" data-bs-toggle="smooth-scroll" data-bs-offset="0">Overview</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#Curriculum" data-bs-toggle="smooth-scroll" data-bs-offset="0">Curriculum</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#Instructor" data-bs-toggle="smooth-scroll" data-bs-offset="0">Instructor</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#Reviews" data-bs-toggle="smooth-scroll" data-bs-offset="0">Reviews</a>
+                        </li>
+                    </ul>
+
+                    <h3 class="mb-6">About the instructor</h3>
+
+                    <div class="d-flex align-items-center mb-6">
+                        <div class="d-inline-block rounded-circle border me-6 p-2">
+                            <div class="avatar avatar-size-120">
+                                <img src="/lms/{{course.author.author_profile}}" alt="..." class="avatar-img rounded-circle">
+                            </div>
+                        </div>
+                        <div class="media-body">
+                            <h4 class="mb-0">{{course.author.name}}</h4>
+                        </div>
+                    </div>
+
+                    <p class="mb-6 line-height-md">{{course.author.about_author}}</p>
+                </div>
+
                 {% if not course_enquiry %}
                 <h2>Enquire about "{{ course.title }}</h2>
 
