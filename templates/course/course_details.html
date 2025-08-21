@@ -120,7 +120,7 @@
                 <div class="d-md-flex align-items-center mb-5">
                     <div class="border rounded-circle d-inline-block mb-4 mb-md-0 me-md-6 me-lg-4 me-xl-6">
                         <div class="p-2">
-                            <img src="/{{course.author.author_profile}}" alt="..." class="rounded-circle" width="68" height="68">
+                            <img src="/lms/{{course.author.author_profile}}" alt="..." class="rounded-circle" width="68" height="68">
                         </div>
                     </div>
 
@@ -385,7 +385,7 @@
                             {% for course in latest_courses %}
                                 <li class="media mb-6 d-flex">
                                     <a href="{{course.get_absolute_url}}" class="w-100p d-block me-5">
-                                        <img src="{{course.featured_image.url}}" alt="..." class="avatar-img rounded-lg h-90p w-100p">
+                                        <img src="{{course.featured_image}}" alt="..." class="avatar-img rounded-lg h-90p w-100p">
                                     </a>
                                     <div class="media-body flex-grow-1">
                                         <a href="{{course.get_absolute_url}}" class="d-block">
