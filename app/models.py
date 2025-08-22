@@ -5,6 +5,8 @@ from django.db import models
 from django.utils.text import slugify
 from django.db.models.signals import pre_save
 from django.conf import settings
+from django.utils import timezone
+from django.core.mail import send_mail
 # Create your models here.
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -104,6 +106,8 @@ class Course(models.Model):
     status = models.CharField(choices=STATUS,max_length=100,null=True)
     certificate = models.CharField(choices=(('Yes', 'Yes'), ('No', 'No')), max_length=100, default='No')
     template = models.ImageField(null=True, upload_to="Media/certificate_templates")
+    resources = models.FileField(upload_to="Media/course_resources", null=True, blank=True)
+    resources_last_updated = models.DateTimeField(null=True, blank=True)
     assessment_type = models.CharField(
         choices=(
             ('Day', 'Day'),
@@ -124,6 +128,42 @@ class Course(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("course_details", kwargs={'slug': self.slug})
+    
+    def save(self, *args, **kwargs):
+        # Check if object is being updated or created
+        if self.pk:
+            # Fetch original object from database
+            orig = Course.objects.filter(pk=self.pk).first()
+            if orig:
+                # If resources field is newly added or changed, update timestamp
+                if self.resources and (not orig.resources or self.resources != orig.resources):
+                    self.resources_last_updated = timezone.now()
+                    notify = True
+        else:
+            # New object, if resource is added, set timestamp
+            if self.resources:
+                self.resources_last_updated = timezone.now()
+
+        super().save(*args, **kwargs)
+
+        # After saving, send notification emails if resources updated
+        if notify:
+            # Retrieve registered users for the course 
+            registered_users = UserCourse.objects.filter(course=self)
+            
+            subject = f"New Resources Available for Course: {self.title}"
+            message = f"Dear User,\n\nNew resources have been updated for the course '{self.title}'. Please log in to your account to access the latest materials.\n\nBest regards,\nIndeed Inspiring Pvt. Ltd."
+            from_email = settings.DEFAULT_FROM_EMAIL
+            
+            # Use Django's send_mail - for many users consider using mass mailing or background tasks
+            for user_course in registered_users:
+                send_mail(
+                    subject,
+                    message,
+                    from_email,
+                    [user_course.user.email],
+                    fail_silently=False,
+                )
     
 
 def create_slug(instance, new_slug=None):
