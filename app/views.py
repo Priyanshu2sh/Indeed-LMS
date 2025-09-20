@@ -265,7 +265,7 @@ def CHECKOUT(request,slug):
     if settings.ENVIRONMENT == 'Local':
         callback_url = "http://127.0.0.1:8000/verify_payment"
     if settings.ENVIRONMENT == 'Server':
-        callback_url = "https://indeedinspiring.com/lms/verify_payment"
+        callback_url = "https://lms.indeedinspiring.com/verify_payment"
 
     if course.price == 0:
         usercourse = UserCourse(
