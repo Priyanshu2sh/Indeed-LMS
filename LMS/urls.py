@@ -68,4 +68,8 @@ urlpatterns = [
     path('course-enquiry/<slug:slug>', views.course_enquiry, name='course_enquiry'),
 
 
+    path('interview_practice', views.interview_practice, name='interview_practice'),
+    path('interview', views.interview_page, name='interview_page'),
+
+
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
