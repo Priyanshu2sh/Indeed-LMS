@@ -1,7 +1,17 @@
 {% extends 'base.html' %}
 {% load course_tags %}
 {% load static %}
-{% block title %}{{course.title}}{% endblock %}
+
+
+{% block head %}
+    <meta charset="UTF-8">
+    <meta name="description" content="{{ course.short_description|default:'Learn more about this course in detail, including syllabus, features, and benefits.' }}">
+    <meta name="keywords" content="{{ course.title }}, online course, e-learning, study materials, {{ course.category.name }}, {{ course.instructor.name }}">
+      
+    </script>
+{% endblock %}
+
+
 {% block content %}
 
 

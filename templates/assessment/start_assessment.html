@@ -2,7 +2,13 @@
 {% load course_tags %}
 {% load static %}
 
+
 {% block title %}{{ course.title }} - Assessment{% endblock %}
+
+{% block meta %}
+  <meta name="description" content="Take the {{ course.title }} assessment to test your knowledge and track your progress. Improve your learning experience with our interactive assessments.">
+  <meta name="keywords" content="{{ course.title }}, {{ course.category }}, online assessment, course test, learning, quiz">
+{% endblock %}
 
 {% block content %}
 <style>

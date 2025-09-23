@@ -8,6 +8,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+     <!-- Title Tag -->
+    <title>{% block title %}Indeed Inspiring LMS - Learn Anytime, Anywhere{% endblock %}</title>
+
+    <!-- Meta Description -->
+    <meta name="description" content="{% block meta_description %}Indeed Inspiring LMS provides flexible online learning opportunities with expert instructors, interactive courses, and engaging content to help you learn anytime, anywhere.{% endblock %}">
+
+    <!-- Keywords (optional but less relevant today) -->
+    <meta name="keywords" content="LMS, Online Learning, eLearning, Courses, Education, Indeed Inspiring LMS">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}">
+    
+   
     <!-- Favicon -->
     <link rel="shortcut icon" href="favicon.png">
 
@@ -32,7 +45,7 @@
     <!-- Theme CSS -->
     <link rel="stylesheet" href="{% static 'assets/css/theme.min.css' %}">
 
-    <title>Indeed Inspiring - {% block title %}{% endblock %}</title>
+    {% comment %} <title>Indeed Inspiring - {% block title %}{% endblock %}</title> {% endcomment %}
 
     <script src="https://kit.fontawesome.com/b01b659931.js" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
