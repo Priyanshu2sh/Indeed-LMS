@@ -1,43 +1,151 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-  .shape-left {
-    left: 0;
-    max-width: 0;
-    overflow: hidden;
-  }
+/* Keep gradient static */
+.gradient-bg {
+  background: linear-gradient(135deg, #2a0312ff, #2287ff);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Floating/Bouncing Rocket */
+.float {
+  animation: bounce 3s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Glow effect */
+.glow {
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8),
+               0 0 25px rgba(255, 255, 255, 0.5),
+               0 0 45px rgba(255, 255, 255, 0.3);
+}
+
+/* Countdown box */
+#countdown span {
+  display: inline-block;
+  min-width: 70px;
+  padding: 14px;
+  margin: 6px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.25rem;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  animation: fadeIn 1s ease-in-out;
+}
+
+/* Fade-in */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Decorative waves */
+.wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 200%;
+  height: 200px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 43%;
+  animation: wave 8s linear infinite;
+}
+.wave:nth-child(2) {
+  animation-delay: -4s;
+  opacity: 0.6;
+}
+@keyframes wave {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Typing effect */
+#typing {
+  border-right: 2px solid #fff;
+  padding-right: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.shape-left {
+  left: 0;
+  max-width: 0;
+  overflow: hidden;
+}
 </style>
-<div class="flex flex-col items-center justify-center h-screen bg-gray-100 text-center">
-    <h1 class="text-5xl font-bold text-gray-800 mb-4">🚀 Coming Soon</h1>
-    <p class="text-lg text-gray-600 mb-6">We’re working hard to launch something amazing. Stay tuned!</p>
-    
-    <!-- Optional Countdown -->
-    <div id="countdown" class="text-xl font-semibold text-gray-700 mb-6"></div>
+
+<div class="flex flex-col items-center justify-center h-screen gradient-bg text-center px-6 relative overflow-hidden">
+  <!-- Floating Rocket -->
+  <h1 class="text-8xl font-extrabold text-white mb-6 mt-12 glow float">🚀</h1>
+
+  <!-- Gradient Animated Text -->
+  <h2 class="text-7xl text-light font-extrabold mb-4 bg-clip-text text-transparent 
+             bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 
+             animate-pulse glow">
+    Coming Soon
+  </h2>
+
+  <!-- Typing Effect Tagline -->
+  <p class="text-lg text-white mb-10 px-4 py-2 rounded-xl shadow-lg glow">
+    <span id="typing"></span>
+  </p>
+  
+  <!-- Countdown -->
+  <div id="countdown" class="flex justify-center flex-wrap gap-4 text-2xl mb-12"></div>
+
+  <!-- Decorative waves -->
+  <div class="wave"></div>
+  <div class="wave"></div>
 </div>
 
 <script>
-    // Simple countdown (example: 7 days from now)
-    const countdown = document.getElementById("countdown");
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() + 7);
+  // Countdown
+  const countdown = document.getElementById("countdown");
+  const targetDate = new Date();
+  targetDate.setDate(targetDate.getDate() + 7);
 
-    function updateCountdown() {
-        const now = new Date().getTime();
-        const distance = targetDate - now;
+  function updateCountdown() {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
 
-        if (distance <= 0) {
-            countdown.innerHTML = "🎉 We are live now!";
-            return;
-        }
+      if (distance <= 0) {
+          countdown.innerHTML = "<span>🎉 We are live now!</span>";
+          return;
+      }
 
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        countdown.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      countdown.innerHTML = `
+          <span>${days}d</span>
+          <span>${hours}h</span>
+          <span>${minutes}m</span>
+          <span>${seconds}s</span>
+      `;
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Typing effect
+  const text = "We’re crafting something extraordinary. Stay tuned!";
+  let i = 0;
+  function typeEffect() {
+    if (i < text.length) {
+      document.getElementById("typing").innerHTML += text.charAt(i);
+      i++;
+      setTimeout(typeEffect, 50);
     }
-
-    setInterval(updateCountdown, 1000);
+  }
+  window.onload = typeEffect;
 </script>
 {% endblock content %}
