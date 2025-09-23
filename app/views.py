@@ -15,7 +15,6 @@ from django.conf.urls import handler404
 import json
 from datetime import datetime, timedelta
 from .generate_certificate import generate_custom_certificate
-
 import razorpay
 from LMS.settings import *
 
@@ -243,6 +242,10 @@ def COURSE_DETAILS(request, slug):
     else:
         wishlist_courses = Course.objects.none()
 
+
+    course_enquiry = CourseEnquiry.objects.filter(course=course, user=request.user).first()
+    if not course_enquiry:
+        course_enquiry = False
     context = {
         'course': course,
         'category': category,
@@ -263,7 +266,8 @@ def COURSE_DETAILS(request, slug):
         'five_star_percent': five_star_percent,
         'assessments': assessments,
         'request': request,
-        'wishlist_courses': wishlist_courses
+        'wishlist_courses': wishlist_courses,
+        'course_enquiry': course_enquiry
     }
     return render(request, 'course/course_details.html', context)
 
@@ -279,7 +283,7 @@ def CHECKOUT(request,slug):
     if settings.ENVIRONMENT == 'Local':
         callback_url = "http://127.0.0.1:8000/verify_payment"
     if settings.ENVIRONMENT == 'Server':
-        callback_url = "http://127.0.0.1:8000/verify_payment"
+        callback_url = "https://lms.indeedinspiring.com/verify_payment"
 
     if course.price == 0:
         usercourse = UserCourse(
@@ -786,3 +790,55 @@ def cancellation_refund(request):
 
 def shipping_exchange(request):
     return render(request, 'main/shipping_exchange.html')
+
+def course_enquiry(request, slug):
+    user = request.user
+    course = get_object_or_404(Course, slug=slug)
+
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        if not message:
+            messages.error(request, 'Please enter a message.')
+            return redirect('course_enquiry', slug=slug)
+        
+        CourseEnquiry.objects.create(
+            course=course,
+            user=user,
+            message=message
+        )
+
+        messages.success(request, 'Your enquiry has been submitted!')
+        return redirect('course_details', slug=slug)
+
+    return render(request, 'courses/course_enquiry.html', {'course': course})
+
+
+def interview_practice(request):
+    return render(request, 'interview/interview_practice.html')
+    # if not request.user.is_authenticated:
+    #     messages.error(request, 'Please login first!')
+    #     return redirect('register')
+
+    if request.method == 'POST':
+        interviewType = request.POST.get('interviewType')
+        difficulty = request.POST.get('difficulty')
+        jdFile = request.FILES.get('jdFile')
+        resumeFile = request.FILES.get('resumeFile')
+
+        # Save the files and other data to the user's profile
+        user = User.objects.get(id=request.user.id)
+        user.interview_type = interviewType
+        user.interview_difficulty = difficulty
+
+        if jdFile:
+            user.jd_file.save(jdFile.name, jdFile)
+        if resumeFile:
+            user.resume_file.save(resumeFile.name, resumeFile)
+
+        user.save()
+
+        return redirect('interview_page')
+    return render(request, 'interview/interview_practice.html')
+
+def interview_page(request):
+    return render(request, 'interview/interview_page.html')

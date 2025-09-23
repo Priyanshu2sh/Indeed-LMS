@@ -19,7 +19,7 @@ def generate_custom_certificate(certificate):
     if settings.ENVIRONMENT == 'Local':
         url = "127.0.0.1:8000/certification/"+certificate.randrand,
     elif settings.ENVIRONMENT == 'Server':
-        url = "indeedinspiring.com/lms/certification/"+certificate.randrand,
+        url = "lms.indeedinspiring.com/certification/"+certificate.randrand,
     
     
     data = {

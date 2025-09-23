@@ -65,6 +65,7 @@ urlpatterns = [
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('cancellation-refund/', views.cancellation_refund, name='cancellation_refund'),
     path('shipping-exchange/', views.shipping_exchange, name='shipping_exchange'),
+    path('course-enquiry/<slug:slug>', views.course_enquiry, name='course_enquiry'),
 
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

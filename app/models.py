@@ -5,6 +5,8 @@ from django.db import models
 from django.utils.text import slugify
 from django.db.models.signals import pre_save
 from django.conf import settings
+from django.utils import timezone
+from django.core.mail import send_mail
 # Create your models here.
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
@@ -60,7 +62,7 @@ class Categories(models.Model):
     
 
 class Author(models.Model):
-    author_profile = models.ImageField(upload_to="Media/author")
+    author_profile = models.ImageField(upload_to="author")
     name = models.CharField(max_length=100, null=True)
     about_author = models.TextField()
 
@@ -88,7 +90,7 @@ class Course(models.Model):
         ('DRAFT', 'DRAFT'),
     )
 
-    featured_image = models.ImageField(upload_to="Media/featured_img",null=True)
+    featured_image = models.ImageField(upload_to="featured_img",null=True)
     featured_video = models.CharField(max_length=300,null=True)
     title = models.CharField(max_length=500)
     created_at = models.DateField(auto_now_add=True)
@@ -103,7 +105,7 @@ class Course(models.Model):
     slug = models.SlugField(default='', max_length=500, null=True, blank=True)
     status = models.CharField(choices=STATUS,max_length=100,null=True)
     certificate = models.CharField(choices=(('Yes', 'Yes'), ('No', 'No')), max_length=100, default='No')
-    template = models.ImageField(null=True, upload_to="Media/certificate_templates")
+    template = models.ImageField(null=True, upload_to="certificate_templates")
     assessment_type = models.CharField(
         choices=(
             ('Day', 'Day'),
@@ -169,7 +171,7 @@ class Lesson(models.Model):
 
 class Video(models.Model):
     serial_number = models.IntegerField(null=True)
-    thumbnail = models.ImageField(upload_to="Media/Yt_Thumbnail", null=True)
+    thumbnail = models.ImageField(upload_to="Yt_Thumbnail", null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
@@ -177,6 +179,7 @@ class Video(models.Model):
     time_duration = models.IntegerField(null=True)
     preview = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
+    resources = models.FileField(upload_to="course_resources", null=True, blank=True)
 
 class Comments(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -205,7 +208,7 @@ class UserCourse(models.Model):
     certificate_issued = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.first_name + " - " + self.course.title
+        return self.user.email + " - " + self.course.title
 
 
 class Payment(models.Model):
@@ -218,7 +221,7 @@ class Payment(models.Model):
     status = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.user.first_name + " - " + self.course.title
+        return self.user.email + " - " + self.course.title
     
 class ContactUs(models.Model):
     name = models.CharField(max_length=255)
@@ -238,7 +241,7 @@ class CourseReview(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.first_name} - {self.course.title} - {self.rating}"
+        return f"{self.user.email} - {self.course.title} - {self.rating}"
     
 class VideoProgress(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -267,7 +270,7 @@ class Post(models.Model):
         ('Trending','Trending')
     )
 
-    featured_image = models.ImageField(upload_to='Media/post_images')
+    featured_image = models.ImageField(upload_to='post_images')
     title = models.CharField(max_length=100)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(choices=CATEGORY, max_length=200)
@@ -396,3 +399,12 @@ class Certificate(models.Model):
             user_course.save()
 
         super().save(*args, **kwargs)  # Call the original save method
+
+class CourseEnquiry(models.Model):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='enquiries')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # optional, for logged-in users
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Enquiry by {self.user.email} for {self.course.title}"

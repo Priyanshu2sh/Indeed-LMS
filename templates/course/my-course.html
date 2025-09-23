@@ -384,7 +384,7 @@ tsParticles.load("tsparticles", {
         <a href="{{ i.course.get_absolute_url }}">
         <div class="card course-card p-3">
           <div class="course-img-container position-relative">
-              <img src="{{i.course.featured_image}}" alt="{{ i.course.title }}">
+              <img src="{{i.course.featured_image.url}}" alt="{{ i.course.title }}">
             <div class="img-overlay"></div>
             <span class="discount-badge">-{{ i.course.discount }}%</span>
           </div>
@@ -393,7 +393,7 @@ tsParticles.load("tsparticles", {
      
             <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="badge category-pill">{{ i.course.category.name }}</span>
-            <img src="{{i.course.author.author_profile}}" alt="Author" class="author-avatar" />
+            <img src="{{i.course.author.author_profile.url}}" alt="Author" class="author-avatar" />
             </div>
 
 
