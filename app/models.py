@@ -35,6 +35,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
+    # interview practice bot inputs
+    interview_type = models.CharField(max_length=100, null=True, blank=True)
+    interview_difficulty = models.CharField(max_length=100, null=True, blank=True)
+    jd_file = models.FileField(upload_to='jd_files', null=True, blank=True)
+    resume_file = models.FileField(upload_to='resume_files', null=True, blank=True)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
