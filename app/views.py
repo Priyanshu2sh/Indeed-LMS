@@ -793,3 +793,34 @@ def course_enquiry(request, slug):
         return redirect('course_details', slug=slug)
 
     return render(request, 'courses/course_enquiry.html', {'course': course})
+
+
+def interview_practice(request):
+    return render(request, 'interview/interview_practice.html')
+    # if not request.user.is_authenticated:
+    #     messages.error(request, 'Please login first!')
+    #     return redirect('register')
+
+    if request.method == 'POST':
+        interviewType = request.POST.get('interviewType')
+        difficulty = request.POST.get('difficulty')
+        jdFile = request.FILES.get('jdFile')
+        resumeFile = request.FILES.get('resumeFile')
+
+        # Save the files and other data to the user's profile
+        user = User.objects.get(id=request.user.id)
+        user.interview_type = interviewType
+        user.interview_difficulty = difficulty
+
+        if jdFile:
+            user.jd_file.save(jdFile.name, jdFile)
+        if resumeFile:
+            user.resume_file.save(resumeFile.name, resumeFile)
+
+        user.save()
+
+        return redirect('interview_page')
+    return render(request, 'interview/interview_practice.html')
+
+def interview_page(request):
+    return render(request, 'interview/interview_page.html')
