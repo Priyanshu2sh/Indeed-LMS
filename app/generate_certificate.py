@@ -24,6 +24,7 @@ def generate_custom_certificate(certificate):
     
     data = {
     "name": certificate.user_course.user.first_name +' '+ certificate.user_course.user.last_name ,
+    "course_name": certificate.user_course.course.title,
     "id": str(certificate.unique_id),
     "template": certificate.user_course.course.template,
     "url": url
@@ -90,10 +91,38 @@ def generate_custom_certificate(certificate):
         font=font1,
         fill="#262626")
 
+    # Get the size of the course name
+    course_max_width = 800
+    course_start_point = 1195
+    course_name_text_bbox = draw.textbbox((0, 0), data["course_name"], font=font1)
+    course_name_width = course_name_text_bbox[2] - course_name_text_bbox[0]
+    y_pos = 740
+
+    if course_name_width > course_max_width:
+        while course_name_width > course_max_width:
+            font_size = font1.size - 2  # Reduce font size
+            y_pos = y_pos + 1
+            font1 = ImageFont.truetype(str('fonts/calibrib.ttf'), font_size)
+            course_name_text_bbox = draw.textbbox((0, 0), data["course_name"], font=font1)
+            course_name_width = course_name_text_bbox[2] - course_name_text_bbox[0]
+
+    padding = course_max_width - course_name_width
+    padding_each_side = padding / 2
+
+    # course name on certificate
+    draw.text(
+        (
+            course_start_point+padding_each_side,    # x-pos
+            y_pos,   # y-pos
+        ),
+        data["course_name"],
+        font=font1,
+        fill="#262626")
+
     # certificate id on certificate
     draw.text(
         (
-            940,    # x-pos
+            930,    # x-pos
             1135,    # y-pos
         ),
         data["id"],
@@ -103,9 +132,11 @@ def generate_custom_certificate(certificate):
 
 
 
+    # Resize QR code (scale it down)
+    qr_small = qr_image.resize((qr_image.width - 20, qr_image.height - 20))  # 50% smaller
     # Draw the QR code on the original image
-    img.paste(qr_image, (915, 950))  # Adjust the position as needed
-    
+    img.paste(qr_small, (915, 970))  # Adjust the position as needed
+
     # saves the image in png format
     # img.save(BASE_DIR / 'certificates/{}.png'.format(data["name"])) 
     # img.save(BASE_DIR / 'certificates/{}.png'.format(name)) 

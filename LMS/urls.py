@@ -26,6 +26,9 @@ handler404 = views.PAGE_NOT_FOUND
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    # dashboard url
+    path('dashboard/', include('dashboard.urls'), name='dashboard'),
+
     path('base',views.BASE, name='base'),
     path('404',views.PAGE_NOT_FOUND,name='404'),
     path('',views.HOME, name='home'),
