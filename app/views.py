@@ -842,3 +842,6 @@ def interview_practice(request):
 
 def interview_page(request):
     return render(request, 'interview/interview_page.html')
+
+
+
