@@ -120,6 +120,38 @@
     max-width: 0;
     overflow: hidden;
   }
+
+  .message {
+    display: flex;
+    margin-bottom: 15px;
+  }
+
+  .message.question {
+    justify-content: flex-start;
+  }
+
+  .message.answer {
+    justify-content: flex-end;
+  }
+
+  .bubble {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 15px;
+    word-wrap: break-word;
+  }
+
+  .bubble.question {
+    background: #f1f1f1;
+    color: #333;
+    border-bottom-left-radius: 0;
+  }
+
+  .bubble.answer {
+    background: #0d6efd;
+    color: white;
+    border-bottom-right-radius: 0;
+  }
 </style>
 
 <!-- Countdown Overlay -->
@@ -134,20 +166,53 @@
   <h3 class="mb-3">Practice Interview</h3>
 
   <!-- Chat Area -->
-  <div id="chat-box">
-  </div>
+  <div id="chat-box"></div>
   <!-- Camera attached inside -->
   <div id="camera">
     <video id="video" autoplay muted></video>
   </div>
 
-    <!-- Mic button bottom center -->
+  <!-- Mic button bottom center -->
   <div id="mic-container">
     <button id="mic-btn">
       <i id="mic-icon" class="fas fa-microphone"></i>
     </button>
   </div>
 </div>
+
+<!-- Summary Modal -->
+<div id="summaryModal" style="
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center;
+  z-index: 9999;
+">
+  <div style="
+    background: #fff;
+    width: 60%;
+    padding: 20px;
+    border-radius: 8px;
+    max-height: 80%;
+    overflow-y: auto;
+    position: relative;
+  ">
+    <h2>Interview Result Summary</h2>
+
+    <div id="summaryContent"></div>
+
+    <button onclick="closeSummaryModal()" style="
+      margin-top: 20px;
+      padding: 8px 16px;
+      background: black;
+      color:white;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+    ">
+      Close
+    </button>
+  </div>
+</div>
+
 
 <script>
   // === Camera & Mic Access ===
@@ -185,12 +250,22 @@
 </script>
 
 <script>
+  function openSummaryModal(summaryHTML) {
+    document.getElementById("summaryContent").innerHTML = summaryHTML;
+    document.getElementById("summaryModal").style.display = "flex";
+  }
+
+  function closeSummaryModal() {
+    console.log("Closing summary modal");
+    document.getElementById("summaryModal").style.display = "none";
+  }
+
   let socket = null;
   let micIcon = document.getElementById("mic-icon");
 
   function connectWebSocket() {
     // Replace this with your actual backend WebSocket endpoint
-    const wsUrl = "ws://127.0.0.1:8001/ws/interview/";
+    const wsUrl = "ws://127.0.0.1:8000/ws/interview/";
 
     socket = new WebSocket(wsUrl);
 
@@ -203,30 +278,111 @@
     socket.onmessage = function (event) {
       const data = JSON.parse(event.data);
       console.log("📩 Message from server:", data);
+      if (data.type === "session_complete" && data.summary) {
+        const s = data.summary;
+
+        const html = `
+          <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+            
+            <h3>Candidate Details</h3>
+            <p><strong>Name:</strong> ${s.candidate_details.name}</p>
+            <p><strong>Interview Mode:</strong> ${s.candidate_details.interview_mode}</p>
+            <p><strong>Difficulty:</strong> ${s.candidate_details.difficulty_level}</p>
+            <p><strong>Date & Time:</strong> ${s.candidate_details.date_time}</p>
+
+            <hr>
+
+            <h3>Interview Summary</h3>
+            <p><strong>Total Questions:</strong> ${s.interview_summary.total_questions}</p>
+
+            ${
+              s.interview_summary.summary_text?.strengths
+                ? `<p><strong>Strengths:</strong> ${s.interview_summary.summary_text.strengths}</p>`
+                : ""
+            }
+            ${
+              s.interview_summary.summary_text?.weaknesses
+                ? `<p><strong>Weaknesses:</strong> ${s.interview_summary.summary_text.weaknesses}</p>`
+                : ""
+            }
+            ${
+              s.interview_summary.summary_text?.engagement
+                ? `<p><strong>Engagement:</strong> ${s.interview_summary.summary_text.engagement}</p>`
+                : ""
+            }
+
+            <hr>
+
+            <h3>Technical Questions</h3>
+            ${
+              s.tech_section.length > 0
+                ? s.tech_section
+                    .map(
+                      (q, i) => `
+                    <div style="margin-bottom: 12px;">
+                      <p><b>Q${i + 1}:</b> ${q.question}</p>
+                      <p><b>A${i + 1}:</b> ${q.answer}</p>
+                      <p><i>${q.comment || ""}</i></p>
+                      <p><b>Score:</b> ${q.score}/5</p>
+                    </div>`
+                    )
+                    .join("")
+                : "<p>No technical questions answered.</p>"
+            }
+
+            <hr>
+
+            <h3>Overall Performance</h3>
+            <p><strong>Average Score:</strong> ${s.overall.average_score}/5</p>
+            <p><strong>Rating:</strong> ${s.overall.rating}</p>
+
+            <hr>
+
+            <h3>Recommendations</h3>
+            ${
+              s.recommendations.length > 0
+                ? `<ul>${s.recommendations.map((r) => `<li>${r}</li>`).join("")}</ul>`
+                : "<p>No specific recommendations.</p>"
+            }
+
+          </div>
+        `;
+
+        openSummaryModal(html);
+      }
+
+
 
       // Example: append message to chat box
       const chatBox = document.getElementById("chat-box");
       if (chatBox) {
-        const msgDiv = document.createElement("div");
-        msgDiv.className = "p-2 bg-light rounded mb-2";
-        msgDiv.innerText = data.message || "[No message]";
-        chatBox.appendChild(msgDiv);
-        // Auto scroll to bottom
+        // Show question (if exists)
+        if (data.question) {
+          const qDiv = document.createElement("div");
+          qDiv.className = "message question";
+          qDiv.innerHTML = `<div class="bubble question">${data.question}</div>`;
+          chatBox.appendChild(qDiv);
+
+          // 🔊 Play audio of the question
+          micIcon.className = "fas fa-microphone-slash";
+          const utterance = new SpeechSynthesisUtterance(data.question);
+          utterance.lang = "en-US";
+          window.speechSynthesis.speak(utterance);
+          utterance.onend = () => {
+            startMic();
+          };
+        }
+
+        // Show answer (if exists)
+        if (data.answer) {
+          const aDiv = document.createElement("div");
+          aDiv.className = "message answer";
+          aDiv.innerHTML = `<div class="bubble answer">${data.answer}</div>`;
+          chatBox.appendChild(aDiv);
+        }
+
+        // Auto scroll
         chatBox.scrollTop = chatBox.scrollHeight;
-      }
-
-      // 🔊 Play audio of the response text
-      if (data.message) {
-        micIcon.className = "fas fa-microphone-slash";
-        const utterance = new SpeechSynthesisUtterance(data.message);
-        utterance.lang = "en-US"; // you can change voice language
-        utterance.rate = 1; // speed (0.5 - 2)
-        utterance.pitch = 1; // pitch (0 - 2)
-        window.speechSynthesis.speak(utterance);
-
-        utterance.onend = () => {
-          startMic();
-        };
       }
     };
 
@@ -282,6 +438,9 @@
       "fas fa-microphone text-green-500";
   }
 
+  let noiseFloor = 0.01;   // gets auto-learned
+  let smoothing = 0.95;    // noise floor smoothing factor
+
   function detectSpeech() {
     analyser.getByteTimeDomainData(dataArray);
     // --- Frequency check (human voice range ~85 Hz to 4000 Hz) ---
@@ -314,7 +473,14 @@
     }
     const rms = Math.sqrt(sumSquares / dataArray.length);
 
-    const speaking = rms > 0.02 && humanRatio > 0.3;
+    // Adaptive noise floor update (only when no speech detected)
+    noiseFloor = smoothing * noiseFloor + (1 - smoothing) * rms;
+
+    // Dynamic speech threshold
+    const threshold = noiseFloor * 3; // 3x louder than background noise
+
+    const speaking = rms > threshold && humanRatio > 0.45;
+    // const speaking = rms > 0.02 && humanRatio > 0.3;
 
     if (speaking) {
       console.log("🎤 Speaking...");
@@ -367,6 +533,13 @@
       "fas fa-microphone-slash text-red-500";
     micEnabled = false;
   }
+</script>
+
+<script>
+  document.getElementById("summaryModal").addEventListener("click", function(e) {
+    if (e.target.id === "summaryModal") closeSummaryModal();
+  });
+
 </script>
 
 {% endblock content %}

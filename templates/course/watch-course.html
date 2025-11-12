@@ -228,7 +228,7 @@
                                 </button>
                             </h5>
                         </div>
-                        {% for video in lesson.video_set.all %}
+                        {% for video in lesson.video_set.all|dictsort:"serial_number" %}
                         <div id="id{{video.lesson.id}}" class="collapse show" aria-labelledby="curriculumheadingOne" data-parent="#accordionCurriculum">
                             <div class="border-top px-5 py-4 min-height-70 d-md-flex align-items-center">
                                 <div class="d-flex align-items-center me-auto mb-4 mb-md-0">

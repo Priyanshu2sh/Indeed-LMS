@@ -143,6 +143,7 @@
                         <a href="#" class="font-size-sm text-gray-800">{{course.category}}</a>
                     </div>
 
+                    {% comment %}
                     <div class="mb-4 mb-md-0 me-md-6 me-lg-4 me-xl-6">
                         <h6 class="mb-0">Review</h6>
                         <div class="d-lg-flex align-items-center">
@@ -155,6 +156,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endcomment %}
                 </div>
 
 <div>
@@ -257,7 +259,7 @@
                         <div class="d-flex align-items-center mb-2">
                             <ins class="h2 mb-0">₹ {% discount_calculation course.price course.discount %}{% if course.is_subscription == True %}/Month{% endif %}</ins>
                             <del class="ms-3">₹ {{course.price}}</del>
-                            <div class="badge badge-lg badge-purple text-white ms-auto fw-normal">91% Off</div>
+                            <div class="badge badge-lg badge-purple text-white ms-auto fw-normal">{{course.discount}}% Off</div>
                         </div>
                         
                         <div class="d-flex align-items-center text-alizarin mb-6">
@@ -513,7 +515,7 @@
                                     </button>
                                 </h5>
                             </div>
-                            {% for video in lesson.video_set.all %}
+                            {% for video in lesson.video_set.all|dictsort:"serial_number" %}
                             <div id="id{{video.lesson.id}}" class="collapse show" aria-labelledby="curriculumheadingOne" data-parent="#accordionCurriculum">
                                 <div class="border-top px-5 py-4 min-height-70 d-md-flex align-items-center">
                                     <div class="d-flex align-items-center me-auto mb-4 mb-md-0">

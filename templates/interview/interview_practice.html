@@ -1,152 +1,167 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-/* Keep gradient static */
-.gradient-bg {
-  background: linear-gradient(135deg, #2a0312ff, #2287ff);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Floating/Bouncing Rocket */
-.float {
-  animation: bounce 3s infinite;
-}
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
-
-/* Glow effect */
-.glow {
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8),
-               0 0 25px rgba(255, 255, 255, 0.5),
-               0 0 45px rgba(255, 255, 255, 0.3);
-}
-
-/* Countdown box */
-#countdown span {
-  display: inline-block;
-  min-width: 70px;
-  padding: 14px;
-  margin: 6px;
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.25rem;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-  animation: fadeIn 1s ease-in-out;
-}
-
-/* Fade-in */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* Decorative waves */
-.wave {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 200%;
-  height: 200px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 43%;
-  animation: wave 8s linear infinite;
-}
-.wave:nth-child(2) {
-  animation-delay: -4s;
-  opacity: 0.6;
-}
-@keyframes wave {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-/* Typing effect */
-#typing {
-  border-right: 2px solid #fff;
-  padding-right: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.shape-left {
-  left: 0;
-  max-width: 0;
-  overflow: hidden;
-}
-</style>
-
-<div class="flex flex-col items-center justify-center h-screen gradient-bg text-center px-6 relative overflow-hidden">
-  <!-- Floating Rocket -->
-  <h1 class="text-8xl font-extrabold text-white mb-6 mt-12 glow float">🚀</h1>
-
-  <!-- Gradient Animated Text -->
-  <h2 class="text-7xl text-light font-extrabold mb-4 bg-clip-text text-transparent 
-             bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 
-             animate-pulse glow">
-    Coming Soon
-  </h2>
-
-  <!-- Typing Effect Tagline -->
-  <p class="text-lg text-white mb-10 px-4 py-2 rounded-xl shadow-lg glow">
-    <span id="typing"></span>
-  </p>
-  
-  <!-- Countdown -->
-  <div id="countdown" class="flex justify-center flex-wrap gap-4 text-2xl mb-12"></div>
-
-  <!-- Decorative waves -->
-  <div class="wave"></div>
-  <div class="wave"></div>
-</div>
-
-<script>
-  // Countdown
-  const countdown = document.getElementById("countdown");
-  // Set a fixed launch date (change as needed)
-  const targetDate = new Date("2025-09-31T23:59:59");
-  targetDate.setDate(targetDate.getDate() + 7);
-
-  function updateCountdown() {
-      const now = new Date().getTime();
-      const distance = targetDate - now;
-
-      if (distance <= 0) {
-          countdown.innerHTML = "<span>🎉 We are live now!</span>";
-          return;
-      }
-
-      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      countdown.innerHTML = `
-          <span>${days}d</span>
-          <span>${hours}h</span>
-          <span>${minutes}m</span>
-          <span>${seconds}s</span>
-      `;
+  .shape-left {
+    left: 0;
+    max-width: 0;
+    overflow: hidden;
   }
 
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
+  .interview-page {
+    background: #f8f9fc;
+    min-height: 100vh;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    padding: 3rem 0;
+  }
 
-  // Typing effect
-  const text = "We’re crafting something extraordinary. Stay tuned!";
-  let i = 0;
-  function typeEffect() {
-    if (i < text.length) {
-      document.getElementById("typing").innerHTML += text.charAt(i);
-      i++;
-      setTimeout(typeEffect, 50);
+  .interview-page .left-section {
+    background: white;
+    border-radius: 18px;
+    padding: 2rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    text-align: left;
+    height: 100%;
+  }
+
+  .interview-page .left-section h2 {
+    font-weight: 700;
+    color: #1a237e;
+    margin-bottom: 1.5rem;
+    font-size: 1.7rem;
+  }
+
+  .interview-page .left-section p {
+    color: #555;
+    line-height: 1.6;
+    font-size: 1.3rem;
+  }
+
+  .interview-page .right-section {
+    background: white;
+    border-radius: 18px;
+    padding: 2rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .interview-page .form-title {
+    font-weight: 600;
+    color: #0d47a1;
+    border-bottom: 2px solid #0d47a1;
+    padding-bottom: 6px;
+    margin-bottom: 1.5rem;
+  }
+
+  .interview-page .custom-label {
+    color: #333;
+    font-weight: 600;
+  }
+
+  .interview-page .custom-input {
+    border-radius: 10px;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .interview-page .custom-input:focus {
+    border-color: #0d47a1;
+    box-shadow: 0 0 6px rgba(13, 71, 161, 0.3);
+  }
+
+  .interview-page .start-btn {
+    background: linear-gradient(90deg, #1e88e5, #3949ab);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: #fff;
+  }
+
+  .interview-page .start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30, 136, 229, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    .interview-page .left-section,
+    .interview-page .right-section {
+      margin-bottom: 1.5rem;
     }
   }
-  window.onload = typeEffect;
-</script>
+
+  .interview-setup-page .fadeIn {
+    animation: fadeInUpInterview 0.8s ease both;
+  }
+</style>
+
+<div class="interview-page">
+  <div class="container">
+    <div class="row g-10 align-items-stretch">
+      <!-- Left Section -->
+      <div class="col-md-5">
+        <div class="left-section h-100">
+          <h2>🎯 Interview Practice Module</h2>
+          <p>
+            Sharpen your interview skills with our AI-powered practice module.
+            Experience realistic, simulated sessions tailored to your goals and comfort level. Whether preparing for technical or HR rounds, our intelligent system helps you train effectively with dynamic, context-aware questions.
+          </p>
+          <p>Upload your resume and job description to personalize your experience — the system analyzes your background and simulates questions relevant to your desired role.</p>
+        </div>
+      </div>
+
+      <!-- Right Section -->
+      <div class="col-md-7">
+        <div class="right-section h-100">
+          <h5 class="form-title">🧩 Set Up Your Interview</h5>
+
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Interview Type -->
+            <div class="mb-3">
+              <label for="interviewType" class="custom-label">Choose Interview Type</label>
+              <select class="form-select custom-input" id="interviewType" name="interviewType" required>
+                <option value="">-- Select Type --</option>
+                <option value="hr">HR Interview</option>
+                <option value="technical">Technical Interview</option>
+              </select>
+            </div>
+
+            <!-- Difficulty -->
+            <div class="mb-3">
+              <label for="difficulty" class="custom-label">Select Difficulty</label>
+              <select class="form-select custom-input" id="difficulty" name="difficulty" required>
+                <option value="">-- Select Difficulty --</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+
+            <!-- JD Upload -->
+            <div class="mb-3">
+              <label for="jdFile" class="custom-label">Upload Job Description</label>
+              <input class="form-control custom-input" type="file" id="jdFile" name="jdFile" accept=".pdf,.doc,.docx" required>
+            </div>
+
+            <!-- Resume Upload -->
+            <div class="mb-4">
+              <label for="resumeFile" class="custom-label">Upload Resume</label>
+              <input class="form-control custom-input" type="file" id="resumeFile" name="resumeFile" accept=".pdf,.doc,.docx" required>
+            </div>
+
+            <!-- Start Button -->
+            <div class="d-grid">
+              <button type="submit" class="start-btn">🚀 Start Interview</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}

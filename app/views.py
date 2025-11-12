@@ -10,7 +10,7 @@ from django.http import FileResponse, HttpResponse, JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from django.db.models import Count
+from django.db.models import Count, Avg
 from django.conf.urls import handler404
 import json
 from datetime import datetime, timedelta
@@ -40,6 +40,10 @@ def HOME(request):
             wishlist = Wishlist.objects.filter(user=request.user, course=c)
             if wishlist:
                 c.is_wishlist = True
+
+        c.course_rating_average = CourseReview.objects.filter(course=c).aggregate(average_rating=Sum('rating') / Count('id'))['average_rating'] or 0
+        # Convert to percent (since rating max is 5)
+        c.rating_percent = (c.course_rating_average / 5) * 100
 
     context = {
         'category':category,
@@ -263,7 +267,7 @@ def CHECKOUT(request,slug):
     order = None
     razorpay_key_id = settings.RAZORPAY_KEY_ID
     if settings.ENVIRONMENT == 'Local':
-        callback_url = "http://127.0.0.1:8000/verify_payment"
+        callback_url = "http://127.0.0.1:8002/verify_payment"
     if settings.ENVIRONMENT == 'Server':
         callback_url = "https://lms.indeedinspiring.com/verify_payment"
 
@@ -796,10 +800,9 @@ def course_enquiry(request, slug):
 
 
 def interview_practice(request):
-    return render(request, 'interview/interview_practice.html')
-    # if not request.user.is_authenticated:
-    #     messages.error(request, 'Please login first!')
-    #     return redirect('register')
+    if not request.user.is_authenticated:
+        messages.error(request, 'Please login first!')
+        return redirect('register')
 
     if request.method == 'POST':
         interviewType = request.POST.get('interviewType')
