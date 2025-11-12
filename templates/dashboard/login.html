@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Login | Indeed LMS</title>
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'vendors/styles/core.css' %}"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'vendors/styles/style.css' %}"
+    />
+    <script
+      src="https://kit.fontawesome.com/b01b659931.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      body {
+        background: linear-gradient(135deg, #d1e0e0, #b5c7f0);
+        font-family: "Inter", sans-serif;
+        margin-top:40%%;
+      }
+
+      .login-container {
+     
+        max-width: 400px;
+        margin: 80px auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        padding: 32px 24px;
+      }
+
+      .login-title {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 24px;
+        color: #4f8df5;
+        font-weight: 700;
+      }
+
+      .form-group {
+        position: relative;
+        margin-bottom: 18px;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 10px 40px 10px 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+      }
+
+      .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #777;
+      }
+
+      .toggle-password:hover {
+        color: #4f8df5;
+      }
+
+      .btn-login {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(135deg, #081a71ff 0%, #f357a8 100%);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.2s;
+      }
+
+      .btn-login:hover {
+        background: linear-gradient(135deg, #4f8df5 0%, #f357a8 100%);
+      }
+
+      .error-message {
+        color: #d32f2f;
+        text-align: center;
+        margin-bottom: 12px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="login-container">
+      <div class="login-title">Admin Login</div>
+
+      <form id="fakeLoginForm">
+        <div class="form-group">
+          <input
+            type="text"
+            id="email"
+            class="form-control"
+            placeholder="Email"
+            required
+          />
+        
+        </div>
+
+        <div class="form-group">
+          <input
+            type="password"
+            id="password"
+            class="form-control"
+            placeholder="Password"
+            required
+          />
+          <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+        </div>
+
+        <button type="submit" class="btn-login">Login</button>
+      </form>
+    </div>
+
+    <script>
+      // Toggle show/hide password
+      const togglePassword = document.querySelector("#togglePassword");
+      const password = document.querySelector("#password");
+
+      togglePassword.addEventListener("click", function () {
+        const type =
+          password.getAttribute("type") === "password" ? "text" : "password";
+        password.setAttribute("type", type);
+        this.classList.toggle("fa-eye");
+        this.classList.toggle("fa-eye-slash");
+      });
+
+      // Fake login (no backend)
+      const fakeLoginForm = document.getElementById("fakeLoginForm");
+      fakeLoginForm.addEventListener("submit", function (e) {
+        e.preventDefault(); // prevent page reload
+
+        const email = document.getElementById("email").value.trim();
+        const pass = document.getElementById("password").value.trim();
+
+        if (email && pass) {
+          // Redirect to dashboard
+          window.location.href = "{% url 'dashboard' %}";
+        } else {
+          alert("Please fill in both email and password.");
+        }
+      });
+    </script>
+  </body>
+</html>

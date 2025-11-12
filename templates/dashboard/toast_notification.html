@@ -1,0 +1,52 @@
+{% if messages %}
+  <div id="toast-container" style="position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;max-width:90vw;">
+    {% for message in messages %}
+      <div class="toast-message" style="
+        background: #43a047;
+        color: #fff;
+        padding: 14px 24px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+        font-weight: 600;
+        min-width: 220px;
+        max-width: 95vw;
+        text-align: center;
+        word-break: break-word;
+        font-size: 1rem;
+      ">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  <style>
+    @media (max-width: 600px) {
+      #toast-container {
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 98vw;
+        max-width: 98vw;
+        padding: 0 4px;
+      }
+      .toast-message {
+        padding: 10px 8px;
+        font-size: 0.95rem;
+        min-width: 120px;
+        max-width: 98vw;
+      }
+    }
+    @media (max-width: 400px) {
+      .toast-message {
+        font-size: 0.85rem;
+        padding: 8px 4px;
+      }
+    }
+  </style>
+  <script>
+    setTimeout(function() {
+      var container = document.getElementById('toast-container');
+      if (container) container.style.display = 'none';
+    }, 2000); // Hide after 2 seconds
+  </script>
+{% endif %}

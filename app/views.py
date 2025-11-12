@@ -162,13 +162,26 @@ def COURSE_DETAILS(request, slug):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login first')
         return redirect('register')
+
     category = Categories.get_all_category(Categories)
-    time_duration = Video.objects.filter(course__slug = slug).aggregate(sum = Sum('time_duration'))
 
-    course = Course.objects.get(slug = slug)
-    reviews = CourseReview.objects.filter(course = course, rating__in=[4, 4.5, 5]).order_by('-date')
-    course_rating_average = CourseReview.objects.filter(course=course).aggregate(average_rating=Sum('rating') / Count('id'))['average_rating'] or 0
+    # Get the course first
+    course = Course.objects.get(slug=slug)
 
+    # Calculate total duration in hours and minutes for this course
+    total_duration = Video.objects.filter(course=course).aggregate(
+        total=Sum('time_duration')
+    )['total'] or 0
+    hours, minutes = divmod(total_duration, 60)
+    formatted_duration = f"{hours}h {minutes}m" if hours else f"{minutes}m"
+
+    # Reviews
+    reviews = CourseReview.objects.filter(course=course, rating__in=[4, 4.5, 5]).order_by('-date')
+    course_rating_average = CourseReview.objects.filter(course=course).aggregate(
+        average_rating=Sum('rating') / Count('id')
+    )['average_rating'] or 0
+
+    # Star counts
     one_star = CourseReview.objects.filter(course=course, rating__in=[0.5, 1]).count()
     two_star = CourseReview.objects.filter(course=course, rating__in=[1.5, 2]).count()
     three_star = CourseReview.objects.filter(course=course, rating__in=[2.5, 3]).count()
@@ -176,7 +189,7 @@ def COURSE_DETAILS(request, slug):
     five_star = CourseReview.objects.filter(course=course, rating__in=[4.5, 5]).count()
 
     total_reviews = one_star + two_star + three_star + four_star + five_star
-    # Avoid division by zero
+
     if total_reviews > 0:
         one_star_percent = (one_star / total_reviews) * 100
         two_star_percent = (two_star / total_reviews) * 100
@@ -186,8 +199,9 @@ def COURSE_DETAILS(request, slug):
     else:
         one_star_percent = two_star_percent = three_star_percent = four_star_percent = five_star_percent = 0
 
+    # Handle review submission
     if request.method == 'POST':
-        if not(request.user.first_name and request.user.last_name):
+        if not (request.user.first_name and request.user.last_name):
             messages.error(request, 'Please complete your profile before leaving a review.')
             return redirect('profile')
 
@@ -204,14 +218,17 @@ def COURSE_DETAILS(request, slug):
         )
         comment.save()
         messages.success(request, 'Comment added successfully!')
-        
+
+    # Enrollment check
     try:
-        check_enroll = UserCourse.objects.get(user = request.user, course = course, is_active=True)
+        check_enroll = UserCourse.objects.get(user=request.user, course=course, is_active=True)
     except UserCourse.DoesNotExist:
         check_enroll = None
 
-    latest_courses = Course.objects.filter(status = 'PUBLISH').order_by('-id')[:5]
+    # Latest courses
+    latest_courses = Course.objects.filter(status='PUBLISH').order_by('-id')[:5]
 
+    # Assessments with user progress
     assessments = Assessment.objects.filter(course=course).order_by('day_number')
     for a in assessments:
         user_progress = UserAssessmentProgress.objects.filter(user=request.user, assessment=a).first()
@@ -222,7 +239,8 @@ def COURSE_DETAILS(request, slug):
             a.wrong = user_progress.wrong
         else:
             a.user_completed = False
-            
+
+    # Wishlist courses
     if request.user.is_authenticated:
         wishlist_courses = Course.objects.filter(wishlist__user=request.user)
     else:
@@ -233,11 +251,11 @@ def COURSE_DETAILS(request, slug):
     if not course_enquiry:
         course_enquiry = False
     context = {
-        'course':course,
-        'category':category,
-        'time_duration':time_duration,
+        'course': course,
+        'category': category,
+        'time_duration': formatted_duration,   # 👈 now shows as "2h 15m"
         'latest_courses': latest_courses,
-        'check_enroll':check_enroll,
+        'check_enroll': check_enroll,
         'reviews': reviews,
         'course_rating_average': round(course_rating_average, 2),
         'one_star': one_star,
@@ -255,7 +273,7 @@ def COURSE_DETAILS(request, slug):
         'wishlist_courses': wishlist_courses,
         'course_enquiry': course_enquiry
     }
-    return render(request,'course/course_details.html',context)
+    return render(request, 'course/course_details.html', context)
 
 
 def PAGE_NOT_FOUND(request, exception):
@@ -827,3 +845,6 @@ def interview_practice(request):
 
 def interview_page(request):
     return render(request, 'interview/interview_page.html')
+
+
+

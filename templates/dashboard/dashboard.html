@@ -1,328 +1,221 @@
-{% extends 'dashboard/base.html' %} {% load static %} {% block content %}
-<div class="pd-ltr-20">
-  <div class="card-box pd-20 height-100-p mb-30">
-    <div class="row align-items-center">
-      <div class="col-md-4">
-        <img src="{% static 'vendors/images/banner-img.png' %}" alt="" />
-      </div>
-      <div class="col-md-8">
-        <h4 class="font-20 weight-500 mb-10 text-capitalize">
-          Welcome back
-          <div class="weight-600 font-30 text-blue">Johnny Brown!</div>
-        </h4>
-        <p class="font-18 max-width-600">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Unde hic non
-          repellendus debitis iure, doloremque assumenda. Autem modi, corrupti,
-          nobis ea iure fugiat, veniam non quaerat mollitia animi error
-          corporis.
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-xl-3 mb-30">
-      <div class="card-box height-100-p widget-style1">
-        <div class="d-flex flex-wrap align-items-center">
-          <div class="progress-data">
-            <div id="chart"></div>
-          </div>
-          <div class="widget-data">
-            <div class="h4 mb-0">2020</div>
-            <div class="weight-600 font-14">Contact</div>
-          </div>
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  .pd-ltr-40 {
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .stat-card {
+    position: relative;
+    background: linear-gradient(135deg, #4f8df5, #6fc1ff 60%, #b2e3ff 100%);
+    color: white;
+    border-radius: 20px;
+    padding: 30px 20px; /* Reduced padding for shorter height */
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    width: 80%;
+    min-height: 180px; /* Decreased height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+  }
+
+  .dashboard-cards-row {
+    margin-top: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    width: 90%;
+  }
+
+  .card-column {
+    flex: 0 0 40%;
+    max-width: 40%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+  }
+
+  .card-column .stat-card {
+    border-radius: 20px;
+  }
+
+  /* For tablets */
+  @media (max-width: 992px) {
+    .card-column {
+      flex: 0 0 40%;
+      max-width: 40%;
+    }
+    
+    .stat-card {
+      width: 85%;
+      min-height: 170px; /* Reduced for tablets */
+      padding: 25px 15px;
+    }
+  }
+
+  /* For mobile devices */
+  @media (max-width: 768px) {
+    .card-column {
+      flex: 0 0 80%;
+      max-width: 80%;
+    }
+    
+    .pd-ltr-40 {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    
+    .stat-card {
+      padding: 25px 15px;
+      min-height: 160px; /* Reduced for mobile */
+      width: 90%;
+    }
+  }
+
+  /* For very small screens */
+  @media (max-width: 480px) {
+    .card-column {
+      flex: 0 0 90%;
+      max-width: 90%;
+    }
+    
+    .stat-card {
+      padding: 20px 15px;
+      min-height: 150px; /* Reduced for small screens */
+      width: 95%;
+    }
+    
+    .stat-number {
+      font-size: 2.5rem;
+    }
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  }
+
+  .stat-number {
+    font-size: 3.2rem;
+    font-weight: 700;
+  }
+
+  .stat-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 10px; /* Reduced margin */
+    letter-spacing: 0.5px;
+  }
+
+  /* Shine effect */
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    top: -60%;
+    left: -60%;
+    width: 120%;
+    height: 120%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.45) 60%, rgba(255,255,255,0.05) 100%);
+    transform: rotate(25deg);
+    pointer-events: none;
+    animation: shine-move 5s linear infinite;
+    border-radius: 20px;
+  }
+
+  @keyframes shine-move {
+    0% {
+      left: -60%;
+      top: -60%;
+    }
+
+    100% {
+      left: 100%;
+      top: 100%;
+    }
+  }
+</style>
+
+<div class="pd-ltr-40">
+  <div class="dashboard-cards-row">
+    <div class="card-column">
+      <a href="{% url 'courses' %}" style="text-decoration:none;display:block;width:100%;">
+        <div class="stat-card">
+          <div class="stat-number" data-count="{{ total_courses }}">0</div>
+          <div class="stat-title">Total Courses</div>
         </div>
-      </div>
+      </a>
     </div>
-    <div class="col-xl-3 mb-30">
-      <div class="card-box height-100-p widget-style1">
-        <div class="d-flex flex-wrap align-items-center">
-          <div class="progress-data">
-            <div id="chart2"></div>
-          </div>
-          <div class="widget-data">
-            <div class="h4 mb-0">400</div>
-            <div class="weight-600 font-14">Deals</div>
-          </div>
+
+    <div class="card-column">
+      <a href="{% url 'authors' %}" style="text-decoration:none;display:block;width:100%;">
+        <div class="stat-card">
+          <div class="stat-number" data-count="{{ total_authors }}">0</div>
+          <div class="stat-title">Total Authors</div>
         </div>
-      </div>
+      </a>
     </div>
-    <div class="col-xl-3 mb-30">
-      <div class="card-box height-100-p widget-style1">
-        <div class="d-flex flex-wrap align-items-center">
-          <div class="progress-data">
-            <div id="chart3"></div>
-          </div>
-          <div class="widget-data">
-            <div class="h4 mb-0">350</div>
-            <div class="weight-600 font-14">Campaign</div>
-          </div>
+
+    <div class="card-column">
+      <a href="{% url 'categories' %}" style="text-decoration:none;display:block;width:100%;">
+        <div class="stat-card">
+          <div class="stat-number" data-count="{{ total_categories }}">0</div>
+          <div class="stat-title">Total Categories</div>
         </div>
-      </div>
+      </a>
     </div>
-    <div class="col-xl-3 mb-30">
-      <div class="card-box height-100-p widget-style1">
-        <div class="d-flex flex-wrap align-items-center">
-          <div class="progress-data">
-            <div id="chart4"></div>
-          </div>
-          <div class="widget-data">
-            <div class="h4 mb-0">$6060</div>
-            <div class="weight-600 font-14">Worth</div>
-          </div>
+
+    <div class="card-column">
+      <a href="{% url 'categories' %}" style="text-decoration:none;display:block;width:100%;">
+        <div class="stat-card">
+          <div class="stat-number" data-count="{{ total_levels }}">0</div>
+          <div class="stat-title">Total Levels</div>
         </div>
-      </div>
+      </a>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-xl-8 mb-30">
-      <div class="card-box height-100-p pd-20">
-        <h2 class="h4 mb-20">Activity</h2>
-        <div id="chart5"></div>
-      </div>
+
+    <div class="card-column">
+      <a href="#" style="text-decoration:none;display:block;width:100%;">
+        <div class="stat-card">
+          <div class="stat-number" data-count="{{ total_enrolled_students }}">0</div>
+          <div class="stat-title">Enrolled Students</div>
+        </div>
+      </a>
     </div>
-    <div class="col-xl-4 mb-30">
-      <div class="card-box height-100-p pd-20">
-        <h2 class="h4 mb-20">Lead Target</h2>
-        <div id="chart6"></div>
-      </div>
-    </div>
-  </div>
-  <div class="card-box mb-30">
-    <h2 class="h4 pd-20">Best Selling Products</h2>
-    <table class="data-table table nowrap">
-      <thead>
-        <tr>
-          <th class="table-plus datatable-nosort">Product</th>
-          <th>Name</th>
-          <th>Color</th>
-          <th>Size</th>
-          <th>Price</th>
-          <th>Oty</th>
-          <th class="datatable-nosort">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="table-plus">
-            <img
-              src="{% static 'vendors/images/product-1.jpg' %}"
-              width="70"
-              height="70"
-              alt=""
-            />
-          </td>
-          <td>
-            <h5 class="font-16">Shirt</h5>
-            by John Doe
-          </td>
-          <td>Black</td>
-          <td>M</td>
-          <td>$1000</td>
-          <td>1</td>
-          <td>
-            <div class="dropdown">
-              <a
-                class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
-                href="#"
-                role="button"
-                data-toggle="dropdown"
-              >
-                <i class="dw dw-more"></i>
-              </a>
-              <div
-                class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
-              >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-eye"></i> View</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-edit2"></i> Edit</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-delete-3"></i> Delete</a
-                >
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="table-plus">
-            <img
-              src="vendors/images/product-2.jpg"
-              width="70"
-              height="70"
-              alt=""
-            />
-          </td>
-          <td>
-            <h5 class="font-16">Boots</h5>
-            by Lea R. Frith
-          </td>
-          <td>brown</td>
-          <td>9UK</td>
-          <td>$900</td>
-          <td>1</td>
-          <td>
-            <div class="dropdown">
-              <a
-                class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
-                href="#"
-                role="button"
-                data-toggle="dropdown"
-              >
-                <i class="dw dw-more"></i>
-              </a>
-              <div
-                class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
-              >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-eye"></i> View</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-edit2"></i> Edit</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-delete-3"></i> Delete</a
-                >
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="table-plus">
-            <img
-              src="vendors/images/product-3.jpg"
-              width="70"
-              height="70"
-              alt=""
-            />
-          </td>
-          <td>
-            <h5 class="font-16">Hat</h5>
-            by Erik L. Richards
-          </td>
-          <td>Orange</td>
-          <td>M</td>
-          <td>$100</td>
-          <td>4</td>
-          <td>
-            <div class="dropdown">
-              <a
-                class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
-                href="#"
-                role="button"
-                data-toggle="dropdown"
-              >
-                <i class="dw dw-more"></i>
-              </a>
-              <div
-                class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
-              >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-eye"></i> View</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-edit2"></i> Edit</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-delete-3"></i> Delete</a
-                >
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="table-plus">
-            <img
-              src="vendors/images/product-4.jpg"
-              width="70"
-              height="70"
-              alt=""
-            />
-          </td>
-          <td>
-            <h5 class="font-16">Long Dress</h5>
-            by Renee I. Hansen
-          </td>
-          <td>Gray</td>
-          <td>L</td>
-          <td>$1000</td>
-          <td>1</td>
-          <td>
-            <div class="dropdown">
-              <a
-                class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
-                href="#"
-                role="button"
-                data-toggle="dropdown"
-              >
-                <i class="dw dw-more"></i>
-              </a>
-              <div
-                class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
-              >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-eye"></i> View</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-edit2"></i> Edit</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-delete-3"></i> Delete</a
-                >
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="table-plus">
-            <img
-              src="vendors/images/product-5.jpg"
-              width="70"
-              height="70"
-              alt=""
-            />
-          </td>
-          <td>
-            <h5 class="font-16">Blazer</h5>
-            by Vicki M. Coleman
-          </td>
-          <td>Blue</td>
-          <td>M</td>
-          <td>$1000</td>
-          <td>1</td>
-          <td>
-            <div class="dropdown">
-              <a
-                class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle"
-                href="#"
-                role="button"
-                data-toggle="dropdown"
-              >
-                <i class="dw dw-more"></i>
-              </a>
-              <div
-                class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
-              >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-eye"></i> View</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-edit2"></i> Edit</a
-                >
-                <a class="dropdown-item" href="#"
-                  ><i class="dw dw-delete-3"></i> Delete</a
-                >
-              </div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="footer-wrap pd-20 mb-20 card-box">
-    DeskApp - Bootstrap 4 Admin Template By
-    <a href="https://github.com/dropways" target="_blank">Ankit Hingarajiya</a>
   </div>
 </div>
+
+<script>
+  // CountUp Animation
+  document.addEventListener("DOMContentLoaded", () => {
+    const counters = document.querySelectorAll(".stat-number");
+    counters.forEach(counter => {
+      const target = +counter.getAttribute("data-count");
+      const speed = 200;
+
+      const updateCount = () => {
+        const current = +counter.innerText.replace(/,/g, '');
+        const increment = target / speed;
+
+        if (current < target) {
+          counter.innerText = Math.ceil(current + increment).toLocaleString();
+          setTimeout(updateCount, 15);
+        } else {
+          counter.innerText = target.toLocaleString();
+        }
+      };
+
+      updateCount();
+    });
+  });
+</script>
 {% endblock %}
