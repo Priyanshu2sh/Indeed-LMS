@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .shape-left {
+    left: 0;
+    max-width: 0;
+    overflow: hidden;
+  }
+
+  .card {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 550px;
+    margin: 25px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+  }
+
+  .fail-icon {
+    font-size: 60px;
+    color: #d9534f;
+  }
+
+  h2 {
+    color: #d9534f;
+    margin-bottom: 10px;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .details-box {
+    background: #fff6f6;
+    border: 1px solid #ffbcbc;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  .details-box p {
+    margin: 8px 0;
+  }
+
+  .home-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.2s ease-in-out;
+  }
+
+  .retry-btn {
+    background: #d9534f;
+    color: white;
+  }
+
+  .retry-btn:hover {
+    background: #c64541;
+  }
+
+  .home-btn {
+    background: #e0e0e0;
+    color: #333;
+    margin-left: 10px;
+  }
+
+  .home-btn:hover {
+    background: #cfcfcf;
+  }
+</style>
+
+<div class="card">
+
+  <div class="fail-icon">✖</div>
+  <h2>Payment Failed</h2>
+
+  <p>Unfortunately, your payment for order <strong>#{{ order.id }}</strong> could not be processed.</p>
+
+  <div class="details-box">
+    <p><strong>Order Amount:</strong> ₹{{ order.total_price }}</p>
+    <p><strong>Payment Status:</strong> {{ order.status }}</p>
+  </div>
+
+  <p style="margin-top: 20px; color: #d9534f;">
+    Don't worry — If any amount was deducted, it will be refunded automatically.<br>
+    You may try again or choose another payment method.
+  </p>
+  <a href="{% url 'home' %}" class="home-btn">Go to Home</a>
+
+</div>
+
+{% endblock content %}

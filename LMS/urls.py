@@ -73,6 +73,14 @@ urlpatterns = [
 
     path('interview_practice', views.interview_practice, name='interview_practice'),
     path('interview', views.interview_page, name='interview_page'),
+    path("demo/save-inputs/", views.save_demo_inputs, name="save_demo_inputs"),
+    path('demo-payment/', views.demo_payment, name='demo_payment'),
+    path('demo/config/', views.demo_config_api, name='demo_config_api'),
+    path('demo/order/', views.create_demo_order, name='create_demo_order'),
+    path('demo/verify/', views.verify_demo_payment, name='verify_demo_payment'),
+    path('start-demo/', views.start_demo, name='start_demo'),
+    path("order-fail/<str:order_id>", views.order_failed, name="order_failed"),
+
 
 
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)

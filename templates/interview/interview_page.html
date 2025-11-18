@@ -161,7 +161,23 @@
   </div>
 </div>
 
+
 <div class="main-screen container mt-4 chat-container">
+  <!-- Add this somewhere in interview_page.html (e.g. near header) -->
+  <div style="margin-bottom: 10px;">
+    <div id="demo-timer" style="
+        background: #e48484;
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 600;
+        display: none;
+        width: fit-content;      /* Auto width */
+    ">
+      Time left: <span id="time-left">--:--</span>
+    </div>
+  </div>
+
   <!-- Heading -->
   <h3 class="mb-3">Practice Interview</h3>
 
@@ -198,18 +214,6 @@
     <h2>Interview Result Summary</h2>
 
     <div id="summaryContent"></div>
-
-    <button onclick="closeSummaryModal()" style="
-      margin-top: 20px;
-      padding: 8px 16px;
-      background: black;
-      color:white;
-      border:none;
-      border-radius:4px;
-      cursor:pointer;
-    ">
-      Close
-    </button>
   </div>
 </div>
 
@@ -262,24 +266,68 @@
 
   let socket = null;
   let micIcon = document.getElementById("mic-icon");
+  let demoRemaining = 0;
+  let timerEl = null;
+  let timeLeftEl = null;
+  let timerStarted = false;
+
+  // Called whenever backend sends an updated remaining time
+  function updateTimerDisplay(seconds) {
+    if (!timerEl || !timeLeftEl) {
+      timerEl = document.getElementById("demo-timer");
+      timeLeftEl = document.getElementById("time-left");
+    }
+
+    if (!timerEl || !timeLeftEl) return;
+
+    if (seconds <= 0) {
+      timerEl.style.display = "none";
+      return;
+    }
+
+    const minutes = Math.floor(seconds / 60);
+    const remSeconds = seconds % 60;
+    timerEl.style.display = "block";
+    timeLeftEl.textContent = `${String(minutes).padStart(2, '0')}:${String(remSeconds).padStart(2, '0')}`;
+  }
 
   function connectWebSocket() {
     // Replace this with your actual backend WebSocket endpoint
-    const wsUrl = "ws://127.0.0.1:8000/ws/interview/";
+    const wsUrl = "{{ chat_socket_url }}";
 
     socket = new WebSocket(wsUrl);
 
     socket.onopen = function () {
       console.log("✅ WebSocket connected");
-      // Example: send initial message if needed
-      // socket.send(JSON.stringify({ message: "Interview started" }));
     };
 
     socket.onmessage = function (event) {
       const data = JSON.parse(event.data);
       console.log("📩 Message from server:", data);
+
+      if (data.error === "No demo/paid time available. Please purchase or contact admin.") {
+        alert(data.error);
+        window.location.href = "/interview_practice";  // Redirect to subscription/purchase page
+        return;
+      }
+
+      // 🕒 Handle time update
+      if (data.type === "time_update" && typeof data.remaining_seconds !== "undefined") {
+        demoRemaining = parseInt(data.remaining_seconds, 10);
+        updateTimerDisplay(demoRemaining);
+      }
+
+      // ⏰ Handle time expiration
+      if (data.type === "time_expired") {
+        console.log("⏰ Time expired message received");
+        alert(data.message || "Your demo/paid session has ended.");
+
+        try { stopMic(); } catch (e) { console.warn("stopMic() not defined:", e); }
+      }
+
       if (data.type === "session_complete" && data.summary) {
         const s = data.summary;
+        try { socket.close(); } catch(e){}
 
         const html = `
           <div style="font-family: Arial, sans-serif; line-height: 1.5;">
@@ -391,155 +439,175 @@
     socket.onerror = function (error) {};
   }
 
+  // =======================
+  // CONFIG
+  // =======================
+  let noiseFloor = 0.01;
+  let smoothing = 0.95;
+
+  const RELATIVE_FACTOR = 2.2;        // how much louder than noise
+  const ABSOLUTE_MIN_RMS = 0.008;     // minimum RMS required to count as voice
+  const START_FRAMES = 3;             // must detect 3 frames of speech before start
+  const STOP_FRAMES = 80;             // ~1.5 sec depending on 60fps → prevents early stop
+
+  // =======================
+  // STATE
+  // =======================
   let micStream;
   let mediaRecorder;
   let audioChunks = [];
   let audioContext, analyser, dataArray, source;
   let silenceTimer = null;
+  let analyzing = false;
 
+  let startCounter = 0;
+  let stopCounter = 0;
+
+
+  // =======================
+  // START MIC
+  // =======================
   async function startMic() {
     micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
     mediaRecorder = new MediaRecorder(micStream, { mimeType: "audio/webm" });
 
-    // Collect chunks only while recording
     mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        audioChunks.push(event.data);
-      }
+      if (event.data.size > 0) audioChunks.push(event.data);
     };
 
-    // When speech fully ends → send blob
     mediaRecorder.onstop = () => {
       if (audioChunks.length > 0) {
         const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-        audioChunks = []; // reset for next speech
+        audioChunks = [];
 
         if (socket && socket.readyState === WebSocket.OPEN) {
-          console.log("📤 Sending full speech to backend:", audioBlob);
+          console.log("📤 Sending speech blob to backend...");
           socket.send(audioBlob);
         }
       }
 
-      stopMic(); // fully stop mic after sending
+      stopMic();
     };
 
-    // ---- Setup analyser for speech detection ----
+    // ANALYSER
     audioContext = new AudioContext();
     source = audioContext.createMediaStreamSource(micStream);
     analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048;
+    analyser.fftSize = 1024;
+
     dataArray = new Uint8Array(analyser.fftSize);
-    freqData = new Uint8Array(analyser.frequencyBinCount); // frequency-domain
+
     source.connect(analyser);
 
-    detectSpeech(); // start detection loop
+    analyzing = true;
+    detectSpeech();
 
     document.getElementById("mic-icon").className =
       "fas fa-microphone text-green-500";
   }
 
-  let noiseFloor = 0.01;   // gets auto-learned
-  let smoothing = 0.95;    // noise floor smoothing factor
 
+  // =======================
+  // STOP MIC
+  // =======================
+  function stopMic() {
+    analyzing = false;
+
+    try {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+        mediaRecorder.stop();
+      }
+    } catch (e) {}
+
+    if (micStream) {
+      micStream.getTracks().forEach((t) => t.stop());
+    }
+
+    if (audioContext) {
+      try { audioContext.close(); } catch (e) {}
+      audioContext = null;
+    }
+
+    if (silenceTimer) clearTimeout(silenceTimer);
+
+    document.getElementById("mic-icon").className =
+      "fas fa-microphone-slash text-red-500";
+  }
+
+
+  // =======================
+  // STABLE RMS-BASED VAD
+  // =======================
   function detectSpeech() {
+    if (!analyzing || !analyser) return;
+
     analyser.getByteTimeDomainData(dataArray);
-    // --- Frequency check (human voice range ~85 Hz to 4000 Hz) ---
-    analyser.getByteFrequencyData(freqData);
 
-    const sampleRate = audioContext.sampleRate; // usually 44100 Hz
-    const nyquist = sampleRate / 2; // max frequency
-    const freqStep = nyquist / freqData.length;
-
-    let humanEnergy = 0;
-    let totalEnergy = 0;
-
-    for (let i = 0; i < freqData.length; i++) {
-      const freq = i * freqStep;
-      const mag = freqData[i];
-      totalEnergy += mag;
-
-      if (freq >= 85 && freq <= 4000) {
-        humanEnergy += mag;
-      }
-    }
-
-    const humanRatio = humanEnergy / (totalEnergy + 1);
-
-    // Calculate RMS volume
-    let sumSquares = 0;
+    // RMS calculation
+    let sum = 0;
     for (let i = 0; i < dataArray.length; i++) {
-      const val = (dataArray[i] - 128) / 128;
-      sumSquares += val * val;
+      const v = (dataArray[i] - 128) / 128;
+      sum += v * v;
     }
-    const rms = Math.sqrt(sumSquares / dataArray.length);
+    const rms = Math.sqrt(sum / dataArray.length);
 
-    // Adaptive noise floor update (only when no speech detected)
-    noiseFloor = smoothing * noiseFloor + (1 - smoothing) * rms;
+    // Update noise floor only when quiet
+    if (rms < noiseFloor * 1.3) {
+      noiseFloor = smoothing * noiseFloor + (1 - smoothing) * rms;
+    }
 
-    // Dynamic speech threshold
-    const threshold = noiseFloor * 3; // 3x louder than background noise
+    // Dynamic threshold
+    const threshold = Math.max(noiseFloor * RELATIVE_FACTOR, ABSOLUTE_MIN_RMS);
 
-    const speaking = rms > threshold && humanRatio > 0.45;
-    // const speaking = rms > 0.02 && humanRatio > 0.3;
+    const isSpeech = rms > threshold;
 
-    if (speaking) {
-      console.log("🎤 Speaking...");
-      if (mediaRecorder.state === "inactive") {
-        console.log("▶️ Started recording...");
-        mediaRecorder.start();
-      }
+    if (isSpeech) {
+      startCounter++;
+      stopCounter = 0;
 
-      // Reset silence timer (user resumed speaking)
-      if (silenceTimer) {
-        clearTimeout(silenceTimer);
-        silenceTimer = null;
+      if (startCounter >= START_FRAMES) {
+        if (mediaRecorder.state === "inactive") {
+          console.log("🎙️ Speech detected → recording started");
+          mediaRecorder.start();
+        }
+
+        if (silenceTimer) {
+          clearTimeout(silenceTimer);
+          silenceTimer = null;
+        }
       }
     } else {
-      // If recording → consider stopping only after a long pause
-      if (mediaRecorder.state === "recording" && !silenceTimer) {
-        silenceTimer = setTimeout(() => {
-          console.log("⏹️ Long silence detected → stopping mic");
-          mediaRecorder.stop();
-        }, 5000); // 5 sec pause considered end of speech
+      startCounter = 0;
+      stopCounter++;
+
+      // Stop only after long silence
+      if (stopCounter >= STOP_FRAMES) {
+        if (mediaRecorder.state === "recording" && !silenceTimer) {
+          silenceTimer = setTimeout(() => {
+            console.log("⏹️ Silence → stop recording");
+            mediaRecorder.stop();
+          }, 0);
+        }
       }
     }
 
     requestAnimationFrame(detectSpeech);
   }
 
-  // Stop mic completely
-  function stopMic() {
-    if (micStream) {
-      micStream.getTracks().forEach((track) => track.stop());
-      micStream = null;
-    }
-    if (audioContext) {
-      audioContext.close();
-      audioContext = null;
-    }
-    document.getElementById("mic-icon").className =
-      "fas fa-microphone text-red-500";
-  }
-
-  // Stop Mic
-  function stopMic() {
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      mediaRecorder.stop();
-    }
-    if (micStream) {
-      micStream.getTracks().forEach((track) => track.stop());
-    }
-    document.getElementById("mic-icon").className =
-      "fas fa-microphone-slash text-red-500";
-    micEnabled = false;
-  }
 </script>
 
 <script>
   document.getElementById("summaryModal").addEventListener("click", function(e) {
-    if (e.target.id === "summaryModal") closeSummaryModal();
-  });
+    if (e.target.id === "summaryModal") {
+      // Close the modal if needed
+      closeSummaryModal();
 
+      // Redirect to a different page
+      window.location.href = "/interview_practice"; 
+      // Example: window.location.href = "/dashboard";
+    }
+  });
 </script>
 
 {% endblock content %}

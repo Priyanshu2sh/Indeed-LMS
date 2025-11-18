@@ -106,10 +106,17 @@
         <div class="left-section h-100">
           <h2>🎯 Interview Practice Module</h2>
           <p>
-            Sharpen your interview skills with our AI-powered practice module.
-            Experience realistic, simulated sessions tailored to your goals and comfort level. Whether preparing for technical or HR rounds, our intelligent system helps you train effectively with dynamic, context-aware questions.
+            Sharpen your interview skills with our AI-powered practice module. Experience realistic, simulated sessions tailored to your goals and comfort level. Whether preparing for technical or HR rounds, our intelligent system helps you train effectively with dynamic, context-aware questions.
           </p>
-          <p>Upload your resume and job description to personalize your experience — the system analyzes your background and simulates questions relevant to your desired role.</p>
+          <p>Upload your resume and job description to personalize your session with role-relevant questions.</p>
+
+          {% if already_paid %}
+            <div class="alert alert-success mt-4">
+              ✅ You already have access!  
+              <br>
+              <b>Remaining Time:</b> {{ time_remaining }}
+            </div>
+          {% endif %}
         </div>
       </div>
 
@@ -118,7 +125,7 @@
         <div class="right-section h-100">
           <h5 class="form-title">🧩 Set Up Your Interview</h5>
 
-          <form method="post" enctype="multipart/form-data">
+          <form id="interviewForm" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
             <!-- Interview Type -->
@@ -155,8 +162,68 @@
             </div>
 
             <!-- Start Button -->
-            <div class="d-grid">
-              <button type="submit" class="start-btn">🚀 Start Interview</button>
+            <div class="d-grid mt-4 text-center">
+              {% load static %}
+              {% if already_paid %}
+                <!-- Case 1: User already paid -->
+                <button id="startDemoBtn"
+                        type="button"
+                        class="start-btn"
+                        style="background: linear-gradient(90deg, #10b981, #059669); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
+                  🚀 Continue Interview Session
+                </button>
+                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
+                  You have an active session. Resume anytime before it expires.
+                </p>
+
+              {% elif demo_used and paid_demo %}
+                <!-- Case 2: Demo is paid -->
+                <button id="startDemoBtn"
+                        type="button"
+                        class="start-btn"
+                        style="background: linear-gradient(90deg, #f59e0b, #d97706); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
+                  🚀 Start 5-min Demo
+                </button>
+                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
+                  💰 This demo costs ₹{{demo_price}}. You’ll be redirected to secure payment.
+                </p>
+
+              {% elif demo_used and not paid_demo %}
+                <!-- Case 2: Demo is paid -->
+                <button id="startDemoBtn"
+                        type="button"
+                        class=""
+                        style="background: linear-gradient(90deg, #cbc0ae, #5b5753); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;" disabled>
+                  🚀 Start 5-min Demo
+                </button>
+                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
+                  You have already used your demo completely. Please contact admin for further access.
+                </p>
+
+              {% elif paid_demo %}
+                <!-- Case 2: Demo is paid -->
+                <button id="startDemoBtn"
+                        type="button"
+                        class="start-btn"
+                        style="background: linear-gradient(90deg, #f59e0b, #d97706); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
+                  🚀 Start 5-min Demo
+                </button>
+                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
+                  💰 This demo costs ₹{{demo_price}}. You’ll be redirected to secure payment.
+                </p>
+
+              {% else %}
+                <!-- Case 3: Demo is free -->
+                <button id="startDemoBtn"
+                        type="button"
+                        class="start-btn"
+                        style="background: linear-gradient(90deg, #3b82f6, #2563eb); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
+                  🚀 Start Free Demo
+                </button>
+                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
+                  🎉 Enjoy your free practice session!
+                </p>
+              {% endif %}
             </div>
           </form>
         </div>
@@ -164,4 +231,118 @@
     </div>
   </div>
 </div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log("🟢 Page loaded, initializing demo setup...");
+  
+  const startBtn = document.getElementById('startDemoBtn');
+  const form = document.getElementById('interviewForm');
+
+  try {
+
+    // ✅ 2. Attach button click handler
+    startBtn.onclick = async () => {
+      console.log("🟩 Start Demo button clicked.");
+
+      try {
+        // 2.1 Validate form inputs
+        const interviewType = form.querySelector('select[name="interviewType"]').value;
+        const difficulty = form.querySelector('select[name="difficulty"]').value;
+        const jdFile = form.querySelector('input[name="jdFile"]').files[0];
+        const resumeFile = form.querySelector('input[name="resumeFile"]').files[0];
+
+        console.log("📋 Current input values:", { interviewType, difficulty, jdFile, resumeFile });
+
+        if (!interviewType || !difficulty || !jdFile || !resumeFile) {
+          alert("Please fill all fields and upload both files before starting the demo.");
+          console.error("❌ Missing input fields or files.");
+          return;
+        }
+
+        // ✅ 3. Save form inputs
+        console.log("💾 Saving form data...");
+        const formData = new FormData(form);
+        const saveResp = await fetch("{% url 'save_demo_inputs' %}", {
+          method: "POST",
+          body: formData,
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        });
+
+        console.log("💾 Save response status:", saveResp.status);
+        const saveData = await saveResp.json();
+        console.log("💾 Save response JSON:", saveData);
+
+        if (!saveData.success) {
+          alert("Error saving your details. Please try again.");
+          console.error("❌ Save failed:", saveData);
+          return;
+        }
+
+        if (saveData.redirect == true) {
+          window.location.href = "{% url 'interview_page' %}";
+          return;
+        }
+
+        // ✅ 4. If free demo, skip payment
+        // if (!saveData.demo_is_paid) {
+        //   console.log("🆓 Free demo detected → redirecting directly...");
+        //   window.location.href = "{% url 'start_demo' %}";
+        //   return;
+        // }
+
+        // ✅ 5. Create Razorpay order
+        console.log("💰 Creating Razorpay order...");
+        const orderResp = await fetch("{% url 'create_demo_order' %}", {
+          method: "POST",
+          headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        });
+
+        console.log("💰 Order response status:", orderResp.status);
+        const orderData = await orderResp.json();
+        console.log("📦 Order data:", orderData);
+
+        if (!orderResp.ok || !orderData.razorpay_order_id) {
+          console.error("❌ Failed to create order:", orderData);
+          alert("Unable to create payment order. Please check console logs.");
+          return;
+        }
+
+        // ✅ 6. Initialize Razorpay
+        console.log("🧩 Initializing Razorpay checkout...");
+
+        const options = {
+          key: orderData.razorpay_key_id,
+          amount: orderData.amount,
+          currency: "INR",
+          name: "Indeed Inspiring Infotech",
+          description: "5-min Demo Session",
+          order_id: orderData.razorpay_order_id,
+          callback_url: orderData.razorpay_callback_url,
+          prefill: { email: orderData.user_email },
+          theme: { color: "#1a73e8" },
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on("payment.failed", function (response) {
+          console.error("❌ Payment failed event triggered:", response.error);
+          alert("Payment failed. Check console for error details.");
+        });
+
+        console.log("🚀 Opening Razorpay popup now...");
+        rzp.open();
+
+      } catch (err) {
+        console.error("🔥 Error inside start demo flow:", err);
+        alert("An unexpected error occurred. Check console logs.");
+      }
+    };
+
+  } catch (e) {
+    console.error("❌ Failed to load demo config:", e);
+    alert("Error initializing demo. Check console logs.");
+  }
+});
+</script>
 {% endblock content %}

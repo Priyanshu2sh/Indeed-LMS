@@ -1,6 +1,7 @@
 # from django.contrib.auth.models import User
 from datetime import datetime
 import random
+import uuid
 from django.db import models
 from django.utils.text import slugify
 from django.db.models.signals import pre_save
@@ -414,3 +415,121 @@ class CourseEnquiry(models.Model):
 
     def __str__(self):
         return f"Enquiry by {self.user.email} for {self.course.title}"
+
+
+class DemoConfig(models.Model):
+    """
+    A small admin-editable config so admin can toggle demo free/paid and set price/duration.
+    Admins can manage this model via Django admin.
+    """
+    demo_is_paid = models.BooleanField(default=False, help_text="If True, user must pay to start demo.")
+    demo_price_cents = models.PositiveIntegerField(default=100, help_text="Price in cents (e.g. 100 => $1.00).")
+    demo_duration_seconds = models.PositiveIntegerField(default=300, help_text="Default demo duration in seconds (e.g. 300s = 5min).")
+
+    def __str__(self):
+        return f"DemoConfig paid={self.demo_is_paid} duration={self.demo_duration_seconds}s price={self.demo_price_cents}c"
+
+    class Meta:
+        verbose_name = "Demo Configuration"
+        verbose_name_plural = "Demo Configuration"
+
+
+class ChatAccess(models.Model):
+    """
+    Tracks demo/paid seconds per-user.
+    - demo_remaining_seconds: leftover demo time (for single one-time demo)
+    - demo_started: True once demo started (to enforce one-time)
+    - demo_used: set True when demo fully consumed
+    - paid_seconds: credits purchased (hourly purchases credited here)
+    """
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_access")
+    demo_remaining_seconds = models.IntegerField(default=0)
+    demo_started = models.BooleanField(default=False)
+    demo_used = models.BooleanField(default=False)
+    paid_seconds = models.IntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def total_remaining(self):
+        return max(0, (self.demo_remaining_seconds or 0) + (self.paid_seconds or 0))
+
+    def consume_seconds(self, seconds: int):
+        """
+        Consume seconds from demo_remaining first, then paid_seconds.
+        Returns remaining_total after consumption.
+        If demo is consumed fully, sets demo_used True.
+        """
+        seconds = int(seconds)
+        if seconds <= 0:
+            return self.total_remaining()
+
+        # consume demo first
+        if self.demo_remaining_seconds and self.demo_remaining_seconds > 0:
+            take = min(self.demo_remaining_seconds, seconds)
+            self.demo_remaining_seconds -= take
+            seconds -= take
+
+        # then consume paid seconds
+        if seconds > 0 and self.paid_seconds and self.paid_seconds > 0:
+            take = min(self.paid_seconds, seconds)
+            self.paid_seconds -= take
+            seconds -= take
+
+        if (self.demo_remaining_seconds or 0) <= 0:
+            # demo exhausted -> mark used (one-time)
+            self.demo_remaining_seconds = 0
+            self.demo_used = True
+
+        self.save(update_fields=['demo_remaining_seconds', 'paid_seconds', 'demo_used', 'updated_at'])
+        return self.total_remaining()
+
+    def grant_demo(self, duration_seconds: int):
+        # Grant demo only if user hasn't used demo previously
+        if self.demo_used:
+            return False
+        self.demo_remaining_seconds = duration_seconds
+        self.demo_started = True
+        self.save(update_fields=['demo_remaining_seconds', 'demo_started', 'updated_at'])
+        return True
+
+    def grant_paid_seconds(self, seconds: int):
+        self.paid_seconds = (self.paid_seconds or 0) + int(seconds)
+        self.save(update_fields=['paid_seconds', 'updated_at'])
+        return self.paid_seconds
+    
+def generate_order_id():
+    # Example: generate a random alphanumeric string of 10 chars
+    return str(uuid.uuid4()).replace("-", "")[:10].upper()
+
+class Order(models.Model):
+    PAYMENT_STATUS_CHOICES = [
+        ("PENDING", "Pending"),   # Not paid yet
+        ("PAID", "Paid"),
+        ("FAILED", "Failed"),
+        ("CANCELLED", "Cancelled"),
+    ]
+
+    id = models.CharField(
+        max_length=20, primary_key=True, editable=False
+    )  # replaces default numeric ID
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(  # PAYMENT STATUS ONLY
+        max_length=30, choices=PAYMENT_STATUS_CHOICES, default="PENDING"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # Razorpay fields (unchanged)
+    razorpay_order_id = models.CharField(max_length=200, blank=True, null=True)
+    razorpay_payment_id = models.CharField(max_length=200, blank=True, null=True)
+    razorpay_signature = models.CharField(max_length=200, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.id:  # generate custom ID only once
+            new_id = generate_order_id()
+            while Order.objects.filter(id=new_id).exists():
+                new_id = generate_order_id()
+            self.id = new_id
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Order {self.id} - {self.user.email}"

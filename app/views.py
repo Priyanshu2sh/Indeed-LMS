@@ -821,30 +821,269 @@ def interview_practice(request):
     if not request.user.is_authenticated:
         messages.error(request, 'Please login first!')
         return redirect('register')
+    
+    cfg = DemoConfig.objects.first()
+    if cfg is None:
+        messages.error(request, "Demo is not configured. Contact admin.")
+        return redirect('interview_practice')
+    
+    access = ChatAccess.objects.filter(user=request.user).first()
+    if access and not access.demo_used and access.total_remaining() > 0:
+        total_seconds = access.total_remaining()
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        time_remaining = f"{minutes} min {seconds} sec"
+        context = {
+            'already_paid': True,
+            'time_remaining': time_remaining
+        }
+        return render(request, 'interview/interview_practice.html', context)
+    
+    if access and access.demo_used:
+        context = {
+            'demo_used': True,
+            'paid_demo': cfg.demo_is_paid,
+            'demo_price': cfg.demo_price_cents / 100.0
+        }
+        return render(request, 'interview/interview_practice.html', context)
 
-    if request.method == 'POST':
-        interviewType = request.POST.get('interviewType')
-        difficulty = request.POST.get('difficulty')
-        jdFile = request.FILES.get('jdFile')
-        resumeFile = request.FILES.get('resumeFile')
+    # if access and access.demo_used and cfg.demo_is_paid:
+    #     context = {
+    #         'buy_again': True,
+    #     }
+    #     return render(request, 'interview/interview_practice.html', context)
 
-        # Save the files and other data to the user's profile
-        user = User.objects.get(id=request.user.id)
-        user.interview_type = interviewType
-        user.interview_difficulty = difficulty
-
-        if jdFile:
-            user.jd_file.save(jdFile.name, jdFile)
-        if resumeFile:
-            user.resume_file.save(resumeFile.name, resumeFile)
-
-        user.save()
-
-        return redirect('interview_page')
-    return render(request, 'interview/interview_practice.html')
+        
+    context = {
+        'already_paid': False,
+        'paid_demo': cfg.demo_is_paid,
+        "demo_price": cfg.demo_price_cents / 100.0
+    }
+    return render(request, 'interview/interview_practice.html', context)
 
 def interview_page(request):
-    return render(request, 'interview/interview_page.html')
+    return render(request, 'interview/interview_page.html', {'chat_socket_url': settings.CHAT_SOCKET_URL})
+
+@login_required
+@csrf_exempt
+def save_demo_inputs(request):
+    if request.method == "POST":
+        interview_type = request.POST.get("interviewType")
+        difficulty = request.POST.get("difficulty")
+        jd_file = request.FILES.get("jdFile")
+        resume_file = request.FILES.get("resumeFile")
+
+        user = request.user
+        user.interview_type = interview_type
+        user.interview_difficulty = difficulty
+
+        if jd_file:
+            user.jd_file.save(jd_file.name, jd_file)
+        if resume_file:
+            user.resume_file.save(resume_file.name, resume_file)
+        user.save()
+
+        cfg = DemoConfig.objects.first()
+        if cfg is None:
+            messages.error(request, "Demo is not configured. Contact admin.")
+            return redirect("interview_practice")
+
+        # --- Ensure ChatAccess ONLY if demo is FREE ---
+        # For paid demo: DO NOT auto-create access here.
+        if cfg.demo_is_paid is False:
+            access, created = ChatAccess.objects.get_or_create(user=request.user)
+
+            # If newly created and demo is free → grant demo time
+            if created:
+                access.grant_demo(cfg.demo_duration_seconds)
+
+        else:
+            # Demo is PAID → do NOT create ChatAccess here
+            access = ChatAccess.objects.filter(user=request.user).first()
+
+        # Now handle redirect conditions
+        # -------------------------------------------------------
+        # CASE 1: FREE DEMO
+        # -------------------------------------------------------
+        if cfg.demo_is_paid is False:
+
+            # If user has access and demo not used and has some time left → redirect = True
+            if access and not access.demo_used and access.total_remaining() > 0:
+                return JsonResponse({"success": True, "redirect": True})
+
+            # Otherwise → no redirect
+            return JsonResponse({"success": True, "redirect": False})
 
 
+        # -------------------------------------------------------
+        # CASE 2: PAID DEMO
+        # -------------------------------------------------------
+        if cfg.demo_is_paid is True:
 
+            # If user HAS an access record AND demo not used AND has time → redirect = True
+            if access and not access.demo_used and access.total_remaining() > 0:
+                return JsonResponse({"success": True, "redirect": True})
+
+            # User has no access OR already used OR no time → NO REDIRECT
+            return JsonResponse({"success": True, "redirect": False})
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+@login_required
+def start_demo(request):
+    # Get site config (assume single row - create via admin)
+    cfg = DemoConfig.objects.first()
+    if cfg is None:
+        messages.error(request, "Demo is not configured. Contact admin.")
+        return redirect('interview_practice')
+
+    # ensure user has ChatAccess row
+    access, _ = ChatAccess.objects.get_or_create(user=request.user)
+
+    if access.demo_used:
+        messages.error(request, "You have already used the demo.")
+        return redirect('interview_practice')
+
+    if cfg.demo_is_paid:
+        # Redirect to payment flow — placeholder. Replace with your payment gateway integration.
+        # Payment flow should on success call `confirm_demo_payment` to grant demo seconds.
+        request.session['demo_payment_for_user'] = request.user.id
+        # Example redirect to a "payment page" we implement as placeholder
+        return redirect('demo_payment')
+    else:
+        # free demo — grant demo and redirect to interview
+        access.grant_demo(cfg.demo_duration_seconds)
+        messages.success(request, f"Free demo started for {cfg.demo_duration_seconds // 60} minutes.")
+        return redirect('interview_page')
+
+
+@login_required
+def demo_payment(request):
+    """
+    Placeholder view to simulate payment. Integrate Stripe/PayPal here.
+    After successful payment, call confirm_demo_payment() or directly grant seconds.
+    For demo/testing you can show a "Simulate successful payment" button.
+    """
+    cfg = DemoConfig.objects.first()
+    if not cfg or not cfg.demo_is_paid:
+        messages.error(request, "Paid demo is not enabled.")
+        return redirect('interview_practice')
+
+    if request.method == 'POST':
+        # --- HERE: integrate real gateway; on gateway callback/return grant seconds ---
+        # Simulate payment success for demo:
+        access, _ = ChatAccess.objects.get_or_create(user=request.user)
+        access.grant_demo(cfg.demo_duration_seconds)
+        messages.success(request, "Payment successful. Demo started.")
+        return redirect('interview_page')
+
+    return render(request, 'interview/demo_payment.html', {'price_cents': cfg.demo_price_cents, 'price_display': cfg.demo_price_cents/100.0})
+
+@login_required
+def demo_config_api(request):
+    """Return current demo config (for frontend JS)."""
+    cfg = DemoConfig.objects.first()
+    if not cfg:
+        return JsonResponse({"error": "Config missing"}, status=500)
+    return JsonResponse({
+        "demo_is_paid": cfg.demo_is_paid,
+        "demo_price_cents": cfg.demo_price_cents,
+        "demo_duration_seconds": cfg.demo_duration_seconds
+    })
+
+
+client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+@login_required
+@csrf_exempt
+def create_demo_order(request):
+    """Creates Razorpay order for paid demo."""
+    cfg = DemoConfig.objects.first()
+    if not cfg or not cfg.demo_is_paid:
+        return JsonResponse({"error": "Paid demo not active"}, status=400)
+
+    amount = cfg.demo_price_cents  # already in paise
+    rz_order = client.order.create(dict(amount=amount, currency="INR", payment_capture=1))
+    
+    order = Order.objects.create(
+        user=request.user,
+        total_price=cfg.demo_price_cents/100,
+        status="PENDING",           # payment status
+        razorpay_order_id=rz_order['id']
+    )
+
+    return JsonResponse(
+        {
+            "user_email": request.user.email,
+            "order_amount": rz_order['amount'],
+            "razorpay_order_id": rz_order['id'],
+            "razorpay_key_id": settings.RAZORPAY_KEY_ID,
+            "razorpay_callback_url": settings.RAZORPAY_CALLBACK_URL,
+        },
+    )
+
+
+@csrf_exempt
+def verify_demo_payment(request):
+    """Verify Razorpay signature and activate demo if valid."""
+    
+    if 'razorpay_signature' not in request.POST:
+        metadata_str = request.POST.get("error[metadata]")
+        metadata = json.loads(metadata_str)
+        order_id = metadata.get("order_id")
+        order = get_object_or_404(Order, razorpay_order_id=order_id)
+        order.status = "FAILED"
+        order.save()
+        messages.error(request, "Payment verification failed.")
+        return redirect("order_failed", order_id=order.id)
+    
+    payment_id = request.POST.get("razorpay_payment_id")
+    razorpay_order_id = request.POST.get("razorpay_order_id")
+    signature = request.POST.get("razorpay_signature")
+
+    order = get_object_or_404(Order, razorpay_order_id=razorpay_order_id)
+
+    try:
+        client.utility.verify_payment_signature({
+            "razorpay_order_id": razorpay_order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": signature,
+        })
+        order.status = "PAID"
+        order.razorpay_payment_id = payment_id
+        order.razorpay_signature = signature
+        order.save()
+
+        # user_id = request.session.get('demo_payment_for_user')
+        # print('user_id:', user_id)
+        # user = get_object_or_404(User, id=user_id)
+
+        cfg = DemoConfig.objects.first()
+        access, _ = ChatAccess.objects.get_or_create(user=order.user)
+        access.demo_used = False
+        access.save()
+        access.grant_demo(cfg.demo_duration_seconds)
+        print(f"Demo started for {cfg.demo_duration_seconds // 60} minutes.")
+        return redirect('interview_page')
+        # return JsonResponse({"success": True})
+    except Exception as e:
+        print(e)
+        order.status = "FAILED"
+        order.save()
+        return redirect("order_failed")
+
+def order_failed(request, order_id):
+    """Order failed page."""
+    order = get_object_or_404(Order, id=order_id)
+
+    # In case Razorpay sends an error description
+    error_description = request.GET.get("error", "Your payment failed. Please try again.")
+
+    context = {
+        "order": order,
+        "payment_status": order.status,   # FAILED, etc.
+        "payment_id": order.razorpay_payment_id,
+        "razorpay_order_id": order.razorpay_order_id,
+        "error_message": error_description,
+    }
+
+    return render(request, "interview/order_failed.html", context)
