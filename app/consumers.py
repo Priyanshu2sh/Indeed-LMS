@@ -6,8 +6,8 @@ import tempfile
 from asgiref.sync import sync_to_async
 from django.utils import timezone
 from .models import ChatAccess
-from .interview_main.updated_interview import InterviewSession
-from .interview_main.pdf_utils import extract_text_from_pdf
+from app.interview_main.updated_interview import InterviewSession
+from app.interview_main.pdf_utils import extract_text_from_pdf
 
 class InterviewConsumer(AsyncWebsocketConsumer):
     async def connect(self):
