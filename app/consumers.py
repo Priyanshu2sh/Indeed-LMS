@@ -145,7 +145,7 @@ class InterviewConsumer(AsyncWebsocketConsumer):
         while self.remaining > 0:
             await asyncio.sleep(1)
             self.remaining -= 1
-            print("Remaining time:", self.remaining)
+            #print("Remaining time:", self.remaining)
             await self.send(text_data=json.dumps({
                 "type": "time_update",
                 "remaining_seconds": self.remaining
