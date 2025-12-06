@@ -70,7 +70,6 @@ def SINGLE_COURSE(request):
     
     
     for c in course:
-        print(c.price)
         total_duration = Video.objects.filter(course=c).aggregate(total=Sum('time_duration'))['total'] or 0
         hours = total_duration // 60
         minutes = total_duration % 60
@@ -359,7 +358,6 @@ def MY_COURSE(request):
 
     # All enrolled courses
     all_user_courses = UserCourse.objects.filter(user=request.user).select_related('course')
-    print("Total enrolled:", all_user_courses.count())
 
     # Get enrolled course categories
     category_ids = all_user_courses.values_list('course__category__id', flat=True).distinct()
@@ -368,16 +366,14 @@ def MY_COURSE(request):
     # Apply combined filters
     if selected_category and selected_category.isdigit():
         all_user_courses = all_user_courses.filter(course__category__id=selected_category)
-        print("After category filter:", all_user_courses.count())
 
     if search_query:
-        print("Search query:", search_query)
         all_user_courses = all_user_courses.filter(course__title__icontains=search_query)
-        print("After search filter:", all_user_courses.count())
 
     # Debug enrolled course titles
     for uc in all_user_courses:
-        print("Matched course title:", uc.course.title)
+        # print("Matched course title:", uc.course.title)
+        pass
 
     # Add total duration
     for c in all_user_courses:
@@ -405,16 +401,15 @@ def VERIFY_PAYMENT(request):
                 'razorpay_payment_id': data.get('razorpay_payment_id'),
                 'razorpay_signature': data.get('razorpay_signature'),
             }
-            print(params_dict)
+            # print(params_dict)
 
             # Proper signature verification
             client.utility.verify_payment_signature(params_dict)
 
             razorpay_order_id = params_dict['razorpay_order_id']
             razorpay_payment_id = params_dict['razorpay_payment_id']
-            print(False)
             payment = Payment.objects.get(order_id=razorpay_order_id)
-            print(payment)
+            # print(payment)
             payment.payment_id = razorpay_payment_id
             payment.status = True
 
@@ -522,10 +517,8 @@ def WATCH_COURSE(request, slug):
                 user_course.completed = True
                 user_course.save()
 
-                print('qqqqqq')
                 # Create certificate if not exists
                 certificate, created = Certificate.objects.get_or_create(user_course=user_course)
-                print('aaaaaaaaaaaa')
                 if created:
                     generate_custom_certificate(certificate)
 
@@ -819,47 +812,47 @@ def course_enquiry(request, slug):
 
 
 def interview_practice(request):
+    """Main interview practice page with both demo and subscription options."""
     if not request.user.is_authenticated:
         messages.error(request, 'Please login first!')
         return redirect('register')
     
-    cfg = DemoConfig.objects.first()
-    if cfg is None:
+    # Get configurations
+    demo_cfg = DemoConfig.objects.first()
+    subscription_cfg = SubscriptionConfig.objects.first()
+    
+    if demo_cfg is None:
         messages.error(request, "Demo is not configured. Contact admin.")
-        return redirect('interview_practice')
+        return redirect('home')
     
-    access = ChatAccess.objects.filter(user=request.user).first()
-    if access and not access.demo_used and access.total_remaining() > 0:
-        total_seconds = access.total_remaining()
-        minutes = total_seconds // 60
-        seconds = total_seconds % 60
-        time_remaining = f"{minutes} min {seconds} sec"
-        context = {
-            'already_paid': True,
-            'time_remaining': time_remaining
-        }
-        return render(request, 'interview/interview_practice.html', context)
+    if subscription_cfg is None:
+        # Create default subscription config if it doesn't exist
+        subscription_cfg = SubscriptionConfig.objects.create()
     
-    if access and access.demo_used:
-        context = {
-            'demo_used': True,
-            'paid_demo': cfg.demo_is_paid,
-            'demo_price': cfg.demo_price_cents / 100.0
-        }
-        return render(request, 'interview/interview_practice.html', context)
-
-    # if access and access.demo_used and cfg.demo_is_paid:
-    #     context = {
-    #         'buy_again': True,
-    #     }
-    #     return render(request, 'interview/interview_practice.html', context)
-
-        
+    # Get or create user's chat access
+    access, created = ChatAccess.objects.get_or_create(user=request.user)
+    
+    # Calculate total remaining time
+    total_seconds = access.total_remaining()
+    
     context = {
-        'already_paid': False,
-        'paid_demo': cfg.demo_is_paid,
-        "demo_price": cfg.demo_price_cents / 100.0
+        # Demo configuration
+        'demo_used': access.demo_used,
+        'paid_demo': demo_cfg.demo_is_paid,
+        'demo_price': demo_cfg.demo_price_cents / 100.0,
+        
+        # Subscription configuration
+        'subscription_price': subscription_cfg.subscription_price_cents / 100.0,
+        'subscription_duration': subscription_cfg.subscription_duration_seconds,
+        'subscription_active': subscription_cfg.is_active,
+        
+        # User status
+        'already_paid': access.has_active_subscription(),
+        'subscription_seconds': access.paid_seconds or 0,
+        'time_remaining': access.get_subscription_time_remaining(),
+        'total_seconds': total_seconds,
     }
+    
     return render(request, 'interview/interview_practice.html', context)
 
 def interview_page(request):
@@ -998,9 +991,16 @@ client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_S
 @csrf_exempt
 def create_demo_order(request):
     """Creates Razorpay order for paid demo."""
-    cfg = DemoConfig.objects.first()
-    if not cfg or not cfg.demo_is_paid:
-        return JsonResponse({"error": "Paid demo not active"}, status=400)
+    cfg = DemoConfig.objects.get()
+    if not cfg:
+        cfg = DemoConfig.objects.create()
+
+    if not cfg.demo_is_paid:
+        access, _ = ChatAccess.objects.get_or_create(user=request.user)
+        access.demo_used = False
+        access.save()
+        access.grant_demo(cfg.demo_duration_seconds)
+        return JsonResponse({"message": True}, status=200)
 
     amount = cfg.demo_price_cents  # already in paise
     rz_order = client.order.create(dict(amount=amount, currency="INR", payment_capture=1))
@@ -1027,15 +1027,21 @@ def create_demo_order(request):
 def verify_demo_payment(request):
     """Verify Razorpay signature and activate demo if valid."""
     
+    # Handle payment failure
     if 'razorpay_signature' not in request.POST:
         metadata_str = request.POST.get("error[metadata]")
-        metadata = json.loads(metadata_str)
-        order_id = metadata.get("order_id")
-        order = get_object_or_404(Order, razorpay_order_id=order_id)
-        order.status = "FAILED"
-        order.save()
+        if metadata_str:
+            try:
+                metadata = json.loads(metadata_str)
+                order_id = metadata.get("order_id")
+                order = get_object_or_404(Order, razorpay_order_id=order_id)
+                order.status = "FAILED"
+                order.save()
+                return redirect("order_failed", order_id=order.id)
+            except:
+                pass
         messages.error(request, "Payment verification failed.")
-        return redirect("order_failed", order_id=order.id)
+        return redirect("interview_practice")
     
     payment_id = request.POST.get("razorpay_payment_id")
     razorpay_order_id = request.POST.get("razorpay_order_id")
@@ -1044,33 +1050,33 @@ def verify_demo_payment(request):
     order = get_object_or_404(Order, razorpay_order_id=razorpay_order_id)
 
     try:
+        # Verify payment signature
         client.utility.verify_payment_signature({
             "razorpay_order_id": razorpay_order_id,
             "razorpay_payment_id": payment_id,
             "razorpay_signature": signature,
         })
+        
         order.status = "PAID"
         order.razorpay_payment_id = payment_id
         order.razorpay_signature = signature
         order.save()
 
-        # user_id = request.session.get('demo_payment_for_user')
-        # print('user_id:', user_id)
-        # user = get_object_or_404(User, id=user_id)
-
+        # Grant demo seconds
         cfg = DemoConfig.objects.first()
         access, _ = ChatAccess.objects.get_or_create(user=order.user)
         access.demo_used = False
         access.save()
         access.grant_demo(cfg.demo_duration_seconds)
-        print(f"Demo started for {cfg.demo_duration_seconds // 60} minutes.")
+        
+        messages.success(request, f"Demo started for {cfg.demo_duration_seconds // 60} minutes.")
         return redirect('interview_page')
-        # return JsonResponse({"success": True})
+        
     except Exception as e:
-        print(e)
+        print(f"Payment verification error: {e}")
         order.status = "FAILED"
         order.save()
-        return redirect("order_failed")
+        return redirect("order_failed", order_id=order.id)
 
 def order_failed(request, order_id):
     """Order failed page."""
@@ -1088,3 +1094,170 @@ def order_failed(request, order_id):
     }
 
     return render(request, "interview/order_failed.html", context)
+
+@login_required
+@csrf_exempt
+def save_subscription_inputs(request):
+    """Save user inputs for subscription-based interview session."""
+    if request.method == "POST":
+        interview_type = request.POST.get("interviewType")
+        difficulty = request.POST.get("difficulty")
+        jd_file = request.FILES.get("jdFile")
+        resume_file = request.FILES.get("resumeFile")
+
+        user = request.user
+        user.interview_type = interview_type
+        user.interview_difficulty = difficulty
+
+        if jd_file:
+            user.jd_file.save(jd_file.name, jd_file)
+        if resume_file:
+            user.resume_file.save(resume_file.name, resume_file)
+        user.save()
+
+        # Check subscription config
+        subscription_cfg = SubscriptionConfig.objects.first()
+        if subscription_cfg is None or not subscription_cfg.is_active:
+            return JsonResponse({
+                "success": False, 
+                "error": "Subscription is not available. Contact admin."
+            }, status=400)
+
+        # Get user's access
+        access = ChatAccess.objects.filter(user=request.user).first()
+
+        # If user already has active subscription time, redirect to interview
+        if access and access.has_active_subscription():
+            return JsonResponse({"success": True, "redirect": True})
+
+        # User needs to purchase subscription
+        return JsonResponse({"success": True, "redirect": False})
+    
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+# ============================================================================
+# CREATE SUBSCRIPTION ORDER
+# ============================================================================
+
+@login_required
+@csrf_exempt
+def create_subscription_order(request):
+    """Creates Razorpay order for subscription purchase."""
+    subscription_cfg = SubscriptionConfig.objects.first()
+    
+    if not subscription_cfg or not subscription_cfg.is_active:
+        return JsonResponse({"error": "Subscription not available"}, status=400)
+
+    amount = subscription_cfg.subscription_price_cents  # already in paise
+    
+    # Create Razorpay order
+    rz_order = client.order.create({
+        'amount': amount,
+        'currency': 'INR',
+        'payment_capture': 1
+    })
+    
+    # Create Order record in database
+    order = Order.objects.create(
+        user=request.user,
+        total_price=subscription_cfg.subscription_price_cents / 100,
+        status="PENDING",
+        razorpay_order_id=rz_order['id']
+    )
+    
+    # Store order type in session for verification
+    request.session['order_type'] = 'subscription'
+    request.session['subscription_order_id'] = order.id
+
+    return JsonResponse({
+        "user_email": request.user.email,
+        "amount": rz_order['amount'],
+        "razorpay_order_id": rz_order['id'],
+        "razorpay_key_id": settings.RAZORPAY_KEY_ID,
+        "razorpay_callback_url": request.build_absolute_uri('/verify-subscription-payment/'),
+    })
+
+
+# ============================================================================
+# VERIFY SUBSCRIPTION PAYMENT
+# ============================================================================
+
+@csrf_exempt
+def verify_subscription_payment(request):
+    """Verify Razorpay signature and grant subscription seconds if valid."""
+    
+    # Handle payment failure
+    if 'razorpay_signature' not in request.POST:
+        metadata_str = request.POST.get("error[metadata]")
+        if metadata_str:
+            try:
+                metadata = json.loads(metadata_str)
+                order_id = metadata.get("order_id")
+                order = get_object_or_404(Order, razorpay_order_id=order_id)
+                order.status = "FAILED"
+                order.save()
+                return redirect("order_failed", order_id=order.id)
+            except:
+                pass
+        messages.error(request, "Payment verification failed.")
+        return redirect("interview_practice")
+    
+    # Get payment details
+    payment_id = request.POST.get("razorpay_payment_id")
+    razorpay_order_id = request.POST.get("razorpay_order_id")
+    signature = request.POST.get("razorpay_signature")
+
+    order = get_object_or_404(Order, razorpay_order_id=razorpay_order_id)
+
+    try:
+        # Verify payment signature
+        client.utility.verify_payment_signature({
+            "razorpay_order_id": razorpay_order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": signature,
+        })
+        
+        # Payment successful - update order
+        order.status = "PAID"
+        order.razorpay_payment_id = payment_id
+        order.razorpay_signature = signature
+        order.save()
+
+        # Grant subscription seconds to user
+        subscription_cfg = SubscriptionConfig.objects.first()
+        access, _ = ChatAccess.objects.get_or_create(user=order.user)
+        access.grant_paid_seconds(subscription_cfg.subscription_duration_seconds)
+        
+        messages.success(
+            request, 
+            f"Subscription activated! You have {subscription_cfg.subscription_duration_seconds // 60} minutes."
+        )
+        return redirect('interview_page')
+        
+    except Exception as e:
+        print(f"Payment verification error: {e}")
+        order.status = "FAILED"
+        order.save()
+        return redirect("order_failed", order_id=order.id)
+    
+@login_required
+def subscription_status(request):
+    """API endpoint to get current subscription status."""
+    access = ChatAccess.objects.filter(user=request.user).first()
+    
+    if not access:
+        return JsonResponse({
+            "has_subscription": False,
+            "seconds_remaining": 0,
+            "time_remaining": "0 min 0 sec"
+        })
+    
+    return JsonResponse({
+        "has_subscription": access.has_active_subscription(),
+        "seconds_remaining": access.paid_seconds or 0,
+        "time_remaining": access.get_subscription_time_remaining(),
+        "demo_used": access.demo_used,
+        "demo_seconds": access.demo_remaining_seconds or 0,
+        "total_seconds": access.total_remaining()
+    })

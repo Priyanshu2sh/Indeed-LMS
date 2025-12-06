@@ -423,7 +423,7 @@ class DemoConfig(models.Model):
     Admins can manage this model via Django admin.
     """
     demo_is_paid = models.BooleanField(default=False, help_text="If True, user must pay to start demo.")
-    demo_price_cents = models.PositiveIntegerField(default=100, help_text="Price in cents (e.g. 100 => $1.00).")
+    demo_price_cents = models.PositiveIntegerField(default=1000, help_text="Price in cents (e.g. 100 => Rs 1).")
     demo_duration_seconds = models.PositiveIntegerField(default=300, help_text="Default demo duration in seconds (e.g. 300s = 5min).")
 
     def __str__(self):
@@ -495,6 +495,19 @@ class ChatAccess(models.Model):
         self.paid_seconds = (self.paid_seconds or 0) + int(seconds)
         self.save(update_fields=['paid_seconds', 'updated_at'])
         return self.paid_seconds
+
+    def has_active_subscription(self):
+        """Check if user has any paid seconds remaining."""
+        return (self.paid_seconds or 0) > 0
+    
+    def get_subscription_time_remaining(self):
+        """Get formatted time remaining for subscription."""
+        if self.paid_seconds <= 0:
+            return "0 min 0 sec"
+        minutes = self.paid_seconds // 60
+        seconds = self.paid_seconds % 60
+        return f"{minutes} min {seconds} sec"
+
     
 def generate_order_id():
     # Example: generate a random alphanumeric string of 10 chars
@@ -533,3 +546,28 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id} - {self.user.email}"
+
+class SubscriptionConfig(models.Model):
+    """
+    Admin-editable config for subscription pricing and duration.
+    Similar to DemoConfig but for the full 20-minute session.
+    """
+    subscription_price_cents = models.PositiveIntegerField(
+        default=5000, 
+        help_text="Price in cents (e.g. 5000 => ₹50.00)."
+    )
+    subscription_duration_seconds = models.PositiveIntegerField(
+        default=1200, 
+        help_text="Subscription duration in seconds (e.g. 1200s = 20min)."
+    )
+    is_active = models.BooleanField(
+        default=True, 
+        help_text="Enable/disable subscription purchases."
+    )
+
+    def __str__(self):
+        return f"Subscription: {self.subscription_duration_seconds}s for {self.subscription_price_cents}c"
+
+    class Meta:
+        verbose_name = "Subscription Configuration"
+        verbose_name_plural = "Subscription Configuration"

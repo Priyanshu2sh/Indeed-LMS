@@ -86,15 +86,162 @@
     box-shadow: 0 8px 20px rgba(30, 136, 229, 0.4);
   }
 
+  /* Pricing Cards */
+  .pricing-cards {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .pricing-card {
+    flex: 1;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    background: #fff;
+  }
+
+  .pricing-card:hover {
+    border-color: #1e88e5;
+    box-shadow: 0 4px 12px rgba(30, 136, 229, 0.2);
+  }
+
+  .pricing-card.selected {
+    border-color: #1e88e5;
+    background: linear-gradient(135deg, #e3f2fd 0%, #f5f9ff 100%);
+    box-shadow: 0 6px 16px rgba(30, 136, 229, 0.3);
+  }
+
+  .pricing-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f5f5f5;
+  }
+
+  .pricing-card.disabled:hover {
+    border-color: #e0e0e0;
+    box-shadow: none;
+  }
+
+  .pricing-badge {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .pricing-badge.free {
+    background: linear-gradient(90deg, #10b981, #059669);
+  }
+
+  .pricing-badge.popular {
+    background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+  }
+
+  .pricing-card h4 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #0d47a1;
+    margin-bottom: 0.5rem;
+  }
+
+  .pricing-card .price {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1a237e;
+    margin-bottom: 0.5rem;
+  }
+
+  .pricing-card .price-small {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+
+  .pricing-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+  }
+
+  .pricing-card ul li {
+    padding: 0.4rem 0;
+    color: #555;
+    font-size: 0.9rem;
+  }
+
+  .pricing-card ul li::before {
+    content: "✓";
+    color: #10b981;
+    font-weight: bold;
+    margin-right: 8px;
+  }
+
+  .active-subscription-alert {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .active-subscription-alert h5 {
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+  }
+
+  .active-subscription-alert p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
   @media (max-width: 768px) {
     .interview-page .left-section,
     .interview-page .right-section {
       margin-bottom: 1.5rem;
     }
+
+    .pricing-cards {
+      flex-direction: column;
+    }
   }
 
   .interview-setup-page .fadeIn {
     animation: fadeInUpInterview 0.8s ease both;
+  }
+
+  .quote-card {
+    background: #f3f4ff;
+    padding: 1.5rem;
+    border-radius: 14px;
+    border-left: 5px solid #5c6bc0;
+    margin-top: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .quote-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a237e;
+    margin: 0;
+  }
+
+  .quote-author {
+    margin-top: 0.5rem;
+    color: #555;
+    font-size: 1rem;
+    font-style: italic;
   }
 </style>
 
@@ -110,13 +257,18 @@
           </p>
           <p>Upload your resume and job description to personalize your session with role-relevant questions.</p>
 
-          {% if already_paid %}
-            <div class="alert alert-success mt-4">
-              ✅ You already have access!  
-              <br>
-              <b>Remaining Time:</b> {{ time_remaining }}
-            </div>
-          {% endif %}
+          <!-- {% if subscription_seconds > 0 %}
+          <div class="alert alert-success mt-4">
+            🎉 You have <b>{{ subscription_seconds }}</b> seconds of subscription left.
+          </div>
+          {% endif %} -->
+
+          <div class="quote-card mt-4">
+            <p class="quote-text">
+              “Great interviews are not stumbled into — they are practiced.”
+            </p>
+            <p class="quote-author">— AI Interview Coach</p>
+          </div>
         </div>
       </div>
 
@@ -125,9 +277,69 @@
         <div class="right-section h-100">
           <h5 class="form-title">🧩 Set Up Your Interview</h5>
 
+          <!-- Active Subscription Banner -->
+          {% if already_paid %}
+          <div class="active-subscription-alert">
+            <h5>✅ Active Subscription</h5>
+            <p><strong>Time Remaining:</strong> {{ time_remaining }}</p>
+            <p>Resume your session anytime before it expires!</p>
+          </div>
+          {% endif %}
+
+          <!-- Pricing Cards -->
+          <div class="pricing-cards">
+            <!-- Demo Card -->
+            <div class="pricing-card {% if demo_used and not paid_demo %}disabled{% endif %}" 
+                 id="demoCard" 
+                 data-type="demo"
+                 onclick="selectPricing('demo')">
+              {% if not demo_used %}
+                <span class="pricing-badge {% if not paid_demo %}free{% endif %}">
+                  {% if paid_demo %}PAID{% else %}FREE{% endif %}
+                </span>
+              {% endif %}
+              <h4>🚀 Quick Demo</h4>
+              <div class="price">
+                {% if paid_demo %}₹{{ demo_price }}{% else %}Free{% endif %}
+              </div>
+              <div class="price-small">5-minute session</div>
+              <ul>
+                <li>Perfect for first-time users</li>
+                <li>Test the platform</li>
+                <li>Quick practice round</li>
+                {% if demo_used and not paid_demo %}
+                <li style="color: #ef4444;">❌ Already used</li>
+                {% endif %}
+              </ul>
+            </div>
+
+            <!-- Subscription Card -->
+            <div class="pricing-card {% if already_paid %}disabled{% endif %}" 
+                 id="subscriptionCard" 
+                 data-type="subscription"
+                 onclick="selectPricing('subscription')">
+              <span class="pricing-badge popular">POPULAR</span>
+              <h4>⭐ Full Session</h4>
+              <div class="price">₹{{ subscription_price }}</div>
+              <div class="price-small">20-minute session</div>
+              <ul>
+                <li>Extended practice time</li>
+                <li>Comprehensive feedback</li>
+                <li>In-depth preparation</li>
+                <li>Reusable after completion</li>
+                {% if already_paid %}
+                <li style="color: #f59e0b;">⏳ Currently active</li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+
           <form id="interviewForm" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
+            <!-- Hidden field to track selected pricing -->
+            <input type="hidden" id="selectedPricing" name="selectedPricing" value="">
+
             <!-- Interview Type -->
             <div class="mb-3">
               <label for="interviewType" class="custom-label">Choose Interview Type</label>
@@ -163,68 +375,22 @@
 
             <!-- Start Button -->
             <div class="d-grid mt-4 text-center">
-              {% load static %}
-              {% if already_paid %}
-                <!-- Case 1: User already paid -->
-                <button id="startDemoBtn"
-                        type="button"
-                        class="start-btn"
-                        style="background: linear-gradient(90deg, #10b981, #059669); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
-                  🚀 Continue Interview Session
-                </button>
-                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
-                  You have an active session. Resume anytime before it expires.
-                </p>
-
-              {% elif demo_used and paid_demo %}
-                <!-- Case 2: Demo is paid -->
-                <button id="startDemoBtn"
-                        type="button"
-                        class="start-btn"
-                        style="background: linear-gradient(90deg, #f59e0b, #d97706); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
-                  🚀 Start 5-min Demo
-                </button>
-                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
-                  💰 This demo costs ₹{{demo_price}}. You’ll be redirected to secure payment.
-                </p>
-
-              {% elif demo_used and not paid_demo %}
-                <!-- Case 2: Demo is paid -->
-                <button id="startDemoBtn"
-                        type="button"
-                        class=""
-                        style="background: linear-gradient(90deg, #cbc0ae, #5b5753); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;" disabled>
-                  🚀 Start 5-min Demo
-                </button>
-                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
-                  You have already used your demo completely. Please contact admin for further access.
-                </p>
-
-              {% elif paid_demo %}
-                <!-- Case 2: Demo is paid -->
-                <button id="startDemoBtn"
-                        type="button"
-                        class="start-btn"
-                        style="background: linear-gradient(90deg, #f59e0b, #d97706); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
-                  🚀 Start 5-min Demo
-                </button>
-                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
-                  💰 This demo costs ₹{{demo_price}}. You’ll be redirected to secure payment.
-                </p>
-
-              {% else %}
-                <!-- Case 3: Demo is free -->
-                <button id="startDemoBtn"
-                        type="button"
-                        class="start-btn"
-                        style="background: linear-gradient(90deg, #3b82f6, #2563eb); border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
-                  🚀 Start Free Demo
-                </button>
-                <p id="demoPriceInfo" style="margin-top:8px; color:#555;">
-                  🎉 Enjoy your free practice session!
-                </p>
-              {% endif %}
-            </div>
+              <button id="startBtn"
+              type="button"
+              class="start-btn"
+              style="border:none; color:white; padding:12px 20px; border-radius:8px; font-size:16px;">
+              🎯 Start Interview Session
+            </button>
+            {% if already_paid %}
+            <p id="pricingInfo" style="margin-top:8px; color:#555;">
+              You can start your interview session without any additional payment.
+            </p>
+            {% else %}
+            <p id="pricingInfo" style="margin-top:8px; color:#555;">
+              Please select a pricing option above
+            </p>
+            {% endif %}
+          </div>
           </form>
         </div>
       </div>
@@ -233,116 +399,194 @@
 </div>
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+let selectedType = '';
+
+function selectPricing(type, force = false) {
+  const demoCard = document.getElementById('demoCard');
+  const subscriptionCard = document.getElementById('subscriptionCard');
+  const pricingInfo = document.getElementById('pricingInfo');
+  const startBtn = document.getElementById('startBtn');
+  const selectedPricingInput = document.getElementById('selectedPricing');
+
+  // If the card is disabled, don't allow selection — unless 'force' is true
+  if (type === 'demo' && demoCard.classList.contains('disabled') && !force) {
+    return;
+  }
+  if (type === 'subscription' && subscriptionCard.classList.contains('disabled') && !force) {
+    return;
+  }
+
+  // Remove selection from both cards
+  demoCard.classList.remove('selected');
+  subscriptionCard.classList.remove('selected');
+
+  // Select the clicked card
+  if (type === 'demo') {
+    demoCard.classList.add('selected');
+    selectedType = 'demo';
+    selectedPricingInput.value = 'demo';
+    
+    {% if paid_demo %}
+      pricingInfo.textContent = '💰 This demo costs ₹{{ demo_price }}. You\'ll be redirected to secure payment.';
+      startBtn.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+    {% else %}
+      pricingInfo.textContent = '🎉 Enjoy your free demo session!';
+      startBtn.style.background = 'linear-gradient(90deg, #3b82f6, #2563eb)';
+    {% endif %}
+    startBtn.textContent = '🚀 Start Demo Session';
+    
+  } else if (type === 'subscription') {
+    subscriptionCard.classList.add('selected');
+    selectedType = 'subscription';
+    selectedPricingInput.value = 'subscription';
+    
+    {% if already_paid %}
+      pricingInfo.textContent = 'You have an active session. Resume anytime before it expires.';
+      startBtn.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+      startBtn.textContent = '🚀 Continue Interview Session';
+    {% else %}
+      pricingInfo.textContent = '💰 This subscription costs ₹{{ subscription_price }} for 20 minutes. You\'ll be redirected to secure payment.';
+      startBtn.style.background = 'linear-gradient(90deg, #8b5cf6, #7c3aed)';
+      startBtn.textContent = '⭐ Purchase Subscription';
+    {% endif %}
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log("🟢 Page loaded, initializing demo setup...");
+  // console.log("🟢 Page loaded, initializing interview setup...");
   
-  const startBtn = document.getElementById('startDemoBtn');
+  const startBtn = document.getElementById('startBtn');
   const form = document.getElementById('interviewForm');
 
-  try {
+  // Auto-select based on user status — force=true so "disabled" cards can still be auto-selected
+  {% if already_paid %}
+    selectPricing('subscription', true);
+  {% elif not demo_used %}
+    selectPricing('demo', true);
+  {% else %}
+    selectPricing('subscription', true);
+  {% endif %}
 
-    // ✅ 2. Attach button click handler
-    startBtn.onclick = async () => {
-      console.log("🟩 Start Demo button clicked.");
+  startBtn.onclick = async () => {
+    // console.log("🟩 Start button clicked.");
 
-      try {
-        // 2.1 Validate form inputs
-        const interviewType = form.querySelector('select[name="interviewType"]').value;
-        const difficulty = form.querySelector('select[name="difficulty"]').value;
-        const jdFile = form.querySelector('input[name="jdFile"]').files[0];
-        const resumeFile = form.querySelector('input[name="resumeFile"]').files[0];
+    // Fallback: if selectedType wasn't set for any reason, use the hidden input
+    const selectedPricingInput = document.getElementById('selectedPricing');
+    if (!selectedType) {
+      selectedType = selectedPricingInput.value || '';
+    }
 
-        console.log("📋 Current input values:", { interviewType, difficulty, jdFile, resumeFile });
+    // console.log("Selected pricing type:", selectedType);
 
-        if (!interviewType || !difficulty || !jdFile || !resumeFile) {
-          alert("Please fill all fields and upload both files before starting the demo.");
-          console.error("❌ Missing input fields or files.");
-          return;
-        }
+    if (!selectedType) {
+      alert("Please select a pricing option (Demo or Subscription).");
+      return;
+    }
 
-        // ✅ 3. Save form inputs
-        console.log("💾 Saving form data...");
-        const formData = new FormData(form);
-        const saveResp = await fetch("{% url 'save_demo_inputs' %}", {
-          method: "POST",
-          body: formData,
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-        });
+    try {
+      // Validate form inputs
+      const interviewType = form.querySelector('select[name="interviewType"]').value;
+      const difficulty = form.querySelector('select[name="difficulty"]').value;
+      const jdFile = form.querySelector('input[name="jdFile"]').files[0];
+      const resumeFile = form.querySelector('input[name="resumeFile"]').files[0];
 
-        console.log("💾 Save response status:", saveResp.status);
-        const saveData = await saveResp.json();
-        console.log("💾 Save response JSON:", saveData);
-
-        if (!saveData.success) {
-          alert("Error saving your details. Please try again.");
-          console.error("❌ Save failed:", saveData);
-          return;
-        }
-
-        if (saveData.redirect == true) {
-          window.location.href = "{% url 'interview_page' %}";
-          return;
-        }
-
-        // ✅ 4. If free demo, skip payment
-        // if (!saveData.demo_is_paid) {
-        //   console.log("🆓 Free demo detected → redirecting directly...");
-        //   window.location.href = "{% url 'start_demo' %}";
-        //   return;
-        // }
-
-        // ✅ 5. Create Razorpay order
-        console.log("💰 Creating Razorpay order...");
-        const orderResp = await fetch("{% url 'create_demo_order' %}", {
-          method: "POST",
-          headers: { "X-CSRFToken": "{{ csrf_token }}" },
-        });
-
-        console.log("💰 Order response status:", orderResp.status);
-        const orderData = await orderResp.json();
-        console.log("📦 Order data:", orderData);
-
-        if (!orderResp.ok || !orderData.razorpay_order_id) {
-          console.error("❌ Failed to create order:", orderData);
-          alert("Unable to create payment order. Please check console logs.");
-          return;
-        }
-
-        // ✅ 6. Initialize Razorpay
-        console.log("🧩 Initializing Razorpay checkout...");
-
-        const options = {
-          key: orderData.razorpay_key_id,
-          amount: orderData.amount,
-          currency: "INR",
-          name: "Indeed Inspiring Infotech",
-          description: "5-min Demo Session",
-          order_id: orderData.razorpay_order_id,
-          callback_url: orderData.razorpay_callback_url,
-          prefill: { email: orderData.user_email },
-          theme: { color: "#1a73e8" },
-        };
-
-        const rzp = new Razorpay(options);
-        rzp.on("payment.failed", function (response) {
-          console.error("❌ Payment failed event triggered:", response.error);
-          alert("Payment failed. Check console for error details.");
-        });
-
-        console.log("🚀 Opening Razorpay popup now...");
-        rzp.open();
-
-      } catch (err) {
-        console.error("🔥 Error inside start demo flow:", err);
-        alert("An unexpected error occurred. Check console logs.");
+      if (!interviewType || !difficulty || !jdFile || !resumeFile) {
+        alert("Please fill all fields and upload both files before starting.");
+        return;
       }
-    };
 
-  } catch (e) {
-    console.error("❌ Failed to load demo config:", e);
-    alert("Error initializing demo. Check console logs.");
-  }
+      // Save form inputs
+      // console.log("💾 Saving form data...");
+      const formData = new FormData(form);
+      
+      const saveUrl = selectedType === 'demo' 
+        ? "{% url 'save_demo_inputs' %}" 
+        : "{% url 'save_subscription_inputs' %}";
+      
+      const saveResp = await fetch(saveUrl, {
+        method: "POST",
+        body: formData,
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+      });
+
+      const saveData = await saveResp.json();
+      // console.log("💾 Save response:", saveData);
+
+      if (!saveData.success) {
+        alert(saveData.error || "Error saving your details. Please try again.");
+        return;
+      }
+
+      // If redirect is true (free demo or already has access), go to interview page
+      if (saveData.redirect === true) {
+        // console.log("✅ Redirecting to interview page...");
+        window.location.href = "{% url 'interview_page' %}";
+        return;
+      }
+
+      // If free demo was granted, redirect immediately
+      if (saveData.is_free === true) {
+        // console.log("🎉 Free demo granted, redirecting...");
+        window.location.href = "{% url 'interview_page' %}";
+        return;
+      }
+
+      // Create payment order for paid demo/subscription
+      // console.log("💰 Creating payment order...");
+      
+      const orderUrl = selectedType === 'demo'
+        ? "{% url 'create_demo_order' %}"
+        : "{% url 'create_subscription_order' %}";
+      
+      const orderResp = await fetch(orderUrl, {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+      });
+
+      const orderData = await orderResp.json();
+      // console.log("📦 Order data:", orderData);
+
+      if (orderData.message === true) {
+        // console.log("🎉 Access granted without payment, redirecting...");
+        window.location.href = "{% url 'interview_page' %}";
+        return;
+      }
+
+      if (!orderResp.ok || !orderData.razorpay_order_id) {
+        alert(orderData.error || "Unable to create payment order. Please try again.");
+        return;
+      }
+
+      // Initialize Razorpay
+      const options = {
+        key: orderData.razorpay_key_id,
+        amount: orderData.amount,
+        currency: "INR",
+        name: "Indeed Inspiring Infotech",
+        description: selectedType === 'demo' ? "5-min Demo Session" : "20-min Interview Session",
+        order_id: orderData.razorpay_order_id,
+        callback_url: orderData.razorpay_callback_url,
+        prefill: { email: orderData.user_email },
+        theme: { color: "#1a73e8" },
+      };
+
+      const rzp = new Razorpay(options);
+      rzp.on("payment.failed", function (response) {
+        // console.error("❌ Payment failed:", response.error);
+        alert("Payment failed. Please try again.");
+      });
+
+      // console.log("🚀 Opening payment gateway...");
+      rzp.open();
+
+    } catch (err) {
+      // console.error("🔥 Error:", err);
+      alert("An unexpected error occurred. Please try again.");
+    }
+  };
 });
 </script>
+
 {% endblock content %}

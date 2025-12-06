@@ -71,15 +71,30 @@ urlpatterns = [
     path('course-enquiry/<slug:slug>', views.course_enquiry, name='course_enquiry'),
 
 
-    path('interview_practice', views.interview_practice, name='interview_practice'),
-    path('interview', views.interview_page, name='interview_page'),
-    path("demo/save-inputs/", views.save_demo_inputs, name="save_demo_inputs"),
-    path('demo-payment/', views.demo_payment, name='demo_payment'),
-    path('demo/config/', views.demo_config_api, name='demo_config_api'),
-    path('demo/order/', views.create_demo_order, name='create_demo_order'),
-    path('demo/verify/', views.verify_demo_payment, name='verify_demo_payment'),
+    # Interview Practice Pages
+    path('interview-practice/', views.interview_practice, name='interview_practice'),
+    path('interview/', views.interview_page, name='interview_page'),
+    
+    # Demo-related URLs
+    path('save-demo-inputs/', views.save_demo_inputs, name='save_demo_inputs'),
+    path('create-demo-order/', views.create_demo_order, name='create_demo_order'),
+    path('verify-demo-payment/', views.verify_demo_payment, name='verify_demo_payment'),
     path('start-demo/', views.start_demo, name='start_demo'),
-    path("order-fail/<str:order_id>", views.order_failed, name="order_failed"),
+    path('demo-payment/', views.demo_payment, name='demo_payment'),
+    path('demo-config-api/', views.demo_config_api, name='demo_config_api'),
+    
+    # Subscription-related URLs (NEW)
+    path('save-subscription-inputs/', views.save_subscription_inputs, name='save_subscription_inputs'),
+    path('create-subscription-order/', views.create_subscription_order, name='create_subscription_order'),
+    path('verify-subscription-payment/', views.verify_subscription_payment, name='verify_subscription_payment'),
+    path('subscription-status/', views.subscription_status, name='subscription_status'),
+    
+    # Admin helper (optional, for manual grants)
+    # path('admin/grant-subscription/<int:user_id>/', views.admin_grant_subscription, name='admin_grant_subscription'),
+    
+    # Order failed page
+    path('order-failed/', views.order_failed, name='order_failed'),
+    path('order-failed/<str:order_id>/', views.order_failed, name='order_failed'),
 
 
 
